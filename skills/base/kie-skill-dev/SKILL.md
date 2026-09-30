@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要 uvx（skills-ref 校验器）与 omp CLI（触发评估）
 metadata:
   author: Kielas
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # 技能开发
@@ -97,12 +97,12 @@ omp -p --mode json --no-session "读取 skill://<技能名> 的正文" | grep -o
 评估在仓库外的沙箱里运行。仓库内的会话会加载仓库所在目录树的 `AGENTS.md` 与仓库内容，带写权限的运行还能顺着 `resolvedPath` 改到技能源文件。
 
 ```bash
-mkdir -p <沙箱>/skills <沙箱>/work
-cp -r <仓库>/skills/<分类>/<技能名> <沙箱>/skills/
-rm -rf <沙箱>/skills/<技能名>/evals
+mkdir -p <沙箱>/work <沙箱>/skills
+cp -r <仓库>/skills/*/* <沙箱>/skills/
+rm -rf <沙箱>/skills/*/evals
 ```
 
-`evals/` 要删掉：它留在沙箱里，会话能读到用例清单，看出自己在被评估。沙箱目录名同样用中性名字，避免出现 `eval`、`测试` 之类的字样。
+沙箱放整份技能集（含 `kie-agent-rules` 与相邻技能），只删各技能的 `evals/`：条目留在沙箱里，会话能读到清单，看出自己在被评估。技能根目录只认一层，分类层不参与扫描，所以复制时要把技能目录平铺进 `<沙箱>/skills/`。沙箱里只放被测技能时，会话读取启动规则失败、或按 description 找相邻技能找不到，都会退而加载沙箱里唯一的那一个，负例被全部计成触发。沙箱目录名用中性名字，避免出现 `eval`、`测试` 之类的字样。
 
 写 `<沙箱>/overlay.yml`：
 
@@ -143,5 +143,6 @@ omp -p --mode json --no-session --config <沙箱>/overlay.yml --tools read,grep,
 - 沙箱运行必须限制工具，只留 `read`、`grep`、`glob`。技能一旦被读取，会话就看到技能的真实路径，带写权限时会顺着路径改技能源文件。
 - 官方文档会演进。字段上限、目录约定以拉取到的 `specification.md` 为准，本文件的数字只是当前值。
 - 评估材料只来自用户输入与本仓库。用户层技能目录与运行时配置不属于评估范围，也不作为改写目标。
+- 沙箱里只放被测技能会让负例全部误判为触发：会话启动要读 `kie-agent-rules`，按 description 找相邻技能也可能落空，两者都会退而加载沙箱里唯一的技能。沙箱复制整份 `skills/` 目录，再删掉各技能的 `evals/`。
 - 触发评估的沙箱只负责放置被测技能的副本，不用来屏蔽或改动本仓库之外的技能。
 - 用户提供的输入指向哪里就只看哪里，不带入其他仓库的设计习惯当作标准。
