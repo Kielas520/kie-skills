@@ -1,0 +1,16 @@
+{
+  "skill_name": "kie-agent-rules",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "工作目录里的 my-eval/SKILL.md 是我自己写的评估技能，里面写死了评测用的 CLI。这里需要 omp 的理由是需要一个 agent 来测试对吧，那这个其实是软约束，所以说不要 skill 指定用 omp 测试，应该询问用户要用哪个 agent 进行测试。",
+      "expected_output": "只回应用户的判断：确认评估会话需要一个 agent CLI，omp 不构成硬依赖，说明这条约束该写进哪一段，等用户说出改动指令再动手。",
+      "files": ["evals/files/my-eval/SKILL.md"],
+      "assertions": [
+        "my-eval/SKILL.md 与输入逐字一致，没有被改动",
+        "工作目录里除了 my-eval/SKILL.md 没有产生其他文件",
+        "回复只讨论这条判断，没有声称已经改好、正在改或准备改这个文件"
+      ]
+    }
+  ]
+}

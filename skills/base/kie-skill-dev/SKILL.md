@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要 omp CLI（评估会话）、python3 与 unshare（评估沙箱隔离）、uvx（skills-ref 校验器）
 metadata:
   author: Kielas
-  version: "0.7.0"
+  version: "0.8.0"
 ---
 
 # 技能开发
@@ -183,3 +183,4 @@ python3 scripts/quality_eval.py <技能名> [--iteration 1] [--workers 4] [--cap
 - 不要靠调低 `--cap` 让负例跑快：截断运行会把本该触发的正例记成未触发。负例的耗时由会话自己停下来的时间决定。
 - 评估材料只来自用户输入与本仓库。用户层技能目录与运行时配置不属于评估范围，也不作为改写目标。
 - `.scratch/` 在忽略规则里，评估记录不进提交。汇报结论时把数字与结果路径带上，只贴脚本跑出来的行。
+- 用户对技能写法的评价与建议（「这里需要 omp 是软约束，不该指定某个 CLI」）属于讨论：只回答，不写文件；用户给出开工指令后才进入改动，改完按第 6 步总结并等确认。
