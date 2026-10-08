@@ -1,0 +1,29 @@
+{
+  "skill_name": "kie-skill-dev",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我写了个技能草稿放在 release-notes-helper/SKILL.md，description 太笼统了，正文也全是套话，帮我改到能用",
+      "expected_output": "改写后的 SKILL.md：description 同时说清做什么与何时使用，并给出不适用场景；正文换成具体步骤、真实命令与踩过的坑；frontmatter 字段保持合法。",
+      "files": ["evals/files/release-notes-helper/SKILL.md"],
+      "assertions": [
+        "description 同时说明了这个技能做什么以及何时使用，而不是只有一句笼统概述",
+        "description 给出了边界或反例排除，即明确写出不适用的场景",
+        "正文里的通用套话至少有一部分被具体的步骤、命令或决策条件替换",
+        "frontmatter 的 name 与目录名一致，metadata.version 仍是 semver 格式"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "release-notes-helper 这个技能装上了但基本不触发，我明明每次说的就是它管的事，帮我看看问题出在哪",
+      "expected_output": "判定为触发问题，定位到 description 的覆盖不足，给出覆盖做什么、何时用、边界、反例排除四块的改写，并说明改完要重跑触发评估用触发率验证。",
+      "files": ["evals/files/release-notes-helper/SKILL.md"],
+      "assertions": [
+        "把问题类型判定为触发问题，而不是输出质量问题",
+        "给出了 description 的具体改写内容，覆盖做什么、何时用、边界、反例排除",
+        "说明了改完 description 要重跑触发评估，用触发率确认是否通过",
+        "没有改动任务范围之外的文件"
+      ]
+    }
+  ]
+}
