@@ -2,10 +2,10 @@
 name: kie-agent-rules
 description: agent 与用户协作的硬性约定，任何任务动手前必读：回答语言与措辞、咨询类与改动类的区分、限制擅自提交与回退、命名只给候选不改、输出只呈现最终状态、命令行工具选择、工作空间路径、文件删除方式、相关技能路由。开始代码开发、代码评审、代码阅读、脚本编写或执行、文件删除、git 操作、仓库拉取、技能开发之前都先加载本技能，只读的查看、排查、评审请求同样适用，包括用户要求先不要改动的情况，不管用户有没有提到「规范」「约定」「习惯」「协作」「规则」，不管任务多小。
 license: MIT
-compatibility: 需要 omp 会话；GitHub 交互用内置工具或已登录的 gh CLI；学术检索用 paper-search-mcp；库文档查询用 context7 CLI；命令行优先使用 rg、fd、bat、sd；删除文件需要 gio trash、gomi 或 trash-cli 之一
+compatibility: 需要支持 Agent Skills 的 agent 会话；GitHub 交互用内置工具或已登录的 gh CLI；学术检索用 paper-search-mcp；库文档查询用 context7 CLI；命令行优先使用 rg、fd、bat、sd；删除文件需要 gio trash、gomi 或 trash-cli 之一
 metadata:
   author: Kielas
-  version: "0.4.0"
+  version: "0.5.0"
 ---
 
 # agent 协作技能

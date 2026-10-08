@@ -51,11 +51,11 @@ skills CLI 从 `skills/` 开始向下扫描，深度上限三层，`skills/<技�
 触发评估与输出质量评估都在仓库内跑，脚本随 `kie-skill-dev` 提供，沙箱建在 `~/project/test/` 下，结果写在仓库的 `.scratch/` 里：
 
 ```bash
-python3 skills/base/kie-skill-dev/scripts/trigger_eval.py <技能名>
-python3 skills/base/kie-skill-dev/scripts/quality_eval.py <技能名> --iteration 1
+python3 skills/base/kie-skill-dev/scripts/trigger_eval.py <技能名> --agent <名字>
+python3 skills/base/kie-skill-dev/scripts/quality_eval.py <技能名> --agent <名字> --iteration 1
 ```
 
-触发评估默认 `--runs 1` 粗筛，只对结果翻转的用例补 `--runs 3`。`kie-skill-dev` 规定两道确认：写完技能要总结改动并等用户同意才进入评估，评估走完才进入提交与部署。
+评估会话由 `--agent` 指定的 agent CLI 驱动，先用 `--list-agents` 看本机有哪些（内置 omp 与 claude 的适配）。触发评估默认 `--runs 1` 粗筛，只对结果翻转的用例补 `--runs 3`。`kie-skill-dev` 规定两道确认：写完技能要总结改动并等用户同意才进入评估，评估走完才进入提交与部署。
 
 ## 本地维护
 

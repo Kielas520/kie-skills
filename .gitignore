@@ -1,3 +1,4 @@
 .scratch/
 .agents/skills/
 .cache/
+__pycache__/

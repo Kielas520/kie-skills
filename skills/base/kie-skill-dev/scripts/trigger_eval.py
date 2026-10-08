@@ -1,3 +1,8 @@
+"""技能触发评估：隔离沙箱里逐条查询运行无头会话，按技能加载信号判定触发率。
+
+会话由 --agent 指定的 agent CLI 驱动，适配细节见同目录的 agent_cli.py。
+"""
+
 import argparse
 import concurrent.futures
 import hashlib
@@ -9,27 +14,17 @@ import sys
 import threading
 import time
 
-USER_SKILLS = pathlib.Path.home() / ".agents" / "skills"
-SANDBOX_ROOT = pathlib.Path.home() / "project" / "test"
-
-
-def find_repo():
-    for parent in pathlib.Path(__file__).resolve().parents:
-        if (parent / "skills" / "base" / "kie-skill-dev").is_dir():
-            return parent
-    raise SystemExit("错误：找不到仓库根目录，本脚本需要在 kie-skills 仓库内运行")
-
-
-REPO = find_repo()
+import agent_cli
+from agent_cli import REPO, SANDBOX_ROOT, HarnessError
 
 
 def parse_args():
     ap = argparse.ArgumentParser(
-        description="技能触发评估：隔离沙箱里逐条查询运行无头会话，按 resolvedPath 判定触发率。"
+        description="技能触发评估：隔离沙箱里逐条查询运行无头会话，按技能加载信号判定触发率。"
                     "先用 --runs 1 粗筛，只对结果翻转的用例补 --runs 3。"
-                    "退出码 0=全部通过，1=有未通过或有证据不足的运行，2=预检失败"
+                    "退出码 0=全部通过，1=有未通过或有证据不足的运行，2=无法开始"
     )
-    ap.add_argument("skill", help="技能名，例如 kie-skill-dev")
+    ap.add_argument("skill", nargs="?", help="技能名，例如 kie-skill-dev")
     ap.add_argument("--runs", type=int, default=1, help="每条查询重复次数，默认 1")
     ap.add_argument("--workers", type=int, default=12, help="并发进程数，默认 12")
     ap.add_argument("--cap", type=int, default=60, help="单次会话时长上限（秒），默认 60")
@@ -38,6 +33,7 @@ def parse_args():
     ap.add_argument("--no-preflight", action="store_true",
                     help="跳过预检（默认先用第一条正例确认客户端能加载技能）")
     ap.add_argument("-v", "--verbose", action="store_true", help="每完成一次运行就打一行到 stderr")
+    agent_cli.add_arguments(ap)
     return ap.parse_args()
 
 
@@ -80,62 +76,41 @@ def filter_cases(cases, spec):
     return picked
 
 
-def prepare(skill, sandbox):
-    skills = sandbox / "skills"
+def prepare(sandbox, agent):
     shutil.rmtree(sandbox, ignore_errors=True)
-    skills.mkdir(parents=True)
-    (sandbox / "work").mkdir()
-    for src in sorted((REPO / "skills").glob("*/*")):
-        if not src.is_dir():
-            continue
-        shutil.copytree(src, skills / src.name)
-        shutil.rmtree(skills / src.name / "evals", ignore_errors=True)
-    overlay = sandbox / "overlay.yml"
-    overlay.write_text(
-        "skills:\n"
-        f"  customDirectories:\n    - {skills}\n"
-        "  enableAgentsUser: false\n"
-    )
-    return overlay
+    (sandbox / "work").mkdir(parents=True)
+    # 沙箱装整份技能集：会话启动要读 ki-agent-rules，按 description 找相邻技能也可能落空
+    return agent.prepare(sandbox, REPO / "skills", with_skills=True)
 
 
-def run_one(job):
-    idx, run, query, target, sandbox, overlay, cap, log = job
+def run_one(agent, skills_root, skill_name, work, job):
+    idx, run, query, cap, log = job
     begun = time.monotonic()
-    inner = (
-        f"mount -t tmpfs none {REPO} && "
-        f"cd {sandbox / 'work'} && "
-        "exec omp -p --mode json --no-session "
-        f"--config {overlay} --tools read,grep,glob --max-time {cap} \"$1\""
-    )
-    if USER_SKILLS.is_dir():
-        inner = f"mount -t tmpfs none {USER_SKILLS} && " + inner
-    cmd = ["unshare", "-rm", "bash", "-c", inner, "omp-eval", query]
-    marker = f'"resolvedPath":"{target}"'
+    cmd = agent.run(query, work, cap, agent.session_tools, False)
     deadline = time.time() + cap + 20
     verdict = "miss"
     with open(log, "w", encoding="utf-8") as fh:
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                text=True, bufsize=1)
+                                text=True, bufsize=1, start_new_session=True)
         try:
             for line in proc.stdout:
                 fh.write(line)
-                if marker in line:
+                if agent.hit(line, skills_root, skill_name):
                     # 判定信号已经出现，后面的工作不再产生新信息，直接结束会话
                     verdict = "hit"
-                    proc.kill()
+                    agent_cli.terminate(proc)
                     break
                 if time.time() > deadline:
                     verdict = "timeout"
-                    proc.kill()
+                    agent_cli.terminate(proc)
                     break
             proc.wait(timeout=30)
         except subprocess.TimeoutExpired:
-            proc.kill()
+            agent_cli.terminate(proc)
             verdict = "timeout"
     if verdict == "miss":
         text = log.read_text(encoding="utf-8", errors="replace")
-        if '"type":"tool_execution_start"' not in text:
+        if not agent.has_events(text):
             verdict = "error"
     return idx, run, verdict, time.monotonic() - begun
 
@@ -159,33 +134,43 @@ def start_heartbeat(progress, lock, interval=5.0):
 
 def main():
     args = parse_args()
+    if not args.skill and not args.list_agents:
+        print("错误：缺少技能名", file=sys.stderr)
+        return 2
+    try:
+        agent = agent_cli.resolve(args)
+        # 遮蔽不成立就在这里失败，不要跑到一半才发现隔离不了
+        agent.mask_dirs()
+    except HarnessError as exc:
+        print(exc, file=sys.stderr)
+        return 2
     skill_dir = find_skill(args.skill)
     cases = filter_cases(load_queries(skill_dir, args.queries), args.only)
 
     sandbox = sandbox_path(args.skill)
-    overlay = prepare(args.skill, sandbox)
-    target = sandbox / "skills" / args.skill / "SKILL.md"
+    skills_root = prepare(sandbox, agent)
+    work = sandbox / "work"
     out = REPO / ".scratch" / "trigger-eval" / args.skill / time.strftime("%Y%m%d-%H%M%S")
     logs = out / "logs"
     logs.mkdir(parents=True)
-    print(f"技能 {args.skill}：{len(cases)} 条用例 × {args.runs} 次，并发 {args.workers}，"
-          f"单次上限 {args.cap}s\n沙箱 {sandbox}\n结果 {out}", file=sys.stderr)
+    print(f"技能 {args.skill}：{len(cases)} 条用例 × {args.runs} 次，agent {agent.name}，"
+          f"并发 {args.workers}，单次上限 {args.cap}s\n沙箱 {sandbox}\n结果 {out}", file=sys.stderr)
 
     positives = [i for i, case in enumerate(cases) if case["should_trigger"]]
     if positives and not args.no_preflight:
         first = positives[0]
         print(f"预检：{cases[first]['query']}", file=sys.stderr)
         _, _, verdict, seconds = run_one(
-            (first, 0, cases[first]["query"], target, sandbox, overlay, args.cap,
-             logs / "preflight.json"))
+            agent, skills_root, args.skill, work,
+            (first, 0, cases[first]["query"], args.cap, logs / "preflight.json"))
         if verdict != "hit":
-            print(f"预检未命中（{verdict}，用时 {seconds:.1f}s）：客户端没有把技能喂给模型，"
-                  "整批结果不可信，已中止。先确认 omp 本身能正常跑通再重跑，"
+            print(f"预检未命中（{verdict}，用时 {seconds:.1f}s）：{agent.name} 没有把技能喂给模型，"
+                  f"整批结果不可信，已中止。先确认 {agent.name} 本身能正常跑通再重跑，"
                   "确认无误时可以加 --no-preflight。", file=sys.stderr)
             return 2
         print(f"预检通过（{seconds:.1f}s）", file=sys.stderr)
 
-    jobs = [(idx, run, case["query"], target, sandbox, overlay, args.cap, logs / f"q{idx:02d}-r{run}.json")
+    jobs = [(idx, run, case["query"], args.cap, logs / f"q{idx:02d}-r{run}.json")
             for idx, case in enumerate(cases)
             for run in range(1, args.runs + 1)]
     started = time.monotonic()
@@ -198,13 +183,13 @@ def main():
         with lock:
             progress["active"][index] = began
         try:
-            result = run_one(job)
+            result = run_one(agent, skills_root, args.skill, work, job)
         finally:
             with lock:
                 progress["active"].pop(index, None)
                 progress["done"] += 1
         if args.verbose:
-            print(f"[+{time.monotonic() - started:5.1f}s] {job[7].stem} {result[3]:5.1f}s "
+            print(f"[+{time.monotonic() - started:5.1f}s] {job[4].stem} {result[3]:5.1f}s "
                   f"{result[2]:5}  {job[2]}", file=sys.stderr)
         return result
 
@@ -254,6 +239,7 @@ def main():
     unverified_runs = sum(row["error"] + row["timeout"] for row in rows)
     summary = {
         "skill": args.skill,
+        "agent": agent.name,
         "runs": args.runs,
         "workers": args.workers,
         "cap_seconds": args.cap,
@@ -268,7 +254,7 @@ def main():
     }
     (out / "results.json").write_text(json.dumps({"summary": summary, "cases": rows},
                                                 ensure_ascii=False, indent=2))
-    print(f"正例 {summary['positives_passed']}/{summary['positives_total']} "
+    print(f"agent {agent.name} 正例 {summary['positives_passed']}/{summary['positives_total']} "
           f"负例 {summary['negatives_passed']}/{summary['negatives_total']} "
           f"墙钟 {wall:.1f}s 超时/错误运行 {unverified_runs} 结果 {out / 'results.json'}")
     if unverified_runs:

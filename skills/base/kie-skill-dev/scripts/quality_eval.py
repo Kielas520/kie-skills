@@ -1,3 +1,8 @@
+"""技能输出质量评估：同一提示词分别带技能与不带技能运行，按 assertions 评分并汇总。
+
+会话与评分都由 --agent 指定的 agent CLI 驱动，适配细节见同目录的 agent_cli.py。
+"""
+
 import argparse
 import concurrent.futures
 import hashlib
@@ -9,31 +14,23 @@ import subprocess
 import sys
 import time
 
-USER_SKILLS = pathlib.Path.home() / ".agents" / "skills"
-SANDBOX_ROOT = pathlib.Path.home() / "project" / "test"
+import agent_cli
+from agent_cli import REPO, SANDBOX_ROOT, HarnessError
+
 FILE_LIMIT = 8000
 TOTAL_LIMIT = 60000
 
 
-def find_repo():
-    for parent in pathlib.Path(__file__).resolve().parents:
-        if (parent / "skills" / "base" / "kie-skill-dev").is_dir():
-            return parent
-    raise SystemExit("错误：找不到仓库根目录，本脚本需要在 kie-skills 仓库内运行")
-
-
-REPO = find_repo()
-
-
 def parse_args():
     ap = argparse.ArgumentParser(description="技能输出质量评估：同一提示词分别带技能与不带技能运行，按 assertions 评分并汇总。"
-                                             "退出码 0=结果可用，1=有运行没有事件输出或有评分失败")
-    ap.add_argument("skill", help="技能名，例如 kie-skill-dev")
+                                             "退出码 0=结果可用，1=有运行没有事件输出或有评分失败，2=无法开始")
+    ap.add_argument("skill", nargs="?", help="技能名，例如 kie-skill-dev")
     ap.add_argument("--iteration", type=int, default=1, help="迭代轮次，结果写入 iteration-<N>，默认 1")
     ap.add_argument("--cases", help="只跑指定 id，逗号分隔")
     ap.add_argument("--workers", type=int, default=4, help="并发会话数，默认 4")
     ap.add_argument("--cap", type=int, default=600, help="单次任务会话时长上限（秒），默认 600")
     ap.add_argument("--no-grade", action="store_true", help="只运行会话与收集产物，不调用评分")
+    agent_cli.add_arguments(ap)
     return ap.parse_args()
 
 
@@ -75,23 +72,12 @@ def input_path(rel):
     return pathlib.Path(parts[-1])
 
 
-def prepare_arm(sandbox, skill_dir, case, with_skill):
-    skills = sandbox / "skills"
+def prepare_arm(sandbox, skill_dir, case, agent, with_skill):
     shutil.rmtree(sandbox, ignore_errors=True)
-    skills.mkdir(parents=True)
     work = sandbox / "work"
-    work.mkdir()
-    if with_skill:
-        for src in sorted((REPO / "skills").glob("*/*")):
-            if src.is_dir():
-                shutil.copytree(src, skills / src.name)
-                shutil.rmtree(skills / src.name / "evals", ignore_errors=True)
-    overlay = sandbox / "overlay.yml"
-    overlay.write_text(
-        "skills:\n"
-        f"  customDirectories:\n    - {skills}\n"
-        "  enableAgentsUser: false\n"
-    )
+    work.mkdir(parents=True)
+    # 带技能组放整份技能集：会话启动要读 ki-agent-rules，按 description 找相邻技能也可能落空
+    agent.prepare(sandbox, REPO / "skills", with_skills=with_skill)
     for rel in case.get("files", []):
         source = skill_dir / rel
         if not source.is_file():
@@ -99,73 +85,26 @@ def prepare_arm(sandbox, skill_dir, case, with_skill):
         target = work / input_path(rel)
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(source.read_bytes())
-    return work, overlay
+    return work
 
 
-def run_session(prompt, work, overlay, cap):
-    inner = (
-        f"mount -t tmpfs none {REPO} && "
-        f"cd {work} && "
-        "exec omp -p --mode json --no-session "
-        f"--config {overlay} --tools read,write,edit,bash,grep,glob --auto-approve "
-        f"--max-time {cap} \"$1\""
-    )
-    if USER_SKILLS.is_dir():
-        inner = f"mount -t tmpfs none {USER_SKILLS} && " + inner
-    cmd = ["unshare", "-rm", "bash", "-c", inner, "omp-eval", prompt]
+def run_session(agent, prompt, work, cap):
+    cmd = agent.run(prompt, work, cap, agent.workspace_tools, True)
     started = time.time()
     truncated = False
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                            text=True, start_new_session=True)
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=cap + 30)
-        out = proc.stdout
-    except subprocess.TimeoutExpired as exc:
-        out = exc.stdout or ""
+        out, _ = proc.communicate(timeout=cap + 30)
+    except subprocess.TimeoutExpired:
+        agent_cli.terminate(proc)
+        out, _ = proc.communicate()
         truncated = True
     wall_ms = (time.time() - started) * 1000
-    # --max-time 到点会由客户端自己退出，用时贴住上限说明这次运行被截断，产物可能不完整
+    # 用时贴住上限说明这次运行是被上限截断的，产物可能不完整
     if wall_ms >= (cap - 2) * 1000:
         truncated = True
     return out, wall_ms, truncated
-
-
-def iter_events(stream):
-    for line in stream.splitlines():
-        if line.startswith("{"):
-            try:
-                yield json.loads(line)
-            except json.JSONDecodeError:
-                continue
-
-
-def collect_timing(transcript, wall_ms):
-    # message_end 是每个助手消息的唯一一次落账，turn_end 与 agent_end 会重复同一份 usage
-    tokens = 0
-    events = 0
-    for event in iter_events(transcript):
-        events += 1
-        if event.get("type") != "message_end":
-            continue
-        message = event.get("message") or {}
-        if message.get("role") != "assistant":
-            continue
-        tokens += ((message.get("usage") or {}).get("totalTokens") or 0)
-    loaded = sorted({m for m in re.findall(r'"resolvedPath":"[^"]*/skills/([^/"]+)/SKILL\.md"', transcript)})
-    return {"duration_ms": round(wall_ms), "total_tokens": tokens, "events": events,
-            "loaded_skills": loaded}
-
-
-def assistant_text(stream):
-    texts = []
-    for event in iter_events(stream):
-        if event.get("type") != "message_end":
-            continue
-        message = event.get("message") or {}
-        if message.get("role") != "assistant":
-            continue
-        for block in message.get("content", []):
-            if block.get("type") == "text" and block.get("text"):
-                texts.append(block["text"])
-    return texts[-1] if texts else ""
 
 
 def dump_outputs(directory):
@@ -191,9 +130,9 @@ def dump_outputs(directory):
     return "\n".join(parts) if parts else "（没有产生任何文件）"
 
 
-def grade(case, arm_dir, cap):
+def grade(case, arm_dir, agent, cap):
     outputs = dump_outputs(arm_dir / "outputs")
-    reply = assistant_text((arm_dir / "transcript.jsonl").read_text(encoding="utf-8", errors="replace"))
+    reply = agent.text((arm_dir / "transcript.jsonl").read_text(encoding="utf-8", errors="replace"))
     prompts = "\n".join(f"{i + 1}. {a}" for i, a in enumerate(case["assertions"]))
     prompt = (
         "你是输出质量评分器。只输出 JSON，不要输出其他文字。\n\n"
@@ -206,9 +145,7 @@ def grade(case, arm_dir, cap):
         '输出格式：{"assertion_results":[{"text":"断言原文","passed":true,"evidence":"证据"}],'
         '"summary":{"passed":0,"failed":0,"total":0,"pass_rate":0}}\n'
     )
-    cmd = ["omp", "-p", "--mode", "json", "--no-session", "--tools", "read", f"--max-time={cap}"]
-    proc = subprocess.run(cmd, input=prompt, capture_output=True, text=True, timeout=cap + 30)
-    text = assistant_text(proc.stdout)
+    text = agent.ask(prompt, cap)
     start = text.find("{")
     end = text.rfind("}")
     if start < 0 or end < start:
@@ -233,13 +170,23 @@ def normalized_rate(result):
 
 def main():
     args = parse_args()
+    if not args.skill and not args.list_agents:
+        print("错误：缺少技能名", file=sys.stderr)
+        return 2
+    try:
+        agent = agent_cli.resolve(args)
+        # 遮蔽不成立就在这里失败，不要跑到一半才发现隔离不了
+        agent.mask_dirs()
+    except HarnessError as exc:
+        print(exc, file=sys.stderr)
+        return 2
     skill_dir = find_skill(args.skill)
     cases = load_cases(skill_dir, args.cases)
     workspace = REPO / ".scratch" / "quality" / args.skill / f"iteration-{args.iteration}"
     if workspace.exists():
         print(f"提示：{workspace} 已存在，本次结果覆盖同名文件")
     workspace.mkdir(parents=True, exist_ok=True)
-    print(f"技能 {args.skill}：{len(cases)} 条用例 × 2 组（带技能 / 不带技能），"
+    print(f"技能 {args.skill}：{len(cases)} 条用例 × 2 组（带技能 / 不带技能），agent {agent.name}，"
           f"并发 {args.workers}，单次上限 {args.cap}s\n结果 {workspace}")
 
     jobs = []
@@ -251,8 +198,8 @@ def main():
 
     def run_arm(job):
         case, arm, sandbox = job
-        work, overlay = prepare_arm(sandbox, skill_dir, case, arm == "with_skill")
-        transcript, wall_ms, truncated = run_session(case["prompt"], work, overlay, args.cap)
+        work = prepare_arm(sandbox, skill_dir, case, agent, arm == "with_skill")
+        transcript, wall_ms, truncated = run_session(agent, case["prompt"], work, args.cap)
         arm_dir = workspace / slug(case) / arm
         shutil.rmtree(arm_dir, ignore_errors=True)
         (arm_dir / "outputs").mkdir(parents=True)
@@ -264,7 +211,8 @@ def main():
             target = arm_dir / "outputs" / path.relative_to(work)
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, target)
-        timing = collect_timing(transcript, wall_ms)
+        timing = agent.timing(transcript, wall_ms)
+        timing["agent"] = agent.name
         timing["truncated"] = truncated
         (arm_dir / "timing.json").write_text(json.dumps(timing, ensure_ascii=False, indent=2))
         kept = sum(1 for p in (arm_dir / "outputs").rglob("*") if p.is_file())
@@ -288,7 +236,7 @@ def main():
             if not case.get("assertions"):
                 print(f"{slug(case)}/{arm} 没有 assertions，跳过评分")
                 continue
-            result = grade(case, arm_dir, 180)
+            result = grade(case, arm_dir, agent, 180)
             (arm_dir / "grading.json").write_text(json.dumps(result, ensure_ascii=False, indent=2))
             rate = normalized_rate(result)
             summary[arm].append(rate)
@@ -304,6 +252,7 @@ def main():
 
     benchmark = {
         "skill": args.skill,
+        "agent": agent.name,
         "iteration": args.iteration,
         "cases": len(cases),
         "with_skill_pass_rate": mean(summary["with_skill"]),
@@ -315,7 +264,7 @@ def main():
     if benchmark["with_skill_pass_rate"] is not None and benchmark["without_skill_pass_rate"] is not None:
         benchmark["delta"] = round(benchmark["with_skill_pass_rate"] - benchmark["without_skill_pass_rate"], 3)
     (workspace / "benchmark.json").write_text(json.dumps(benchmark, ensure_ascii=False, indent=2))
-    print(f"带技能通过率 {benchmark['with_skill_pass_rate']} "
+    print(f"agent {agent.name} 带技能通过率 {benchmark['with_skill_pass_rate']} "
           f"不带技能通过率 {benchmark['without_skill_pass_rate']} "
           f"差值 {benchmark.get('delta')}")
     if unverified:
