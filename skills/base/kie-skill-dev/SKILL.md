@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要 omp CLI（评估会话）、python3 与 unshare（评估沙箱隔离）、uvx（skills-ref 校验器）
 metadata:
   author: Kielas
-  version: "0.5.0"
+  version: "0.6.0"
 ---
 
 # 技能开发
@@ -22,7 +22,7 @@ Agent Skills 的格式约束不写死在本文件里：字段、目录约定、�
 
 - 允许读取：本仓库内的文件、用户显式提供的文件与链接、`~/project/AGENTS.md` 及其明确引用的开发约定。
 - 不作为技能内容依据：`~/.agents/skills/` 等用户层技能目录、`~/.omp/` 等运行时配置、其他仓库的技能与参考文件。
-- 评估沙箱建在 `~/project/test/coop-<技能名>-*` 下，仓库内只保留 `.scratch/` 里的运行结果。
+- 评估沙箱建在 `~/project/test/coop-<沙箱标记>/` 下（目录名由技能名哈希得到，不含技能名），仓库内只保留 `.scratch/` 里的运行结果。
 - 用户给的输入明确指向某个外部技能时，才读取该技能，并在产出里说明来源。
 
 ## 仓库约定
@@ -110,7 +110,7 @@ python3 scripts/trigger_eval.py <技能名> [--runs 1] [--workers 12] [--cap 60]
 
 脚本做四件事：
 
-- 在 `~/project/test/coop-<技能名>-trigger/` 建沙箱：整份 `skills/` 平铺复制进沙箱的 `skills/`，删掉各技能的 `evals/`，`work/` 作为会话工作目录，`overlay.yml` 把 `customDirectories` 指向沙箱并关掉 `enableAgentsUser`。
+- 在 `~/project/test/coop-<技能名哈希>/` 建沙箱：整份 `skills/` 平铺复制进沙箱的 `skills/`，删掉各技能的 `evals/`，`work/` 作为会话工作目录，`overlay.yml` 把 `customDirectories` 指向沙箱并关掉 `enableAgentsUser`。沙箱目录名不含技能名，会话翻到路径时不会顺着名字判定这是该技能的评测。
 - 每次运行套 `unshare -rm`，用 tmpfs 盖住本仓库路径与 `~/.agents/skills`，会话读不到真实仓库与用户层技能。
 - 判定看输出里有没有 `"resolvedPath":"<沙箱>/skills/<技能名>/SKILL.md"`。这行一出现就终止会话：判定信号出现在一次运行的前 5% 时间里，之后是无关工作。负例没有这个信号，要等会话自己停下来，受 `--cap` 约束。
 - 累计触发率：正例高于 0.5 通过，负例低于 0.5 通过。每次运行的耗时与判定一起记进 `results.json`，路径为 `.scratch/trigger-eval/<技能名>/<时间戳>/results.json`。

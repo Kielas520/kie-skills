@@ -1,5 +1,6 @@
 import argparse
 import concurrent.futures
+import hashlib
 import json
 import pathlib
 import re
@@ -34,6 +35,11 @@ def parse_args():
     ap.add_argument("--cap", type=int, default=600, help="单次任务会话时长上限（秒），默认 600")
     ap.add_argument("--no-grade", action="store_true", help="只运行会话与收集产物，不调用评分")
     return ap.parse_args()
+
+
+def sandbox_root(skill):
+    # 目录名不带技能名：会话翻到沙箱路径时，不会顺着名字判定这是该技能的评测
+    return f"coop-{hashlib.sha256(skill.encode()).hexdigest()[:8]}-q"
 
 
 def find_skill(skill):
@@ -240,7 +246,7 @@ def main():
     for case in cases:
         for with_skill in (True, False):
             arm = "with_skill" if with_skill else "without_skill"
-            sandbox = SANDBOX_ROOT / f"coop-{args.skill}-quality" / slug(case) / arm
+            sandbox = SANDBOX_ROOT / sandbox_root(args.skill) / slug(case) / arm
             jobs.append((case, arm, sandbox))
 
     def run_arm(job):

@@ -1,0 +1,51 @@
+{
+  "skill_name": "kie-git-worktree",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "先在本目录里建一个演示仓库 demo-project（git init，分支 main，一个初始提交），然后为 bug 单 f-7128574383 开分支和独立工作区，内容梗概用 linux-commit-unknown，基线和分支名你按规范定，工作区放在本目录的 worktrees/ 下。定好直接建，不用等我确认。",
+      "expected_output": "分支名为 fix/f-7128574383/linux-commit-unknown，工作区建在 worktrees/demo-project/fix/f-7128574383/linux-commit-unknown，位于 main 的初始提交上；回复里给出分支名、工作区路径、基线 commit 与进入命令，并提醒新工作区不共享构建产物。",
+      "files": [],
+      "assertions": [
+        "创建出的分支名是 fix/f-7128574383/linux-commit-unknown",
+        "工作区目录是 worktrees/demo-project/fix/f-7128574383/linux-commit-unknown，且由 git worktree 创建（目录里存在指向主仓库的 .git 文件）",
+        "回复说明新工作区与构建产物或依赖的关系：有依赖或构建产物时提醒需要重新准备，没有时写明不需要重新准备"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "本目录里的 demo-project 先 git init 一下，分支叫 main，做一个初始提交。我准备开始做 m-7113016070 的 git commit provenance，这件事要跟手上现在的活并行推进。",
+      "expected_output": "只给出分支名与工作区路径的建议（feat/m-7113016070/<梗概>，工作区在 ~/project/worktree/demo-project/ 下），并说明占用检查结论，不创建分支，不创建工作区目录，等用户确认。",
+      "files": [],
+      "assertions": [
+        "回复给出「分支 / 工作区 / 基线」三项的具体方案，分支名形如 feat/m-7113016070/<英文梗概>",
+        "没有创建任何新分支（仓库里仍然只有 main）",
+        "没有创建工作区目录（工作目录下没有生成 worktrees 之类的目录）",
+        "说明了拟用分支名在该仓库的占用情况"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "本目录里的 demo-project 先 git init 一下，分支叫 main，做一个初始提交。然后为 f-7117500826 开分支，工作区放在本目录的 worktrees/ 下。worktrees/demo-project/fix/f-7117500826/topic-access 这个路径我已经放了东西占位，别删。",
+      "expected_output": "创建前发现目标目录已被占用，把冲突路径报给用户并停下，不覆盖目录、不使用 --force，占位的 keep.txt 保持原样；同时说明失败后分支的状态与重试方式。",
+      "files": ["evals/files/worktrees/demo-project/fix/f-7117500826/topic-access/keep.txt"],
+      "assertions": [
+        "回复指出目标目录已被占用，引用或复述了 git 报出的 already exists 一类错误",
+        "占位的 keep.txt 保持原样，内容没有被改动、删除或移动",
+        "没有使用 --force 覆盖目标目录",
+        "把换路径还是处理占位目录的决定交给用户，没有自行选一个继续执行"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "本目录里的 notes-cli 是我自己的小工具仓库，先 git init（分支 main，一个初始提交，放个 README）。我想把命令行参数的依赖升一下级，帮我开个分支和单独的工作区，工作区放在本目录的 worktrees/ 下，定好直接建。",
+      "expected_output": "个人项目没有工作项 ID，分支名直接用英文梗概（例如 update-deps），不带 fix/、feat/、chore/ 之类的前缀；工作区建在 worktrees/notes-cli/<分支名>，回复给出分支名、工作区路径、基线与进入命令。",
+      "files": [],
+      "assertions": [
+        "分支名不带 fix/、feat/、chore/ 等类型前缀，直接是英文梗概（例如 update-deps）",
+        "工作区目录建在 worktrees/notes-cli/<分支名> 下",
+        "回复给出分支名、工作区路径、基线与进入命令"
+      ]
+    }
+  ]
+}

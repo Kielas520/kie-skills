@@ -1,5 +1,6 @@
 import argparse
 import concurrent.futures
+import hashlib
 import json
 import pathlib
 import shutil
@@ -38,6 +39,11 @@ def parse_args():
                     help="跳过预检（默认先用第一条正例确认客户端能加载技能）")
     ap.add_argument("-v", "--verbose", action="store_true", help="每完成一次运行就打一行到 stderr")
     return ap.parse_args()
+
+
+def sandbox_path(skill):
+    # 目录名不带技能名：会话翻到沙箱路径时，不会顺着名字判定这是该技能的评测而去加载它
+    return SANDBOX_ROOT / f"coop-{hashlib.sha256(skill.encode()).hexdigest()[:8]}"
 
 
 def find_skill(skill):
@@ -156,7 +162,7 @@ def main():
     skill_dir = find_skill(args.skill)
     cases = filter_cases(load_queries(skill_dir, args.queries), args.only)
 
-    sandbox = SANDBOX_ROOT / f"coop-{args.skill}-trigger"
+    sandbox = sandbox_path(args.skill)
     overlay = prepare(args.skill, sandbox)
     target = sandbox / "skills" / args.skill / "SKILL.md"
     out = REPO / ".scratch" / "trigger-eval" / args.skill / time.strftime("%Y%m%d-%H%M%S")
