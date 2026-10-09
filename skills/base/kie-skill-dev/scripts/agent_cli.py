@@ -14,7 +14,7 @@ import subprocess
 
 HOME = pathlib.Path.home()
 USER_SKILLS = HOME / ".agents" / "skills"
-SANDBOX_ROOT = HOME / "project" / "test"
+SANDBOX_ROOT = HOME / "kie-ws" / "test"
 WINDOWS_PATH = re.compile(r"([A-Za-z]):[\\/](.*)")
 PATH_SEPARATORS = re.compile(r"[\\/]+")
 

@@ -15,7 +15,7 @@
     {
       "id": 2,
       "prompt": "本目录里的 demo-project 先 git init 一下，分支叫 main，做一个初始提交。我准备开始做 m-7113016070 的 git commit provenance，这件事要跟手上现在的活并行推进。",
-      "expected_output": "只给出分支名与工作区路径的建议（feat/m-7113016070/<梗概>，工作区在 ~/project/worktree/demo-project/ 下），并说明占用检查结论，不创建分支，不创建工作区目录，等用户确认。",
+      "expected_output": "只给出分支名与工作区路径的建议（feat/m-7113016070/<梗概>，工作区在 ~/kie-ws/demo-project-p/worktrees/ 下），并说明占用检查结论，不创建分支，不创建工作区目录，等用户确认。",
       "files": [],
       "assertions": [
         "回复给出「分支 / 工作区 / 基线」三项的具体方案，分支名形如 feat/m-7113016070/<英文梗概>",

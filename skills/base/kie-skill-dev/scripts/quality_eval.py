@@ -27,6 +27,8 @@ def parse_args():
     ap.add_argument("skill", nargs="?", help="技能名，例如 kie-skill-dev")
     ap.add_argument("--iteration", type=int, default=1, help="迭代轮次，结果写入 iteration-<N>，默认 1")
     ap.add_argument("--cases", help="只跑指定 id，逗号分隔")
+    ap.add_argument("--skills-repo", action="store_true",
+                    help="把整份 kie-skills 仓库（不含 .git 与评估结果）投到工作目录，供用例复现技能问题时使用")
     ap.add_argument("--workers", type=int, default=4, help="并发会话数，默认 4")
     ap.add_argument("--cap", type=int, default=600, help="单次任务会话时长上限（秒），默认 600")
     ap.add_argument("--no-grade", action="store_true", help="只运行会话与收集产物，不调用评分")
@@ -37,6 +39,16 @@ def parse_args():
 def sandbox_root(skill):
     # 目录名不带技能名：会话翻到沙箱路径时，不会顺着名字判定这是该技能的评测
     return f"coop-{hashlib.sha256(skill.encode()).hexdigest()[:8]}-q"
+
+
+def copy_repo(work):
+    """把整份仓库投到工作目录，供用例在沙箱内复现技能问题。
+
+    排除 .git、评估结果与缓存：用例不该看到工作区里的真实仓库，也不该带上与本次任务无关的历史。
+    """
+    shutil.copytree(REPO, work, dirs_exist_ok=True,
+                    ignore=shutil.ignore_patterns(".git", ".scratch", ".cache",
+                                                  "__pycache__", ".agents", ".claude"))
 
 
 def find_skill(skill):
@@ -72,10 +84,12 @@ def input_path(rel):
     return pathlib.Path(parts[-1])
 
 
-def prepare_arm(sandbox, skill_dir, case, agent, with_skill):
+def prepare_arm(sandbox, skill_dir, case, agent, with_skill, skills_repo=False):
     shutil.rmtree(sandbox, ignore_errors=True)
     work = sandbox / "work"
     work.mkdir(parents=True)
+    if skills_repo:
+        copy_repo(work)
     # 带技能组放整份技能集：会话启动要读 ki-agent-rules，按 description 找相邻技能也可能落空
     agent.prepare(sandbox, REPO / "skills", with_skills=with_skill)
     for rel in case.get("files", []):
@@ -198,7 +212,7 @@ def main():
 
     def run_arm(job):
         case, arm, sandbox = job
-        work = prepare_arm(sandbox, skill_dir, case, agent, arm == "with_skill")
+        work = prepare_arm(sandbox, skill_dir, case, agent, arm == "with_skill", args.skills_repo)
         transcript, wall_ms, truncated = run_session(agent, case["prompt"], work, args.cap)
         arm_dir = workspace / slug(case) / arm
         shutil.rmtree(arm_dir, ignore_errors=True)

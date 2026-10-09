@@ -6,7 +6,7 @@ license: MIT
 compatibility: 需要 git；缺陷单的对照实验需要能取到有问题版本的产物或源码。
 metadata:
   author: Kielas
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # 推送前的本地测试
@@ -64,7 +64,7 @@ metadata:
 
 ## 测试报告
 
-测试通过、用户确认可以推送之后再写报告，写到 `~/project/<项目名称>/.idea/test-report.md`，结构按 [assets/测试报告模板.md](assets/测试报告模板.md)。项目名以用户给的为准，用户没说就按当前工作目录的仓库名。
+测试通过、用户确认可以推送之后再写报告，写到 `~/kie-ws/<项目名称>-p/.idea/<任务>/test-report.md`，结构按 [assets/测试报告模板.md](assets/测试报告模板.md)。`<项目名称>` 与 `<任务>` 的取值见 `kie-agent-rules` 的工作空间约定，任务目录由 `kie-dev-execute` 建立。
 
 - 报告固定这一份文件，新一轮测试覆盖写最新结果，不留旧版本。
 - 测试结果写成表格，逐条对应验收标准，写清预期与实际。
@@ -81,7 +81,7 @@ metadata:
 工单: {m-/f- 单号，无工单省略本行}
 范围: {测了哪些产物、哪些验收标准}
 对照实验: {缺陷单写明有问题版本与当前分支的结果，无则省略本行}
-报告: ~/project/<项目名称>/.idea/test-report.md
+报告: ~/kie-ws/<项目名称>-p/.idea/<任务>/test-report.md
 未覆盖: {没测到的部分，没有则省略本行}
 下一步: 用户确认后推送并发起 PR，PR body 起草走 kie-pr-start
 ```

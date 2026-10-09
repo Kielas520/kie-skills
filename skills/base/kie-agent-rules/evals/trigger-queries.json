@@ -8,7 +8,7 @@
   { "query": "帮我删掉这个目录里的构建产物", "should_trigger": true },
   { "query": "看看 src/transport.rs 这个重试逻辑，先别改", "should_trigger": true },
   { "query": "帮我把这个脚本里用到的 sed 换成 sd", "should_trigger": true },
-  { "query": "帮我把 ~/project/wuji-sdk-dev 拉下来看看", "should_trigger": true },
+  { "query": "帮我把 ~/kie-ws/wuji-sdk-dev 拉下来看看", "should_trigger": true },
   { "query": "我要开个 worktree 改这块，放哪儿？", "should_trigger": true },
   { "query": "帮我评审一下这个 PR 的并发部分", "should_trigger": true },
   { "query": "把这个函数的名字改一下，你觉得叫什么好？", "should_trigger": true },

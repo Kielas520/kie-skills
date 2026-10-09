@@ -6,7 +6,7 @@ license: MIT
 compatibility: 需要 git 与已登录的 gh CLI；拉取产物需要 GitHub Actions 的读取权限。
 metadata:
   author: Kielas
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # PR 远端产物验收
@@ -16,7 +16,7 @@ PR 推送之后验收 CI 构建出来的远端产物，产出测试报告评论�
 ## 前置条件
 
 - PR 已经建立并推送，CI 已经跑完。还在跑就先等，或用 `gh pr checks <pr> --watch` 等结束。
-- 本地测试已经做过，报告在 `~/project/<项目名称>/.idea/test-report.md`。
+- 本地测试已经做过，报告在 `~/kie-ws/<项目名称>-p/.idea/<任务>/test-report.md`（`<项目名称>` 与 `<任务>` 的取值见 `kie-agent-rules` 的工作空间约定）。
 - 工单内容与缺陷单里的有问题版本信息可以取到。
 
 ## 步骤 1：检查 PR 内的 CI 基础
@@ -33,8 +33,10 @@ gh pr view <pr> --json statusCheckRollup \
 
 ```bash
 gh run list --branch <分支名> --json databaseId,name,status,conclusion,url -L 10
-gh run download <run-id> -n <artifact 名称> -D <下载目录>
+gh run download <run-id> -n <artifact 名称> -D .scratch/ci-<run-id>/
 ```
+
+下载目录固定为工作区仓库内被 gitignore 忽略的 `.scratch/ci-<run-id>/`（与 `kie-dev-execute` 的临时脚本同一套约定），产物验完删除；该目录不被忽略时放 `~/kie-ws/<项目名称>-p/.scratch/ci-<run-id>/`。
 
 按工单类型确定要给出的链接：
 
@@ -73,7 +75,7 @@ gh pr view <pr> --json body --jq .body > <body 文件>
 gh pr edit <pr> --body-file <改好的 body 文件>
 ```
 
-同时把远端结果写进 `~/project/<项目名称>/.idea/test-report.md` 的「远端 CI 结果」段。
+同时把远端结果写进 `~/kie-ws/<项目名称>-p/.idea/<任务>/test-report.md` 的「远端 CI 结果」段。
 
 ## 交付
 
@@ -83,7 +85,7 @@ PR: {链接}
 CI: {通过数}/{总数}
 产物: {CI 产物链接}
 有问题版本: {tag，缺陷单才写}
-报告: ~/project/<项目名称>/.idea/test-report.md
+报告: ~/kie-ws/<项目名称>-p/.idea/<任务>/test-report.md
 评论: {已发布 / 待用户确认}
 PR body: {已追加远端结果 / 无需变更}
 ```

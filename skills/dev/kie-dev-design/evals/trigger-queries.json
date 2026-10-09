@@ -1,7 +1,7 @@
 [
   {"query": "方案我选 B 了，写设计文档吧", "should_trigger": true},
   {"query": "把设计写下来，放到 .idea/design.md", "should_trigger": true},
-  {"query": "出个技术方案，我这边要拿去评审", "should_trigger": true},
+  {"query": "日志导出功能出个技术设计，我这边要拿去评审", "should_trigger": true},
   {"query": "设计文档里补一下数据链路图，要能看出新功能插在哪", "should_trigger": true},
   {"query": "方案定了，进入设计阶段，把接口签名和数据结构详细写出来", "should_trigger": true},
   {"query": "这个改动涉及哪几个模块，写成设计文档给我", "should_trigger": true},
@@ -9,7 +9,7 @@
   {"query": "设计文档审核意见我提了，改完再给我看一遍", "should_trigger": true},
   {"query": "把 B 方案展开成详细设计，兼容性和影响面要写清楚", "should_trigger": true},
   {"query": "选好的方案要落地了，先给我一份设计，包括测试用例怎么安排", "should_trigger": true},
-  {"query": "新功能插在日志上传这条链路哪个环节，画个图放设计文档里", "should_trigger": true},
+  {"query": "新加的日志导出环节插在日志上传这条链路哪个位置，把设计文档里的链路图补一下", "should_trigger": true},
   {"query": "帮我调研一下有没有现成的库能做这件事", "should_trigger": false},
   {"query": "给我几个方案对比，我还没定用哪个", "should_trigger": false},
   {"query": "直接把这个函数改成 async 的", "should_trigger": false},

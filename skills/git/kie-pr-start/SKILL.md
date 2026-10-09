@@ -6,7 +6,7 @@ license: MIT
 compatibility: 需要 git 与已登录的 gh CLI。
 metadata:
   author: Kielas
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # 发起 PR
@@ -15,7 +15,7 @@ metadata:
 
 ## 前置条件
 
-- 本地测试通过，报告在 `~/project/<项目名称>/.idea/test-report.md`（由 `kie-dev-test` 产出）。
+- 本地测试通过，报告在 `~/kie-ws/<项目名称>-p/.idea/<任务>/test-report.md`（由 `kie-dev-test` 产出；`<项目名称>` 与 `<任务>` 的取值见 `kie-agent-rules` 的工作空间约定）。
 - 分支上的改动已经提交。尚未提交或推送时，按用户要求执行，不擅自提交推送。
 - 工单信息可以取到：单号、工单类型（需求单或缺陷单）、链接。
 

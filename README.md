@@ -48,7 +48,7 @@ skills CLI 从 `skills/` 开始向下扫描，深度上限三层，`skills/<技�
 
 ## 评估
 
-触发评估与输出质量评估都在仓库内跑，脚本随 `kie-skill-dev` 提供，沙箱建在 `~/project/test/` 下，结果写在仓库的 `.scratch/` 里：
+触发评估与输出质量评估都在仓库内跑，脚本随 `kie-skill-dev` 提供，沙箱建在 `~/kie-ws/test/` 下，结果写在仓库的 `.scratch/` 里：
 
 ```bash
 python3 skills/base/kie-skill-dev/scripts/trigger_eval.py <技能名> --agent <名字>

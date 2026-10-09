@@ -6,7 +6,7 @@ license: MIT
 compatibility: 需要 git 与已登录的 gh CLI；读取与回复评审需要仓库的读取权限。
 metadata:
   author: Kielas
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # 处理 PR 评审意见
@@ -16,7 +16,7 @@ metadata:
 ## 前置条件
 
 - PR 已经建立（否则走 `kie-pr-start`）。
-- 当前工作区在 PR 对应的分支上。
+- 当前工作区在 PR 对应的分支上。`<项目名称>` 与 `<任务>` 的取值见 `kie-agent-rules` 的工作空间约定，与 `kie-dev-test` 写报告的任务目录同一个。
 - 能取到 PR 编号与仓库信息：
 
 ```bash
@@ -25,7 +25,7 @@ gh pr view --json number,url,headRefName,baseRefName
 
 ## 流程一：审核文档
 
-产出 `~/project/<项目名称>/.idea/pr-<编号>-review.md`。
+产出 `~/kie-ws/<项目名称>-p/.idea/<任务>/pr-<编号>-review.md`。
 
 1. 拉取全部评论载体，三类都要拉，不能只看行内评论：未解决的 review threads、review body、PR 会话区的 issue comments。命令见 [references/github-pr-review.md](references/github-pr-review.md)。
 2. 逐条读意见，结合当前代码实现判断状态：已经解决、需要解决、不需要改（超出改动范围、与项目约定冲突、意见本身不成立）。
@@ -54,7 +54,7 @@ gh pr view --json number,url,headRefName,baseRefName
 
 ## 流程二：实现文档
 
-产出 `~/project/<项目名称>/.idea/pr-<编号>-fix.md`。
+产出 `~/kie-ws/<项目名称>-p/.idea/<任务>/pr-<编号>-fix.md`。
 
 文档结构：
 
@@ -79,7 +79,7 @@ gh pr view --json number,url,headRefName,baseRefName
 ## 流程三：实现与本地测试闭环
 
 1. 按实现文档改代码，一次完成一处，跑该处的验收命令。
-2. 全部改完后做本地测试闭环，走 `kie-dev-test`：报告写到 `~/project/<项目名称>/.idea/test-report.md`。
+2. 全部改完后做本地测试闭环，走 `kie-dev-test`：报告写到 `~/kie-ws/<项目名称>-p/.idea/<任务>/test-report.md`。
 3. 验证命令失败时读完整错误输出定位根因再改，不放宽验证项。
 4. 本地通过后把结果给用户，用户确认无误才进入流程四。用户要求测远端时才走 `kie-pr-ci-test`。
 

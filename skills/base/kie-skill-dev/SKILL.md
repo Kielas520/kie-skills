@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要 python3 与 unshare（评估沙箱隔离）、uvx（skills-ref 校验器），以及一个可无头驱动的 agent CLI（脚本内置 omp 与 claude 的适配，用 --list-agents 看本机有哪些）
 metadata:
   author: Kielas
-  version: "0.17.0"
+  version: "0.19.0"
 ---
 
 # 技能开发
@@ -22,7 +22,7 @@ Agent Skills 的格式约束不写死在本文件里：字段、目录约定、�
 
 - 允许读取：本仓库内的文件，以及用户显式提供的文件与链接。
 - 不作为技能内容依据：`~/.agents/skills/` 等用户层技能目录、`~/.omp/` 与 `~/.claude/` 等 agent 运行时配置、其他仓库的技能与参考文件、工作空间根目录下的通用约定文件（它的规则按 `kie-agent-rules` 的优先级参与冲突判定，取材不算在内）。
-- 评估沙箱建在 `~/project/test/coop-<沙箱标记>/` 下（目录名由技能名哈希得到，不含技能名），仓库内只保留 `.scratch/` 里的运行结果。
+- 评估沙箱建在 `~/kie-ws/test/coop-<沙箱标记>/` 下（目录名由技能名哈希得到，不含技能名），仓库内只保留 `.scratch/` 里的运行结果。
 - 用户给的输入明确指向某个外部技能时，才读取该技能，并在产出里说明来源。
 
 ## 仓库约定
@@ -127,7 +127,7 @@ python3 scripts/trigger_eval.py <技能名> --agent <名字> [--runs 1] [--worke
 
 脚本做四件事：
 
-- 在 `~/project/test/coop-<技能名哈希>/` 建沙箱：整份 `skills/` 平铺复制进沙箱并删掉各技能的 `evals/`，`work/` 作为会话工作目录，技能按所选 agent 的目录约定投放（omp 写 `overlay.yml` 的 `customDirectories`，claude 用 `--add-dir` 指向带 `.claude/skills` 的目录）。沙箱目录名不含技能名，会话翻到路径时不会顺着名字判定这是该技能的评测。
+- 在 `~/kie-ws/test/coop-<技能名哈希>/` 建沙箱：整份 `skills/` 平铺复制进沙箱并删掉各技能的 `evals/`，`work/` 作为会话工作目录，技能按所选 agent 的目录约定投放（omp 写 `overlay.yml` 的 `customDirectories`，claude 用 `--add-dir` 指向带 `.claude/skills` 的目录）。沙箱目录名不含技能名，会话翻到路径时不会顺着名字判定这是该技能的评测。
 - 每次运行套 `unshare -rm`，用 tmpfs 盖住本仓库路径、该 agent 的用户层技能目录、测试工作区里本次运行之外的目录，以及同一轮里的兄弟目录（其他组、其他用例），会话读不到真实仓库、用户层技能与旁边的其他沙箱。
 - 判定看输出里有没有技能加载信号：omp 是 `"resolvedPath":"<沙箱>/skills/<技能名>/SKILL.md"`，claude 是会话用技能工具加载了该技能（目录列举里出现路径不算）。信号一出现就终止会话：它出现在一次运行的前 5% 时间里，之后是无关工作。负例没有这个信号，要等会话自己停下来，受 `--cap` 约束。
 - 累计触发率：正例高于 0.5 通过，负例低于 0.5 通过。每次运行的耗时与判定一起记进 `results.json`，路径为 `.scratch/trigger-eval/<技能名>/<时间戳>/results.json`。
