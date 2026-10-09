@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要支持 Agent Skills 的 agent 会话；GitHub 交互用内置工具或已登录的 gh CLI；学术检索用 paper-search-mcp；库文档查询用 context7 CLI；命令行优先使用 rg、fd、bat、sd；删除文件需要 gio trash、gomi 或 trash-cli 之一
 metadata:
   author: Kielas
-  version: "0.6.0"
+  version: "0.7.0"
 ---
 
 # agent 协作技能
@@ -138,4 +138,4 @@ agent 与用户交互的硬性规则。本技能约束协作行为本身：回�
 - 「顺便提一下」「记得提交」这类顺带指令也算明确要求，但拿不准就先问一句再执行。
 - 越界最常见的形态是「评价加祈使词」：「这个其实是软约束，所以说不要 X，应该 Y」是用户在讲看法，不是开工指令。用户没有说出「改」之前一个文件都不写；被指出越界后先用文件编辑工具把文件恢复到改动前，再说明改了哪些文件。
 - 咨询类任务即使发现明显 bug 也只指出，不顺手修。
-- [references/user-rules-full.md](references/user-rules-full.md) 只收录正文没有的内容：新增或修改规则写进正文，再判断详述层要补什么；正文已有结论的条目不在该文件重复。用户更新 `~/project/AGENTS.md` 后同步该文件。
+- [references/user-rules-full.md](references/user-rules-full.md) 只收录正文没有的内容：新增或修改规则写进正文，再判断详述层要补什么；正文已有结论的条目不在该文件重复。
