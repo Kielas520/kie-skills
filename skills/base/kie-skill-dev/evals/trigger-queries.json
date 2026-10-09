@@ -1,5 +1,5 @@
 [
-  { "query": "帮我写个 skill，把我们现在这套发布流程固化进去", "should_trigger": true },
+  { "query": "我们这套代码评审的流程想固化成技能，你先帮我看看该怎么切", "should_trigger": true },
   { "query": "新建的技能目录该叫什么名字？", "should_trigger": true },
   { "query": "kie-doc-style 这个技能老是不触发，我明明就在问文风检查的事", "should_trigger": false },
   { "query": "把最近修 CI 的这套打法沉淀成技能吧，下次不想再重讲一遍", "should_trigger": true },

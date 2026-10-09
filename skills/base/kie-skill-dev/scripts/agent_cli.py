@@ -61,7 +61,8 @@ def windows_to_wsl(path):
 
 
 def test_workspace_masks(work):
-    """挡掉测试工作区里不属于本次运行的目录：旁边的其他沙箱会把会话带偏。"""
+    """挡掉测试工作区里用不到的目录：其他运行的沙箱，以及同一轮里其他组、其他用例的沙箱，
+    会话翻进去就能接着答。只留当前组自己的目录。"""
     current = None
     for path in work.parents:
         if path.parent == SANDBOX_ROOT:
@@ -69,7 +70,13 @@ def test_workspace_masks(work):
             break
     if current is None:
         return []
-    return [path for path in sorted(SANDBOX_ROOT.iterdir()) if path != current and path.is_dir()]
+    masks = [path for path in sorted(SANDBOX_ROOT.iterdir()) if path != current and path.is_dir()]
+    # 质量评估把两组放在同一轮目录下，逐层盖住兄弟目录，直到本轮沙箱根
+    arm = work.parent
+    while arm != current:
+        masks += [path for path in sorted(arm.parent.iterdir()) if path != arm and path.is_dir()]
+        arm = arm.parent
+    return masks
 
 
 def terminate(proc):
@@ -177,15 +184,16 @@ class OmpAgent(Agent):
             copy_skills(skills_source, root)
         else:
             root.mkdir(parents=True, exist_ok=True)
-        self.config = sandbox / "overlay.yml"
-        self.config.write_text("skills:\n"
-                               f"  customDirectories:\n    - {root}\n"
-                               "  enableAgentsUser: false\n")
+        (sandbox / "overlay.yml").write_text("skills:\n"
+                                             f"  customDirectories:\n    - {root}\n"
+                                             "  enableAgentsUser: false\n")
         return root
 
     def command(self, work, cap, tools, auto_approve):
+        # 路径从沙箱推出来，不落实例字段：多个组并发跑同一个适配实例，字段会被别的组改写
+        overlay = work.parent / "overlay.yml"
         approve = " --auto-approve" if auto_approve else ""
-        return (f"omp -p --mode json --no-session --config {self.config} --tools {tools}"
+        return (f"omp -p --mode json --no-session --config {overlay} --tools {tools}"
                 f"{approve} --max-time {cap} \"$1\"")
 
     def hit(self, line, skills_root, skill_name):
@@ -258,13 +266,14 @@ class ClaudeAgent(Agent):
         root.mkdir(parents=True, exist_ok=True)
         if with_skills:
             copy_skills(skills_source, root / ".claude" / "skills")
-        self.root = root
         return root
 
     def command(self, work, cap, tools, auto_approve):
+        # 路径从沙箱推出来，不落实例字段：多个组并发跑同一个适配实例，字段会被别的组改写
         # --restricted 会连沙箱技能一起停掉，隔离靠 --add-dir 投放的技能目录
         return (f"claude -p \"$1\" --output-format stream-json --verbose --no-session-persistence "
-                f"--permission-mode bypassPermissions --tools \"{tools}\" --add-dir {self.root}")
+                f"--permission-mode bypassPermissions --tools \"{tools}\" "
+                f"--add-dir {work.parent / 'skills-root'}")
 
     def normalize(self, line):
         # claude 在本机以 Windows 进程运行，路径在输出里是 \\wsl.localhost\... 形式

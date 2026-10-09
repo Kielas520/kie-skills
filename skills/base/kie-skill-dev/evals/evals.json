@@ -3,9 +3,9 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "我写了个技能草稿放在 release-notes-helper/SKILL.md，description 太笼统了，正文也全是套话，帮我改到能用。我们这套发布记录的实际做法我整理在 release-notes-material.md 里。",
+      "prompt": "我写了个技能草稿放在 repro-helper/SKILL.md，description 太笼统了，正文也全是套话，帮我改到能用。我们这套复现与定位的实际做法我整理在 repro-material.md 里。",
       "expected_output": "改写后的 SKILL.md：description 同时说清做什么与何时使用，并给出不适用场景；正文换成素材里的真实命令、分节写法与判断条件；frontmatter 字段保持合法。",
-      "files": ["evals/files/release-notes-helper/SKILL.md", "evals/files/release-notes-material.md"],
+      "files": ["evals/files/repro-helper/SKILL.md", "evals/files/repro-material.md"],
       "assertions": [
         "description 同时说明了这个技能做什么以及何时使用，并写出不适用的场景",
         "正文里的通用套话至少有一部分被具体的步骤、命令或决策条件替换",
@@ -14,11 +14,21 @@
     },
     {
       "id": 2,
-      "prompt": "帮我把这套发布流程固化成技能，技能和评估用例写好放我给的目录里；评估先别跑，写完给我看。",
-      "expected_output": "写出的技能正文与评估用例都能在沙箱内闭环：远端动作标注为人工执行，或换成沙箱内本地 remote 的演练写法；用例的 prompt 与 query 不让会话碰 GitHub。",
-      "files": ["evals/files/release-process-notes.md"],
+      "prompt": "帮我把这套改动到合并的流程固化成技能，技能写成当前工作目录下的 `kie-pr-flow/`（含 `evals/`）；评估先别跑，写完给我看。",
+      "expected_output": "当前工作目录的 kie-pr-flow/ 下写出技能正文与评估用例，内容都能在沙箱内闭环：推送、开 PR、合并、看 CI 状态、发通知这类远端动作在用例里换成人工执行或信息型提问；用例的 prompt 与 query 不让会话碰远端。",
+      "files": ["evals/files/pr-flow-notes.md"],
       "assertions": [
-        "产出的评估用例里没有要求会话碰远端的输入（触发、推送、合并、打 tag、发 release、发通知，或去取 Actions/PR/Release 状态）——trigger-queries.json 的 query 与 evals.json 的 prompt 都算"
+        "产出的评估用例里，正例 query 与 evals.json 的 prompt 不要求会话碰远端（远端 workflow 的触发、推送、合并、打 tag、发通知，或去远端取 PR、CI 与产物的状态）——负例不在此列"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "log-triage/SKILL.md 这份草稿是我照仓库里技能的老写法抄的，取材边界那段我不确定对不对。你按仓库现在的约定核一遍，不对的地方改掉，改完给我看。",
+      "expected_output": "改后的草稿取材来源只有用户给的输入与仓库内已固化的约定，工作空间根目录下的 AGENTS.md 不再作为来源出现。",
+      "files": ["evals/files/log-triage/SKILL.md"],
+      "assertions": [
+        "改后的 log-triage/SKILL.md 保留了取材边界的表述，来源侧只列用户给的输入与本仓库已固化的约定，工作空间根目录下的 AGENTS.md 被排除在来源之外",
+        "允许读取的范围限于本仓库内的文件与用户显式提供的文件、链接，没有引入新的外部来源"
       ]
     }
   ]
