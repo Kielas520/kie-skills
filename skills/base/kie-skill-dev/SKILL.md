@@ -1,11 +1,11 @@
 ---
 name: kie-skill-dev
-description: 当任务要产出或改动技能目录里的文件时使用：新建技能、把已经跑通的流程沉淀成技能、改技能正文或 description、排查技能不触发或误触发、判断字段命名与目录该怎么写。用户说「写个 skill」「把这套流程固化成技能」「这个技能老是不触发，明明问的就是它管的范围」时适用，即使没提到 skill 这个词。只改本仓库 `skills/` 下自己维护的技能：不动任何文件、只要一段解释的问答，别人渠道装来的技能怎么装怎么卸怎么升级，编写 AGENTS.md 与 README 这类普通文档，都不适用，直接回答即可。
+description: 当任务要动本仓库 `skills/` 下技能目录里的文件时才用本技能：新建技能、把已经跑通的流程沉淀成技能，以及技能本身没有出现行为异常时的正文与 description 改写，含判断字段命名与目录该怎么写。用户说「写个 skill」「把这套流程固化成技能」「帮我起个技能」「这个技能的 description 太笼统，改到能用」时适用，即使没提到 skill 这个词。不适用：不动任何文件、只要一段解释的问答，别人渠道装来的技能怎么装怎么卸怎么升级，编写 AGENTS.md 与 README 这类普通文档，直接回答即可；已装技能出现行为异常（越界、该做没做、做错事、输出走样、不触发或误触发）走 kie-skill-fix。
 license: MIT
 compatibility: 需要 python3 与 unshare（评估沙箱隔离）、uvx（skills-ref 校验器），以及一个可无头驱动的 agent CLI（脚本内置 omp 与 claude 的适配，用 --list-agents 看本机有哪些）
 metadata:
   author: Kielas
-  version: "0.12.0"
+  version: "0.14.0"
 ---
 
 # 技能开发
@@ -14,7 +14,7 @@ metadata:
 
 Agent Skills 的格式约束不写死在本文件里：字段、目录约定、评估 schema 一律实时从 `https://agentskills.io/llms.txt` 及其页面拉取。本文件是工作流。规则优先级：以下仓库约定 > 官方文档 > 本文件其余内容。
 
-用户反馈技能不触发、误触发或效果不好时先定位类型：触发问题走第 7 步，输出质量问题走第 8 步。
+改动技能之后按改的内容选评估：`description` 动过走第 7 步触发评估，正文动过走第 8 步输出质量评估。用户报某个已装技能出现行为异常（越界、该做没做、做错事、输出走样、不触发或误触发）时走 kie-skill-fix。
 
 ## 调查边界
 
@@ -136,7 +136,7 @@ python3 scripts/trigger_eval.py <技能名> --agent <名字> [--runs 1] [--worke
 
 ### 8. 输出质量评估
 
-技能触发正常但输出质量差时用。用例写在技能的 `evals/evals.json`，字段按官方 schema，`files` 里的内容按 `evals/files/` 之后的相对路径放进工作目录：
+改完正文、要验证技能输出质量时用。用例写在技能的 `evals/evals.json`，字段按官方 schema，`files` 里的内容按 `evals/files/` 之后的相对路径放进工作目录：
 
 ```json
 {
