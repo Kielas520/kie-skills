@@ -9,7 +9,16 @@
       "assertions": [
         "description 同时说明了这个技能做什么以及何时使用，并写出不适用的场景",
         "正文里的通用套话至少有一部分被具体的步骤、命令或决策条件替换",
-        "在技能的 evals/ 目录下同时给出 trigger-queries.json 与 evals.json"
+        "改动后先给出改动总结，并说明评估还没跑、等用户确认后再启动"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "帮我把这套发布流程固化成技能，技能和评估用例写好放我给的目录里；评估先别跑，写完给我看。",
+      "expected_output": "写出的技能正文与评估用例都能在沙箱内闭环：远端动作标注为人工执行，或换成沙箱内本地 remote 的演练写法；用例的 prompt 与 query 不让会话碰 GitHub。",
+      "files": ["evals/files/release-process-notes.md"],
+      "assertions": [
+        "产出的评估用例里没有要求会话碰远端的输入（触发、推送、合并、打 tag、发 release、发通知，或去取 Actions/PR/Release 状态）——trigger-queries.json 的 query 与 evals.json 的 prompt 都算"
       ]
     }
   ]
