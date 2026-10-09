@@ -13,9 +13,27 @@
         "evals/files/demo-crate/README.md"
       ],
       "assertions": [
-        "判定本次改动涉及 Rust 源码，并实际执行 cargo fmt 与 cargo clippy",
-        "说明测试范围的依据（改动到测试的对应关系），没有无依据地跑 workspace 全量",
+        "判定本次改动涉及 Rust 源码，并实际执行 cargo fmt 与 cargo clippy --fix",
+        "按改动到测试的对应关系说明测试范围，没有无依据地跑 workspace 全量",
         "汇报里给出 fmt 与 clippy 的真实输出结论，clippy 的自动改动经过复核"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "这次只改了 docs/ 下的使用说明和 README.md，代码一行没动，我要 commit 了，帮我过一遍门禁。工程在 work/demo-crate，变更说明在 work/变更说明-文档.md。",
+      "expected_output": "判定改动不含 Rust 源码与清单，跳过 fmt、clippy 与测试并说明依据。",
+      "files": [
+        "evals/files/变更说明-文档.md",
+        "evals/files/demo-crate/Cargo.toml",
+        "evals/files/demo-crate/src/lib.rs",
+        "evals/files/demo-crate/tests/smoke.rs",
+        "evals/files/demo-crate/README.md",
+        "evals/files/demo-crate/docs/使用说明.md"
+      ],
+      "assertions": [
+        "判定本次改动不含 Rust 源码与 Cargo 清单改动，跳过 fmt、clippy 与测试",
+        "说明跳过门禁的依据是改动路径全部为文档",
+        "没有无依据地执行 cargo fmt、cargo clippy 或 cargo test"
       ]
     }
   ]

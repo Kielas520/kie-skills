@@ -1,7 +1,7 @@
 ---
 name: kie-python-style
 description: |
-  涉及 Python 代码的开发约定，用户提到任何一项都先加载本技能：环境与依赖用 uv（版本基线 3.13 及以上、最低 3.10），类型注解用 `|` 联合与内置小写容器、抽象容器取 collections.abc，路径操作走 pathlib，进度条走 rich，结构化输出走 rich.print，日志走 loguru。写、改、评审、重构 Python 代码，或建环境、装依赖、挑库、补类型注解、替换旧写法（logging、os.path、typing.Union）、写脚本与调试代码时都适用，即使只是一句话的改动要求、没有给出文件与上下文、也没有提到「规范」「约定」。不适用：Rust 项目与 Rust 的提交推送门禁（用 kie-rust-gates）；推送前的验收测试与测试报告（用 kie-dev-test）；与语言无关的协作规则（见 kie-agent-rules）；纯知识问答（解释 GIL、语法速查）。
+  涉及 Python 代码的开发约定，用户提到任何一项都先加载本技能：环境与依赖用 uv（版本基线 3.13 及以上、最低 3.10），类型注解用 `|` 联合与内置小写容器、抽象容器取 collections.abc，路径操作走 pathlib，进度条走 rich，结构化输出走 rich.print，日志走 loguru。写、改、评审、重构 Python 代码，或建环境、装依赖、挑库、补类型注解、替换旧写法（logging、os.path、typing.Union）、写脚本与调试代码时都适用；哪怕只是一句「换成 loguru」「加个进度条」「用 pathlib」，或没有给出文件与上下文、也没有提到「规范」「约定」，同样先加载本技能。不适用：Rust 项目与 Rust 的提交推送门禁（用 kie-rust-gates）；推送前的验收测试与测试报告（用 kie-dev-test）；与语言无关的协作规则（见 kie-agent-rules）；纯知识问答（解释 GIL、语法速查）。
 license: MIT
 compatibility: 需要 uv 与 Python 3.10 及以上，推荐 3.13 及以上。
 metadata:

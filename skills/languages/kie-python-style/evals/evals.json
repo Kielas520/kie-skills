@@ -4,12 +4,25 @@
     {
       "id": 1,
       "prompt": "work/legacy_script.py 是之前别人写的，按我们的 Python 约定改一遍，改完的文件留在当前目录下。",
-      "expected_output": "改写后的脚本：用 pathlib、`|` 联合类型、内置小写容器、loguru 日志，函数带类型注解。",
+      "expected_output": "改写后的脚本：用 pathlib、`|` 联合类型、内置小写容器、collections.abc 抽象容器、loguru 日志，语义明确的键值对用 namedtuple 类。",
       "files": ["evals/files/legacy_script.py"],
       "assertions": [
-        "改用 pathlib 处理路径，不再使用 os.path",
-        "联合类型用 `|`、容器用内置小写泛型，不再使用 typing.Union 与 typing.List",
+        "不再使用 typing.Optional、typing.Union、typing.Dict，联合类型写 `|`、容器写内置小写泛型",
+        "抽象容器注解从 collections.abc 取，并去掉 `from __future__ import annotations`",
+        "键值对用 namedtuple 类表达语义，不再返回裸 tuple",
+        "路径与文件操作改用 pathlib，不再使用 os.path",
         "日志改用 loguru，不再使用标准库 logging"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "work/legacy_project 这个项目要加个日志依赖 loguru，依赖和环境按我们的约定弄好，顺便把 main.py 的日志改成 loguru。",
+      "expected_output": "依赖用 uv 管理并写进 pyproject.toml，运行说明用 uv run，main.py 的日志改用 loguru。",
+      "files": ["evals/files/legacy_project/main.py", "evals/files/legacy_project/requirements.txt"],
+      "assertions": [
+        "依赖用 uv 管理：写进 pyproject.toml 的 dependencies 或用 uv add，而不是只在 requirements.txt 里追加一行",
+        "运行方式说明用 uv run 或 uv 管理的虚拟环境，不用全局 pip 安装",
+        "main.py 的日志改用 loguru"
       ]
     }
   ]

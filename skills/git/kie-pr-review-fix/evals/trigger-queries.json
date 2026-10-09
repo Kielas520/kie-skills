@@ -6,7 +6,7 @@
   {"query": "这些未解决的评论怎么处理", "should_trigger": true},
   {"query": "PR 的评审意见先给我个方案", "should_trigger": true},
   {"query": "评审意见改完推送之后逐条回复", "should_trigger": true},
-  {"query": "reviewer 在 PR 上指出这里的边界没处理，你评估一下怎么改", "should_trigger": true},
+  {"query": "PR 上 reviewer 说这里的边界没处理，按流程给我一个处理方案", "should_trigger": true},
   {"query": "把评审过掉，然后更新 PR body", "should_trigger": true},
   {"query": "解决一下 PR 上的 review threads", "should_trigger": true},
   {"query": "CHANGES_REQUESTED 了，先分析一下哪些意见要采纳", "should_trigger": true},
