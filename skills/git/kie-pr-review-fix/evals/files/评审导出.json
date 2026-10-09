@@ -1,0 +1,63 @@
+{
+  "pull_request": {
+    "number": 482,
+    "url": "https://github.com/example/logfmt/pull/482",
+    "headRefName": "fix/f-8123456789/logfmt-blank-line",
+    "baseRefName": "main"
+  },
+  "review_threads": [
+    {
+      "id": "THREAD_1",
+      "isResolved": false,
+      "isOutdated": false,
+      "path": "logfmt.py",
+      "line": 9,
+      "comments": [
+        {
+          "author": "reviewer-a",
+          "body": "空行判断拆成两行没必要，直接写成 `if not line.strip(): continue` 更清楚。",
+          "databaseId": 1001
+        }
+      ]
+    },
+    {
+      "id": "THREAD_2",
+      "isResolved": false,
+      "isOutdated": true,
+      "path": "logfmt.py",
+      "line": 22,
+      "comments": [
+        {
+          "author": "coderabbitai",
+          "body": "main() 里没有处理文件不存在的情况，建议加 try/except 并返回非零退出码。",
+          "databaseId": 1002
+        }
+      ]
+    },
+    {
+      "id": "THREAD_3",
+      "isResolved": true,
+      "isOutdated": false,
+      "path": "tests/test_parse.py",
+      "line": 12,
+      "comments": [
+        {
+          "author": "reviewer-b",
+          "body": "这个用例的断言太弱，只检查了条数。",
+          "databaseId": 1003
+        }
+      ]
+    }
+  ],
+  "reviews": [
+    {"user": "reviewer-a", "state": "COMMENTED", "body": ""},
+    {
+      "user": "reviewer-c",
+      "state": "CHANGES_REQUESTED",
+      "body": "整体没问题，但 parse() 现在遇到 `key=` 这种没有值的字段会抛异常，历史日志里有这类行，麻烦一起处理。"
+    }
+  ],
+  "issue_comments": [
+    {"user": "reviewer-a", "body": "顺便问一下，这个改动对性能有影响吗？"}
+  ]
+}

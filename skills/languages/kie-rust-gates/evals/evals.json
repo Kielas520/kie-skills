@@ -1,0 +1,22 @@
+{
+  "skill_name": "kie-rust-gates",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "这次改了 src/lib.rs 和 README.md，我要 commit 了，提交前帮我把门禁过一遍。变更说明在 work/变更说明.md，工程在 work/demo-crate，检查过程与结论写在回答里。",
+      "expected_output": "判定改动涉及 Rust 源码，执行 fmt 与 clippy --fix 并说明测试范围选择依据，README 的改动不影响判定。",
+      "files": [
+        "evals/files/变更说明.md",
+        "evals/files/demo-crate/Cargo.toml",
+        "evals/files/demo-crate/src/lib.rs",
+        "evals/files/demo-crate/tests/smoke.rs",
+        "evals/files/demo-crate/README.md"
+      ],
+      "assertions": [
+        "判定本次改动涉及 Rust 源码，并实际执行 cargo fmt 与 cargo clippy",
+        "说明测试范围的依据（改动到测试的对应关系），没有无依据地跑 workspace 全量",
+        "汇报里给出 fmt 与 clippy 的真实输出结论，clippy 的自动改动经过复核"
+      ]
+    }
+  ]
+}

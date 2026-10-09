@@ -1,0 +1,5 @@
+time=12:00:01 level=info msg=started
+
+time=12:00:02 level=warn msg=retry src=net
+time=12:00:03 level=info msg=done
+time=12:00:04 level=info msg=flush bytes=2048

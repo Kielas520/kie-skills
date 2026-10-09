@@ -1,0 +1,22 @@
+{
+  "skill_name": "kie-dev-test",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "f-8123456789 的修复我做完了，推送前你本地测一遍。工单在 work/工单-f-8123456789.md，有问题那个版本我放在 work/logfmt-0.1.0/ 了，测完把测试报告写到当前目录下的 .idea/test-report.md。",
+      "expected_output": "按工单两条验收标准实测当前版本与 v0.1.0，给出对照结果，测试报告写到 .idea/test-report.md。",
+      "files": [
+        "evals/files/工单-f-8123456789.md",
+        "evals/files/logfmt/logfmt.py",
+        "evals/files/logfmt/sample.log",
+        "evals/files/logfmt-0.1.0/logfmt.py"
+      ],
+      "assertions": [
+        "报告含测试环境（系统、依赖版本、构建方式）、测试产物、测试结果三部分，并写明与工单环境的差异",
+        "测试结果逐条对应工单里的两条验收标准，并给出预期与实际",
+        "报告给出 v0.1.0 与当前版本在同一份输入上的对照实验结论，包含有问题版本复现与当前版本结果",
+        "报告含未覆盖段，列出没测到的部分、原因与影响"
+      ]
+    }
+  ]
+}

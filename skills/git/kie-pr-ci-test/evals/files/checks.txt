@@ -1,0 +1,4 @@
+Build / build (linux)	pass	1m12s	https://github.com/example/logfmt/actions/runs/99000001/job/77000001
+Build / build (macos)	pass	2m03s	https://github.com/example/logfmt/actions/runs/99000001/job/77000002
+Lint / clippy	pass	45s	https://github.com/example/logfmt/actions/runs/99000001/job/77000003
+Test / unit	pass	1m40s	https://github.com/example/logfmt/actions/runs/99000001/job/77000004

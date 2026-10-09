@@ -1,0 +1,26 @@
+{
+  "skill_name": "kie-pr-ci-test",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "PR #482 的 CI 跑完了，checks 输出、产物列表、本地测试报告都在 work 目录里，远端产物按工单验收一下。结果并进测试报告写到当前目录下的 .idea/ 里，本地那部分保持原样，评论等我确认再发。",
+      "expected_output": "与本地方案同结构的测试报告，远端 CI 段给出 CI 运行链接、产物链接与有问题版本 tag，评论只起草不发布。",
+      "files": [
+        "evals/files/工单-f-8123456789.md",
+        "evals/files/checks.txt",
+        "evals/files/产物列表.md",
+        "evals/files/本地测试报告.md",
+        "evals/files/PR-482-body.md",
+        "evals/files/artifacts/logfmt-linux-x86_64/logfmt.py",
+        "evals/files/artifacts/logfmt-0.1.0/logfmt.py",
+        "evals/files/artifacts/sample.log"
+      ],
+      "assertions": [
+        "远端结果写进测试报告的远端 CI 结果段，本地测试结果保持原样",
+        "报告含 CI 运行链接、CI 产物链接与有问题版本的 tag",
+        "测试结果逐条对应工单的验收标准，并给出远端产物上的实测结论",
+        "评论只以草稿形式给出，没有发布评论或直接改 PR body"
+      ]
+    }
+  ]
+}

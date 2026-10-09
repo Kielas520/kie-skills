@@ -1,0 +1,16 @@
+{
+  "skill_name": "kie-python-style",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "work/legacy_script.py 是之前别人写的，按我们的 Python 约定改一遍，改完的文件留在当前目录下。",
+      "expected_output": "改写后的脚本：用 pathlib、`|` 联合类型、内置小写容器、loguru 日志，函数带类型注解。",
+      "files": ["evals/files/legacy_script.py"],
+      "assertions": [
+        "改用 pathlib 处理路径，不再使用 os.path",
+        "联合类型用 `|`、容器用内置小写泛型，不再使用 typing.Union 与 typing.List",
+        "日志改用 loguru，不再使用标准库 logging"
+      ]
+    }
+  ]
+}
