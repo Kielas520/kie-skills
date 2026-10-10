@@ -2,7 +2,7 @@
 
 > 本文件由 `kie-dev-solution` 在用户拍板后产出，只记录已确认的方向，供 `kie-dev-design` 写 `design.md` 使用。
 > 取舍过程、全部候选方案与未选原因留在同目录的 `solution.md`，本文件不重复抄录。
-> 落点：`~/kie-ws/demo-p/.idea/m-7000000001/solve.md`。
+> 落点：`~/kie-ws/demo-p/.idea/feat/m-7000000001/solve.md`。
 
 ## 要实现的功能
 
@@ -31,4 +31,4 @@
 
 ## 依据
 
-- 选型文档：`.idea/m-7000000001/solution.md` 的「方案二：全量读进内存再一次性写」标题处已标注选定
+- 选型文档：`.idea/feat/m-7000000001/solution.md` 的「方案二：全量读进内存再一次性写」标题处已标注选定

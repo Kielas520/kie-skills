@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要支持 Agent Skills 的 agent 会话；GitHub 交互用内置工具或已登录的 gh CLI；学术检索用 paper-search-mcp；库文档查询用 context7 CLI；命令行优先使用 rg、fd、bat、sd；删除文件需要 gio trash、gomi 或 trash-cli 之一
 metadata:
   author: Kielas
-  version: "0.11.0"
+  version: "0.12.0"
 ---
 
 # agent 协作技能
@@ -132,7 +132,7 @@ agent 与用户交互的硬性规则。本技能约束协作行为本身：回�
 
 - `<项目名称>-p/` 这一层是项目容器，放源仓库、工作区与项目文档，本身不是仓库，不在这一层执行 git 命令。末尾的 `-p` 标记它是项目容器，与同名的普通克隆区分开。
 - 每个项目只保留 `source/<仓库名>/` 一份克隆，调研、设计、报告都基于它，工作区由它开出。
-- `<任务>` 取工单号（`f-7128574383`、`m-7113016070`），无工单时取分支梗概段（如 `linux-commit-unknown`），不含斜杠。
+- `<任务>` 是 `.idea/` 下的任务文档目录，分类头与 `worktrees/` 对齐：有工单时按工单类型分两层，Bug 单落 `fix/f-{ID}`（如 `fix/f-7128574383`），Story 与 Epic 落 `feat/m-{ID}`（如 `feat/m-7113016070`）；无工单时取分支梗概段单层目录（如 `linux-commit-unknown`）。工单类型前缀与 `kie-git-worktree` 的分支前缀是同一套，不要把工单目录平铺到 `.idea/` 根下。
 - 项目名以用户给的为准；用户没说时看仓库所在位置：在 `~/kie-ws/<项目名称>-p/source/<仓库名>/` 下就取 `source/` 上层目录名去掉末尾的 `-p`，直接克隆在 `~/kie-ws/<仓库名>/` 下就取仓库目录名。
 - 只为查看而克隆的仓库放 `~/kie-ws/<仓库名>/`；要参与开发的一律放项目容器的 `source/` 下，方便后续所有环节引用。
 - `~/kie-ws` 根目录只放项目容器、`test/`、`.tmp/`、`.draft/` 与只读克隆，不落单个文件。
