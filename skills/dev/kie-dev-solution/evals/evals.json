@@ -23,6 +23,18 @@
         "solve.md 含「要实现的功能」与「选定方案」两节，并写明它由 solution.md 的选定结论而来",
         "工作目录里没有生成 design.md：用户只拍板，没有要求写设计文档"
       ]
+    },
+    {
+      "id": 3,
+      "prompt": "工作目录里 ws/demo-p 是项目容器（源仓库在 source/myrepo 下），draft/glove-offline-data-flow.md 是我之前整理的离线解算链路说明，以这份素材为准。把它整理成正式的任务文档 ws/demo-p/.idea/feat/m-7000000001/solution.md，工单是给 C SDK 加离线解算接口。",
+      "expected_output": "solution.md 的「项目现状」开头讲清既有实现的技术原理：离线解算的定义与覆盖/不覆盖边界、实时链路与离线链路的对应关系、数据经过哪些环节与每层职责；随后才是与本次改动位置相关的现状。",
+      "files": ["evals/files/draft/glove-offline-data-flow.md", "evals/files/ws/demo-p/source/myrepo/README.md"],
+      "assertions": [
+        "solution.md 的「项目现状」一节讲清原有设计的技术原理，不是只有文件与符号清单：写出离线解算是什么（不连设备、不建订阅、调用方逐帧传入、与实时链路共用同一套求解器，差别只在帧来源）与覆盖/不覆盖边界，并写出实时链路与离线链路的对应（实时 `emf_raw_data` → `emf_poses` → `hand_joint_angles` → `tip_poses` / `hand_skeleton`，`imu_raw/<指>` → `imu_data/<指>`；离线把 `EmfPoseArray` 当入口）",
+        "solution.md 写到函数与环节职责这一级：构造期读该 SN 的参数存储、按「显式 URDF 路径 → 标定文件 → 内置默认」三级选 URDF、建 `HandSolver` 与 `ImuFusionSolver`；`input_wire` 与 `ensure_latest_frame` 按 postcard 字节决定是否重新解算、手部三类共用一次解算；`materialize_tip_poses` 用 pipeline 自增 `seq` 而 `materialize_hand_skeleton` 用输入的 `seq`",
+        "solution.md 保留素材里的数值边界与跳过条件：IMU 融合在相邻帧时间戳差为 0 或超过 5 秒时不积分也不修正、加速度模长不在 `[1.0, 30.0]` 时跳过倾斜修正、关节角超出 URDF 限位超过 `1e-6 rad` 时限流告警而角度本身不截断",
+        "solution.md 保留了素材里的使用须知与一致性验证现状：SN 必须是采集该数据的设备或已完成标定的设备的 SN（填了不存在的 SN 不报错，但会静默使用内置默认 URDF）、录像要保存 `emf_poses` 的输出而不是 `emf_raw_data`、实时录制再离线重放时两边从空状态开始且每帧对同一组资源各调一次；`offline_pipeline_parity.rs`、仓内 `#[cfg(test)]` 段、Python 测试与 `online_offline_mcap_parity.py` 各自覆盖的内容"
+      ]
     }
   ]
 }

@@ -6,7 +6,7 @@ license: MIT
 compatibility: 需要联网；学术文献用 paper-search（随 paper-search-mcp 安装），GitHub 检索用 gh CLI。
 metadata:
   author: Kielas
-  version: "0.3.0"
+  version: "0.4.0"
 ---
 
 # 开发前的调研与方案选型
@@ -83,7 +83,7 @@ git -C ~/kie-ws/<项目名称>-p/source/<仓库名> rev-list --count main..origi
 <要达成什么，验收条件是什么>
 
 ## 项目现状
-<已有工程写清当前实现与相关模块；新项目写清可复用的东西>
+<已有工程先讲清原有设计的技术原理：这套机制是什么、覆盖与不覆盖哪些范围、数据从哪来到哪去、每个环节与函数各做什么；再写与本次改动直接相关的现状要点。新项目写清可复用的东西>
 
 ## 方案一：<名称>（风险 <低/中/高>）
 ### 方案细节
@@ -103,6 +103,7 @@ git -C ~/kie-ws/<项目名称>-p/source/<仓库名> rev-list --count main..origi
 <同上>
 ```
 
+- 「项目现状」开头讲清原有设计的技术原理，写到环节与函数职责这一级。调研时手上已有的链路说明、草稿这类素材，原有设计内容要承接到这一节里，不能只压成文件与符号清单。
 - 方案数量由调研结果定。只有一个可行路径时只写一个，说明没有别的路径的原因。
 - 按风险从低到高排，第一条是风险最低的。
 - 给已有工程加功能时，每个方案都要写到文件与符号一级。
@@ -110,7 +111,7 @@ git -C ~/kie-ws/<项目名称>-p/source/<仓库名> rev-list --count main..origi
 
 ### `solve.md`
 
-用户在 `solution.md` 上拍板后写到同目录，只记录已确认的方向，按 [references/solve.md](references/solve.md) 的模板组织，供 `kie-dev-design` 写 `design.md` 使用。取舍过程与未选方案留在 `solution.md`，这份不重复抄录。
+用户在 `solution.md` 上拍板后写到同目录，只记录已确认的方向，按 [references/solve.md](references/solve.md) 的模板组织，供 `kie-dev-design` 写 `design.md` 使用。取舍过程与未选方案留在 `solution.md`，这份不重复抄录。原有设计原理在这份里保留要点（这套机制是什么、覆盖范围、数据链路、本次改动碰到的环节），粒度低于 `solution.md` 的「项目现状」，不复述函数级职责与使用须知。
 
 `.idea/<任务>/` 不存在就创建，只写自己任务目录下的文档，不动同级其他任务目录与其他文件。
 
