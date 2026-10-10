@@ -1,0 +1,28 @@
+{
+  "skill_name": "kie-dev-solution",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "工作目录里 ws/demo-p 是项目容器（源仓库在 source/myrepo 下），draft/offline-solve-data-flow.md 是我之前整理的链路说明。你看看要不要在里面做一些修改或者加一些东西，先和我确认一下要改什么。另外这些东西是不是应该整理成方案选型文档？",
+      "expected_output": "只回答该改哪些内容，以及产出物形态：选型文档叫 solution.md，列出项目现状与全部候选方案，用户拍板时在对应方案标题处标注选定，拍板后另出一份 solve.md 交 kie-dev-design。不创建 .idea/ 目录，不写任何文件。",
+      "files": ["evals/files/draft/offline-solve-data-flow.md", "evals/files/ws/demo-p/source/myrepo/README.md"],
+      "assertions": [
+        "工作目录里除输入文件 draft/offline-solve-data-flow.md 与 ws/demo-p/source/myrepo/README.md 外没有新增或修改的文件，尤其没有 .idea/ 目录，也没有 solution.md / solve.md / solver.md",
+        "回复没有把选型文档接到 design.md 上：没有出现「定稿后就是设计文档的内容」这类说法；提到后续步骤时只指向拍板后另出 solve.md",
+        "回复只列出准备修改的内容并等用户确认，没有声称已经写出、正在写或准备写文档"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "工作目录里 ws/demo-p/.idea/m-7000000001/solution.md 是本任务的选型文档。三个方案里按第二个来，拍板了。",
+      "expected_output": "在 solution.md 的第二个方案标题处标注选定、其余内容不动，并在同目录新增 solve.md，只记录已确认的方向，按 references/solve.md 的模板组织。",
+      "files": ["evals/files/ws/demo-p/.idea/m-7000000001/solution.md"],
+      "assertions": [
+        "ws/demo-p/.idea/m-7000000001/solution.md 里第二个方案的标题处出现选定标记，方案一与方案三仍保留在文档中且未被加标记",
+        "ws/demo-p/.idea/m-7000000001/ 下新增 solve.md，内容只涉及第二个方案，没有把另外两个方案作为备选抄进去",
+        "solve.md 含「要实现的功能」与「选定方案」两节，并写明它由 solution.md 的选定结论而来",
+        "工作目录里没有生成 design.md：用户只拍板，没有要求写设计文档"
+      ]
+    }
+  ]
+}

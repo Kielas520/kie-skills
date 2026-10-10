@@ -1,0 +1,16 @@
+{
+  "skill_name": "kie-dev-design",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "工作目录里 ws/demo-p/.idea/m-7000000001/solve.md 是本任务已确认的方向。按它写设计文档，落到同目录。",
+      "expected_output": "按 assets/技术方案模板.md 的章节写出 ws/demo-p/.idea/m-7000000001/design.md，选定方案来自 solve.md，未改 solve.md。",
+      "files": ["evals/files/ws/demo-p/.idea/m-7000000001/solve.md"],
+      "assertions": [
+        "ws/demo-p/.idea/m-7000000001/ 下新增 design.md，且 solve.md 内容未被改动",
+        "design.md 含「变更记录」「背景与目标」「方案与取舍」「详细设计」「测试用例」五节，章节顺序与 assets/技术方案模板.md 一致",
+        "design.md 的「方案与取舍」把 solve.md 里的选定方案（全量读进内存再一次性写）作为选定项展开，未选方案只留一行及不选原因"
+      ]
+    }
+  ]
+}
