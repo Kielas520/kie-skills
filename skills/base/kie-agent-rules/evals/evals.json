@@ -11,6 +11,16 @@
         "工作目录里除了 my-eval/SKILL.md 没有产生其他文件",
         "回复只讨论这条判断，没有声称已经改好、正在改或准备改这个文件"
       ]
+    },
+    {
+      "id": 2,
+      "prompt": "当前目录里的 ticket-story.json 是工单接口的原始返回，description 是转义过的。帮我把 description 还原成 markdown 存成一份文件，另外把这条 MQL 写成参数文件留给同事：SELECT `名称`, `验收标准` FROM `软件空间`.`Story` WHERE `work_item_id` = 7000000001",
+      "expected_output": "读出 description 与 MQL 参数，两份产物落在工作空间约定的落点（还没有工作区时是 ~/kie-ws/.tmp/），回复里说明落在哪里，不落在会话工作目录。",
+      "files": ["evals/files/ticket-story.json"],
+      "assertions": [
+        "会话工作目录里除了投放的 ticket-story.json 没有新增文件",
+        "回复里给出的落点是 `~/kie-ws/.tmp/` 或 `~/kie-ws/.draft/`，没有把当前目录当成落点"
+      ]
     }
   ]
 }
