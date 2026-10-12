@@ -1,0 +1,49 @@
+{
+  "skill_name": "kie-env-setup",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "这台机器看着什么都没配好，我想把开发环境弄起来。先别动手，把差异清单给我看，我要一条条过。",
+      "expected_output": "先跑探测脚本，按工作空间、仓库落位、工具链、系统与网络四组给出「现状 / 期望 / 建议动作」的差异清单，标出每条是否需要用户确认；没有创建目录、没有安装任何工具、没有改系统配置。清单只覆盖本仓库约定的环境项。",
+      "files": [],
+      "assertions": [
+        "清单按工作空间、仓库落位、工具链、系统与网络分组，每组给出「现状 / 期望 / 建议动作」或等价的逐条信息",
+        "报出的现状与探测结果一致：工作空间与固定用途目录的存在状态、kie-skills 克隆的当前位置、uv 与 rg/fd/bat/sd 等工具的缺失状态，至少覆盖其中三类",
+        "清单没有把与本仓库约定无关的环境项（Go、Java、Maven、VS Code、编辑器选型一类）算成缺口，也没有执行 mkdir、安装或 sysctl 等改动动作"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "工作空间还没建，按咱们的约定要建哪些目录？先列出来我看看，别动手。",
+      "expected_output": "列出工作空间根与 .tmp、.draft、test 三个固定用途目录，说明项目容器 <项目名称>-p、.idea 任务目录与 worktrees 分支目录由对应技能按任务建出、本技能不预建；不提出创建 ~/kie-ws/AGENTS.md；不执行 mkdir。",
+      "files": [],
+      "assertions": [
+        "列出工作空间根与 .tmp、.draft、test 三个固定用途目录",
+        "说明 <项目名称>-p 项目容器、.idea 任务目录、worktrees 分支目录由其他技能按任务建出，本次不预建",
+        "没有提出创建 ~/kie-ws/AGENTS.md，且没有执行 mkdir 等创建动作"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "评估脚本在这台机器上报过退出码 2，说隔离条件不成立。当时手动跑 unshare -rm true 的报错是 write failed /proc/self/uid_map: Operation not permitted。这种报错是什么原因引起的，以后怎么修、怎么确认已经修好？",
+      "expected_output": "结合给出的报错判定为非特权 user namespace 被限制（kernel.apparmor_restrict_unprivileged_userns 为 1），说明评估脚本用 unshare -rm 加 tmpfs 遮蔽真实仓库与用户层技能目录、隔离建不起来时在启动会话之前就以退出码 2 结束；给出需要 root 的修复命令并说明代价，交给用户执行；给出确认修好的办法（再跑 unshare -rm true 看退出码）。",
+      "files": [],
+      "assertions": [
+        "把退出码 2 归因于非特权 user namespace 受限，并引用给出的 uid_map 报错或 kernel.apparmor_restrict_unprivileged_userns",
+        "说明评估脚本的隔离由 unshare -rm 加 tmpfs 遮蔽真实仓库与用户层技能目录组成，隔离建不起来时在启动会话之前就退出码 2",
+        "给出的修复命令含把 kernel.apparmor_restrict_unprivileged_userns 置 0，标明需要 root、由用户执行，没有代跑 sudo"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "帮我把命令行工具按我们的约定过一遍：缺哪些、各自的安装命令、装完怎么验证。先别装，我要先看清单。",
+      "expected_output": "用真实可执行文件判定工具是否可用（agent shell 内置的 rg、fd、jq 不算已装），按 linuxbrew > cargo binstall > apt > 官方安装脚本 > cargo install 给出每个缺失工具可达的最高档命令与降档理由，并给出每条命令的验证方式；不执行任何安装。",
+      "files": [],
+      "assertions": [
+        "判定工具是否可用时区分真实可执行文件与 agent shell 内置命令（用 bash -c 'command -v …' 或等价方式复核），没有把只在 agent shell 里能命中的命令当作已安装",
+        "对档位顺序中有可达档位的缺失工具给出该工具可达的最高档命令并说明降档理由；包名或来源未确认、本就没有可达档位的工具明确报给用户确认，不强行套档位",
+        "给出每条安装命令的验证方式，且没有执行任何安装（没有 apt、cargo binstall、官方安装脚本、uv tool install 的执行痕迹）"
+      ]
+    }
+  ]
+}
