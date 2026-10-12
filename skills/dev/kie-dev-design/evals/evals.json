@@ -4,12 +4,28 @@
     {
       "id": 1,
       "prompt": "工作目录里 ws/demo-p/.idea/feat/m-7000000001/solve.md 是本任务已确认的方向。按它写设计文档，落到同目录。",
-      "expected_output": "按 assets/技术方案模板.md 的章节写出 ws/demo-p/.idea/feat/m-7000000001/design.md，选定方案来自 solve.md，未改 solve.md。",
-      "files": ["evals/files/ws/demo-p/.idea/feat/m-7000000001/solve.md"],
+      "expected_output": "按 assets/design.md 的章节写出 ws/demo-p/.idea/feat/m-7000000001/design.md，选定方案来自 solve.md，未改 solve.md。",
+      "files": [
+        "evals/files/ws/demo-p/.idea/feat/m-7000000001/solve.md"
+      ],
       "assertions": [
         "ws/demo-p/.idea/feat/m-7000000001/ 下新增 design.md，且 solve.md 内容未被改动",
-        "design.md 含「变更记录」「背景与目标」「方案与取舍」「详细设计」「测试用例」五节，章节顺序与 assets/技术方案模板.md 一致",
+        "design.md 的章节恰好是「变更记录」+ 1 至 8 节：不出现第 0 节或第 9 节，§1 不拆 1.1/1.2 这类模板外小节，§8 表头是「层」",
         "design.md 的「方案与取舍」把 solve.md 里的选定方案（全量读进内存再一次性写）作为选定项展开，未选方案只留一行及不选原因"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "工作目录里 ws/demo-p/.idea/feat/m-7000000001/solve.md 是本任务已确认的方向。按它写设计文档，落到同目录；接口变更清单、详细设计、测试用例都写全，我好一次性评审。",
+      "expected_output": "按 assets/design.md 写出 design.md：章节与表头与模板一致，不带知识库模板那套（状态行、9. review、已有设计段、测试层级表头）；全文按去重规则精简，同一符号的签名不重复出现；solve.md 未被改动。",
+      "files": [
+        "evals/files/ws/demo-p/.idea/feat/m-7000000001/solve.md"
+      ],
+      "assertions": [
+        "design.md 的章节恰好是「变更记录」+ 1 至 8 节：不含第 0 节与第 9 节、不含状态行、不含「已有设计」段，§8 表头是「层」而不是「测试层级」",
+        "design.md 全文不超过 250 行",
+        "`export_buffered` 的完整签名（含参数列表）在全文只出现一次",
+        "solve.md 内容未被改动"
       ]
     }
   ]
