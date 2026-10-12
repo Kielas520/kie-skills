@@ -33,7 +33,7 @@ sudo sysctl --system
 
 判据：`env | grep -i proxy` 看变量，再看端口能不能连上。
 
-变量共八个：`HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`（socks 地址）、`NO_PROXY`，各自大小写一份。2026-10-12 探测：当前进程里这八个变量都未设置，`/etc/environment`、`/etc/profile.d/*`、`~/.bashrc`、`~/.profile` 里也搜不到，因此本机现在没有代理。变量是否设置随网络环境变化，取值以本次探测输出为准。
+变量共八个：`HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`（socks 地址）、`NO_PROXY`，各自大小写一份。是否设置、指向哪个地址与端口，取本次探测输出，不套用参考文件与历史会话里的取值。
 
 交互终端需要代理时，由用户把下面几行写进 `~/.bashrc`，取值换成本次探测到的地址：
 
@@ -58,7 +58,7 @@ git config --global user.name
 git config --global user.email
 ```
 
-全局身份缺失时提交报 `Please tell me who you are`。本机 2026-10-12：全局配置里没有身份，`/etc/gitconfig` 不存在，而仓库历史里有提交，说明身份由 agent 运行时注入；在 agent 之外的终端提交会失败。
+全局身份缺失时提交报 `Please tell me who you are`。全局配置里没有身份不代表提交一定失败：身份也可能由 agent 运行时注入，也可能完全没有，以 `git var GIT_AUTHOR_IDENT` 的本次输出为准，不预设注入存在。
 
 写入的值由用户提供，不套用历史提交里的姓名与邮箱：
 
@@ -76,7 +76,7 @@ gh auth status
 git config --global credential.https://github.com.helper
 ```
 
-本机 2026-10-12：`gh` 2.102.0 已登录账号 `Kielas520`，令牌存在 keyring，scopes 为 `gist, read:org, repo`，git 操作用 https 协议；全局配置里的凭据助手是 `!gh auth git-credential`。
+登录账号、令牌存放位置、scopes 与 git 协议取 `gh auth status` 的本次输出；凭据助手取 `git config --global credential.https://github.com.helper` 的本次输出，不在这里记本机取值。
 
 未登录时 `gh auth login`；令牌缺权限时 `gh auth refresh -s <scope>`。两条都是交互式的，由用户执行。
 
@@ -100,6 +100,6 @@ Host github.com
   IdentityFile ~/.ssh/<私钥文件>
 ```
 
-本机 2026-10-12 用的就是这一条（注释写着 22 端口在本网络不可达）。
+本机用的是直连还是 443 端点，以 `ssh -G github.com` 的本次输出为准。
 
-验证：`ssh -T git@github.com` 输出含 `successfully authenticated`，且 `ssh -G github.com` 显示的 `hostname` 是 `ssh.github.com`、`port` 是 `443`。
+验证：`ssh -T git@github.com` 输出含 `successfully authenticated`；`ssh -G github.com` 显示的 hostname 与 port 与本次实际使用的链路一致（直连是 `github.com` + `22`，走 443 端点时是 `ssh.github.com` + `443`）。

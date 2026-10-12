@@ -6,7 +6,7 @@ license: MIT
 compatibility: 需要 Linux、python3 与 git；补齐系统层配置需要用户具备 sudo 权限；联网探测需要代理或直连可用
 metadata:
   author: Kielas
-  version: "0.1.1"
+  version: "0.2.0"
 ---
 
 # 环境初始化技能
@@ -22,7 +22,7 @@ metadata:
 
 - 默认只探测与报告。差异清单逐项等用户确认，确认一条执行一条，不批量执行，不做清单以外的动作。
 - 系统层动作不代跑：`sudo sysctl`、`sudo apt`、安装 linuxbrew、写 shell 配置文件这类改系统状态或要密码的操作，只给命令、影响与回退方式，由用户自己执行。用户要求整批代办时，也先把命令逐条列出再动手。
-- 探测到的取值不作示例：代理地址与端口、git 身份、已有克隆的路径都按本次探测输出写，不套用正文与参考文件里的历史取值。
+- 探测到的取值不作示例，也不写进 `SKILL.md` 与 `references/`：代理地址与端口、git 身份、已有克隆的路径、工具是否已装与版本、系统开关状态，一律按本次 `scripts/env_probe.py` 的输出写。参考文件只写判定方式与安装内容（探测命令、期望、安装命令、执行者、依赖顺序）。
 - 目录移动用 `mv`，不使用 `rm`。
 - 每条差异都要有依据：附上探测到的命令与原始输出，不写「可能缺失」这类无依据结论。
 - 报告现状时不评价工作量，不预告后续轮次要做的事。
@@ -153,10 +153,10 @@ git -C ~/kie-ws/kie-skills status --short
 
 - 判断工具是否装上要用真实可执行文件，不用 agent shell 的判断结果：agent 的 shell 内置了 `rg`、`fd`、`jq`，`command -v rg` 能命中但这个命令在其真实终端里不存在。用 `bash -c 'command -v <工具>'` 或直接看 `shutil.which` 的返回值。
 - `crates.io` 的 API 不带 User-Agent 时返回 403，带上 `-A 'cargo <版本>'` 才 200。拿到 403 不代表断网，别据此下结论。
-- 代理变量可能只存在于 agent 运行时进程里，用户自己的交互终端拿不到：本机 2026-10-12 探测时 `/etc/environment`、`/etc/profile.d/*`、`~/.bashrc` 与 `~/.profile` 都搜不到代理端口，而登录 shell 里有。判断「用户终端有没有代理」要单独看配置文件，不能只看当前进程的环境变量。
+- 代理变量可能只存在于 agent 运行时进程里，用户自己的交互终端拿不到。判断「用户终端有没有代理」要单独看 `/etc/environment`、`/etc/profile.d/*`、`~/.bashrc` 与 `~/.profile`，不能只看当前进程的环境变量。
 - 非特权 user namespace 受限时，`unshare -rm` 报 `write failed /proc/self/uid_map: Operation not permitted`，kie-skill-dev 的 `trigger_eval.py` 与 `quality_eval.py` 直接退出码 2（隔离条件不成立）。先查 `kernel.apparmor_restrict_unprivileged_userns`，不要在描述或用例上找原因。
-- 全局 git 身份缺失时 `git config --global user.name` 输出为空，但仓库里仍可能有提交：agent 运行时会注入提交身份。判据用 `git var GIT_AUTHOR_IDENT`，它在两种情况下都能给出实际生效的身份来源。
+- 全局 git 身份为空时 `git config --global user.name` 无输出，但提交未必失败：身份也可能由 agent 运行时注入，也可能完全没有，本会话就遇到过 `git var GIT_AUTHOR_IDENT` 直接报 `Author identity unknown`。判据用 `git var GIT_AUTHOR_IDENT`，按本次输出结论，不预设注入存在。
 - uv 缺失时 kie-skill-dev 的校验命令 `uvx --from skills-ref agentskills validate` 跑不了；skills CLI（`npx -y skills`）没有 validate 子命令，不要拿它顶替。
-- 技能正文里记的本机工具版本会过期：kie-pr-ci-test 与 kie-pr-review-fix 的 Gotchas 记着「本机 gh 为 2.46.0」，2026-10-12 探测已是 2.102.0。以探测输出为准，并把过期的记录报给用户。
+- 正文与参考文件里记的本机取值会过期（别的技能的 Gotchas 里就有记着旧版本号的例子）：以本次探测输出为准，不引用参考文件里的历史取值，发现过期的记录报给用户。
 - `context7` 的包名未确认：npm 上 `context7`、`ctx7`、`@upstash/context7-mcp` 都存在，含义不同。缺失时报给用户，按用户给的命令安装，不自行挑一个。
-- 移动仓库前先确认 `~/.agents/skills/` 里是实拷贝还是软链：skills CLI 装的是实拷贝时移动不影响已装技能，是软链时移动后会全部失效，需要重新安装；`--copy` 安装的一定是实拷贝。本机 2026-10-12 检查到的是实拷贝目录。
+- 移动仓库前先确认 `~/.agents/skills/` 里是实拷贝还是软链：skills CLI 装的是实拷贝时移动不影响已装技能，是软链时移动后会全部失效，需要重新安装；`--copy` 安装的一定是实拷贝。
