@@ -6,7 +6,7 @@ license: MIT
 compatibility: 需要 Linux、python3 与 git；补齐系统层配置需要用户具备 sudo 权限；联网探测需要代理或直连可用
 metadata:
   author: Kielas
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # 环境初始化技能

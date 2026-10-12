@@ -33,7 +33,7 @@ sudo sysctl --system
 
 判据：`env | grep -i proxy` 看变量，再看端口能不能连上。
 
-变量共八个：`HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`（socks 地址）、`NO_PROXY`，各自大小写一份。本机 2026-10-12 探测：这些变量只出现在 agent 运行时进程里，指向 `127.0.0.1` 上的本地端口；`/etc/environment`、`/etc/profile.d/*`、`~/.bashrc`、`~/.profile` 里都搜不到，因此用户自己的交互终端没有代理。
+变量共八个：`HTTP_PROXY`、`HTTPS_PROXY`、`ALL_PROXY`（socks 地址）、`NO_PROXY`，各自大小写一份。2026-10-12 探测：当前进程里这八个变量都未设置，`/etc/environment`、`/etc/profile.d/*`、`~/.bashrc`、`~/.profile` 里也搜不到，因此本机现在没有代理。变量是否设置随网络环境变化，取值以本次探测输出为准。
 
 交互终端需要代理时，由用户把下面几行写进 `~/.bashrc`，取值换成本次探测到的地址：
 
