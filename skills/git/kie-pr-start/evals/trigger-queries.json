@@ -20,5 +20,7 @@
   {"query": "PR 上的 CI 挂了，看看日志", "should_trigger": false},
   {"query": "写一份方案调研文档", "should_trigger": false},
   {"query": "帮我评审下这个 PR 的改动", "should_trigger": false},
+  {"query": "feat 单的 PR body，按背景、改动、验证、影响写", "should_trigger": true},
+  {"query": "这几处改动提交一下，消息里带 Resolve m-7113016070", "should_trigger": false},
   {"query": "更新一下 CHANGELOG 然后打 tag", "should_trigger": false}
 ]

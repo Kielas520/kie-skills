@@ -6,7 +6,7 @@ license: MIT
 compatibility: 需要 git；缺陷单的对照实验需要能取到有问题版本的产物或源码。
 metadata:
   author: Kielas
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # 推送前的本地测试

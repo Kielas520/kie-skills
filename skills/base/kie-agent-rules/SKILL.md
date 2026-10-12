@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要支持 Agent Skills 的 agent 会话；GitHub 交互用内置工具或已登录的 gh CLI；学术检索用 paper-search-mcp；库文档查询用 context7 CLI；命令行优先使用 rg、fd、bat、sd；删除文件需要 gio trash、gomi 或 trash-cli 之一
 metadata:
   author: Kielas
-  version: "0.12.0"
+  version: "0.13.0"
 ---
 
 # agent 协作技能
@@ -58,10 +58,11 @@ agent 与用户交互的硬性规则。本技能约束协作行为本身：回�
 
 ### 提交与回退
 
-- 禁止擅自提交：改动类任务中禁止执行 add、commit、push 等任何产生历史记录或对外可见的动作，除非用户在该次对话里明确要求。这些动作需要人工复核。
+- 禁止擅自提交：改动类任务中禁止执行 add、commit、push、合并等任何产生历史记录或对外可见的动作，除非用户在该次对话里明确要求。这些动作需要人工复核。
+- 合入 main 前先征询用户，用户准许后才进入合入流程；合入统一用 squash merge，合并后删除开发分支。团队仓库的 main 受保护，只允许通过 PR 合并，禁止直接 push；合入门禁是 2 个 approval 加 CodeRabbit 通过加 CI 全绿，不允许用管理员权限绕过，禁止 `--admin`。
+- 同步上游与集成分支用 git merge，不用 rebase。例外：用户明确要求 rebase、目标仓库要求线性历史（如强制 squash merge）、整理自己的私人分支历史。
 - 项目规定的提交前流程（例如 Wuji CLI 的 `scripts/ci/fix.sh`）按项目规则执行。
 - 禁止用 git 回滚代码。用户要求回滚时，使用文件编辑工具把内容改回上一个状态。
-- merge 优先：默认用 git merge 集成分支、同步上游，不用 rebase。例外：用户明确要求 rebase、目标仓库要求线性历史（如强制 squash merge）、整理自己的私人分支历史。
 
 ### 命名与呈现
 
@@ -149,6 +150,7 @@ agent 与用户交互的硬性规则。本技能约束协作行为本身：回�
 
 | 场景 | 技能 |
 | --- | --- |
+| 生成提交信息、执行本地提交 | `kie-git-commit` |
 | 修改普通文档、README、release notes 等正文 | `kie-doc-style` |
 | 进行 skill 开发 | `kie-skill-dev` |
 

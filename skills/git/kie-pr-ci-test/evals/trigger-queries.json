@@ -8,7 +8,7 @@
   {"query": "缺陷单的远端产物测一下，顺手把有问题版本的 tag 也写上", "should_trigger": true},
   {"query": "PR 建好了，远端产物过一遍验收标准", "should_trigger": true},
   {"query": "评论起草一下，说明远端测试的结果", "should_trigger": true},
-  {"query": "把远端结果追加到 PR body 的测试报告部分", "should_trigger": true},
+  {"query": "PR 的 CI 验证结果要并进 PR body 的验证段，原来的 body 在 work 里，追加的时候别动其他段", "should_trigger": true},
   {"query": "帮我看看 PR 的 checks 过没过，过了就测一下产物", "should_trigger": true},
   {"query": "本地测一遍这个单，推送前先看看", "should_trigger": false},
   {"query": "PR 描述帮我起草一下", "should_trigger": false},

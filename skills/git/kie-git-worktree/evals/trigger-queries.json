@@ -12,6 +12,8 @@
   {"query": "帮我从 main 切一个新分支放到独立环境里，我要改 CLI 的校验逻辑", "should_trigger": true},
   {"query": "给我建个隔离的开发环境，这个是 m-7099114340 的活", "should_trigger": true},
   {"query": "我自己那个小工具仓库要加个导出功能，帮我开个分支放到单独一个目录里做", "should_trigger": true},
+  {"query": "已交付的那个版本出了 P0，帮我切个 hotfix 分支和独立工作区", "should_trigger": true},
+  {"query": "把 hotfix 分支合进 main", "should_trigger": false},
   {"query": "把当前分支合并到 main", "should_trigger": false},
   {"query": "把已经合过的分支删掉，别留着占地方", "should_trigger": false},
   {"query": "切到 fix/f-7128574383/linux-commit-unknown 分支继续改", "should_trigger": false},
