@@ -1,0 +1,5 @@
+INFO 启动完成
+WARN 队列积压 12
+
+DEBUG 收到心跳
+ERROR 写入失败

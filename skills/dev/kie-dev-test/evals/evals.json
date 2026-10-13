@@ -18,6 +18,29 @@
         "报告给出 v0.1.0 与当前版本在同一份输入上的对照实验结论，包含有问题版本复现与当前版本结果",
         "报告含未覆盖段，列出没测到的部分、原因与影响"
       ]
+    },
+    {
+      "id": 2,
+      "prompt": "f-8123456790 的修复我做完了，推送前你本地按工单验收标准测一遍。工单在 工单-f-8123456790.md，有问题那一版我放在 source/logfmt-0.1.0/ 了。这次的项目容器就当当前目录，仓库在 source/demo。",
+      "expected_output": "按工单两条验收标准实测当前版本与 v0.1.0，给出对照结果；构建与测试命令限定在改动涉及的 crate 与产物，不整仓重建。",
+      "files": [
+        "evals/files/工单-f-8123456790.md",
+        "evals/files/source/demo/Cargo.toml",
+        "evals/files/source/demo/AGENTS.md",
+        "evals/files/source/demo/.gitignore",
+        "evals/files/source/demo/sample.log",
+        "evals/files/source/demo/crates/logfmt/Cargo.toml",
+        "evals/files/source/demo/crates/logfmt/src/lib.rs",
+        "evals/files/source/demo/crates/logfmt/tests/parse.rs",
+        "evals/files/source/demo/crates/cli/Cargo.toml",
+        "evals/files/source/demo/crates/cli/src/main.rs",
+        "evals/files/source/logfmt-0.1.0/Cargo.toml",
+        "evals/files/source/logfmt-0.1.0/src/main.rs"
+      ],
+      "assertions": [
+        "会话最后一条回复说明了这次测试的范围与构建、测试方式，命令限定在改动涉及的 crate 与产物（如 cargo test -p logfmt、cargo run -q -p cli -- sample.log），没有出现 cargo test --all-features --workspace、cargo build --workspace 这类整仓命令",
+        "没有执行或搬用 AGENTS.md 里 Pre-Push Verification 段的全量门禁（workspace 全量测试、cargo doc、全量 clippy）来充当本地验收测试"
+      ]
     }
   ]
 }

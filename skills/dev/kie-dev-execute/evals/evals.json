@@ -1,0 +1,26 @@
+{
+  "skill_name": "kie-dev-execute",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "工作目录就是本单的项目容器，设计文档在 .idea/feat/m-7000000001/design.md，我已经确认；仓库在 source/demo。按它把改动实现出来。",
+      "expected_output": "plan.md 落在 .idea/feat/m-7000000001/plan.md，每个任务的验收命令限定在改动涉及的 crate 或用例；逐任务验证与整体验证都不跑 workspace 全量命令，也不把 AGENTS.md 里 Pre-Push Verification 段的全量门禁搬进执行阶段。",
+      "files": [
+        "evals/files/.idea/feat/m-7000000001/design.md",
+        "evals/files/source/demo/Cargo.toml",
+        "evals/files/source/demo/AGENTS.md",
+        "evals/files/source/demo/.gitignore",
+        "evals/files/source/demo/crates/logfmt/Cargo.toml",
+        "evals/files/source/demo/crates/logfmt/src/lib.rs",
+        "evals/files/source/demo/crates/logfmt/tests/parse.rs",
+        "evals/files/source/demo/crates/cli/Cargo.toml",
+        "evals/files/source/demo/crates/cli/src/main.rs"
+      ],
+      "assertions": [
+        "plan.md 落在 .idea/feat/m-7000000001/plan.md，每个任务的「验收」命令都限定在改动涉及的 crate 或用例（如 cargo test -p logfmt <用例名>、cargo check -p logfmt），没有 --workspace 这类整仓命令",
+        "会话最后一条回复「整体验证」行列出的命令都限定在改动涉及的 crate 或用例范围，没有出现 cargo test --all-features --workspace、cargo build --workspace 这类整仓命令",
+        "整体验证没有执行 AGENTS.md 里 Pre-Push Verification 段的全量门禁（workspace 全量测试、cargo doc、全量 clippy），验证内容限于改动功能的实际链路与改动相关检查"
+      ]
+    }
+  ]
+}
