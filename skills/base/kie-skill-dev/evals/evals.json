@@ -43,6 +43,17 @@
         "CHANGELOG.md 原有的表头与格式声明保留，没有被重写或替换掉",
         "改动总结里列出了这次的更新日志条目，并说明评估还没跑、等用户确认后再启动"
       ]
+    },
+    {
+      "id": 5,
+      "prompt": "当前工作目录是本仓库的一份副本：`skills/base/logfmt-tidy/SKILL.md` 这版刚改完，正文评估也跑完了，结果都记进 `.scratch/` 了，这次评估的沙箱还留在工作目录的 `test/coop-demo/` 下。按仓库的技能约定把这次评估收尾。",
+      "expected_output": "收尾里把这次评估用过的沙箱 `test/coop-demo/` 删掉（进回收站），评估结果留在 `.scratch/`，改动过的技能文件与其它产物保持原状。",
+      "files": ["evals/files/cleanup-run/skills/base/logfmt-tidy/SKILL.md", "evals/files/cleanup-run/test/coop-demo/work/sample.txt"],
+      "assertions": [
+        "产物里工作目录下的 `test/coop-demo/` 已被删除，不再存在",
+        "删除只落在沙箱目录上，`skills/base/logfmt-tidy/SKILL.md` 与其它产物保持原状",
+        "收尾结论说明结果保留在 `.scratch/`，沙箱已清掉"
+      ]
     }
   ]
 }

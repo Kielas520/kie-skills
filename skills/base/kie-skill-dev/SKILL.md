@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要 python3 与 unshare（评估沙箱隔离）、uvx（skills-ref 校验器），以及一个可无头驱动的 agent CLI（脚本内置 omp 与 claude 的适配，用 --list-agents 看本机有哪些）
 metadata:
   author: Kielas
-  version: "0.20.0"
+  version: "0.21.0"
 ---
 
 # 技能开发
@@ -23,6 +23,7 @@ Agent Skills 的格式约束不写死在本文件里：字段、目录约定、�
 - 允许读取：本仓库内的文件，以及用户显式提供的文件与链接。
 - 不作为技能内容依据：`~/.agents/skills/` 等用户层技能目录、`~/.omp/` 与 `~/.claude/` 等 agent 运行时配置、其他仓库的技能与参考文件、工作空间根目录下的通用约定文件（它的规则按 `kie-agent-rules` 的优先级参与冲突判定，取材不算在内）。
 - 评估沙箱建在 `~/kie-ws/test/coop-<沙箱标记>/` 下（目录名由技能名哈希得到，不含技能名），仓库内只保留 `.scratch/` 里的运行结果。
+- 沙箱是临时物：一次评估或复现跑完、结果写进 `.scratch/`、结论汇报完之后，把本次用过的沙箱删掉（进回收站），不在 `~/kie-ws/test/` 与 `~/kie-ws/.tmp/` 下留沙箱；要留作物证时先在汇报里说明再留。旧沙箱留着还会让下一轮评估的会话翻进去（见第 7 步的 Gotcha）。
 - 用户给的输入明确指向某个外部技能时，才读取该技能，并在产出里说明来源。
 
 ## 仓库约定

@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要 python3 与 unshare（评估沙箱隔离）、uvx（skills-ref 校验器），以及一个可无头驱动的 agent CLI（评估脚本内置 omp 与 claude 的适配，用 --list-agents 看本机有哪些）
 metadata:
   author: Kielas
-  version: "0.4.0"
+  version: "0.5.0"
 ---
 
 # 技能修复
@@ -22,7 +22,7 @@ frontmatter 与正文的写法、`skills-ref` 校验、软链接接入、评估�
 
 - 反馈的对象是技能的行为。属于代码缺陷、PR 评审意见或文档写作的，按 description 里的对照表转走。
 - 能确认是哪个技能：用户给了技能名、技能目录，或某次会话里的表现。确认不了先问用户，不靠猜。
-- 复现跑评估沙箱，脚本在 `~/kie-ws/kie-skills/skills/base/kie-skill-dev/scripts/` 下，只在 kie-skills 仓库内可用。沙箱位置与内容来源边界按 kie-skill-dev 的「调查边界」段。
+- 复现跑评估沙箱，脚本在 `~/kie-ws/kie-skills/skills/base/kie-skill-dev/scripts/` 下，只在 kie-skills 仓库内可用。沙箱位置、内容来源边界与收尾清理按 kie-skill-dev 的「调查边界」段。
 - 用哪个 agent CLI 跑评估由用户定，先 `--list-agents` 看本机有哪些，再问用户。
 
 ## 步骤
@@ -69,7 +69,7 @@ description 的四块指做什么、何时用、边界、反例排除。
 
 ### 5. 改完验证
 
-批准后按方案改，改完按 kie-skill-dev 第 6 步总结等用户确认，再跑评估：description 动过必须跑第 7 步（正例与负例都跑），正文动过跑第 8 步，两者都动就都跑。改动与它的更新日志同批写，提交前按 kie-skill-dev 第 9 步核对。
+批准后按方案改，改完按 kie-skill-dev 第 6 步总结等用户确认，再跑评估：description 动过必须跑第 7 步（正例与负例都跑），正文动过跑第 8 步，两者都动就都跑。改动与它的更新日志同批写，提交前按 kie-skill-dev 第 9 步核对。评估跑完，把本次用过的沙箱删掉，收尾才算结束。
 
 ### 6. 留下回归用例
 
