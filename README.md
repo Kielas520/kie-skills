@@ -66,4 +66,4 @@ mkdir -p .agents/skills
 ln -s ../../skills/<分类>/<技能名> .agents/skills/<技能名>
 ```
 
-`.agents/skills/` 只服务于本地维护，已加入忽略规则。
+`.agents/skills/` 随仓库入库，只保留开发技能所需的 base 链接：`kie-agent-rules`、`kie-doc-style`、`kie-skill-dev`、`kie-skill-fix`，克隆后无需手工建立。
