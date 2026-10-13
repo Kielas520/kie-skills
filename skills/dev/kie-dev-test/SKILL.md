@@ -72,7 +72,7 @@ metadata:
 - 没测到的部分写进「未覆盖」，说明原因与影响。
 - 远端 CI 结果段在本地测试阶段留空，由 `kie-pr-ci-test` 追加。
 
-用户确认报告内容之后，它同时作为 `kie-pr-start` 起草 PR body 的测试报告来源。
+用户确认报告内容之后，它同时作为 `kie-commit-pr` 起草 PR body 的测试报告来源。
 
 ## 交付
 
@@ -83,7 +83,7 @@ metadata:
 对照实验: {缺陷单写明有问题版本与当前分支的结果，无则省略本行}
 报告: ~/kie-ws/<项目名称>-p/.idea/<任务>/test-report.md
 未覆盖: {没测到的部分，没有则省略本行}
-下一步: 用户确认后推送并发起 PR，PR body 起草走 kie-pr-start
+下一步: 用户确认后推送并发起 PR，PR body 起草走 kie-commit-pr
 ```
 
 ## 硬性约束

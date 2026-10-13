@@ -150,7 +150,7 @@ agent 与用户交互的硬性规则。本技能约束协作行为本身：回�
 
 | 场景 | 技能 |
 | --- | --- |
-| 生成提交信息、执行本地提交 | `kie-git-commit` |
+| 生成提交信息与 PR 文案、执行提交与建 PR | `kie-commit-pr` |
 | 修改普通文档、README、release notes 等正文 | `kie-doc-style` |
 | 进行 skill 开发 | `kie-skill-dev` |
 
