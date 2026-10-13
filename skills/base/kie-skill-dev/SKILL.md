@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要 python3 与 unshare（评估沙箱隔离）、uvx（skills-ref 校验器），以及一个可无头驱动的 agent CLI（脚本内置 omp 与 claude 的适配，用 --list-agents 看本机有哪些）
 metadata:
   author: Kielas
-  version: "0.19.0"
+  version: "0.20.0"
 ---
 
 # 技能开发
@@ -33,6 +33,7 @@ Agent Skills 的格式约束不写死在本文件里：字段、目录约定、�
 | 命名 | 目录名等于 frontmatter `name`，统一 `kie-` 前缀，只用小写字母、数字、连字符 |
 | 分类 | 只用于组织源文件，按领域划分（`base/` 元技能与协作规则，其他按实际需要新增） |
 | 版本 | `metadata.version` 用 semver，新技能从 `0.1.0` 起。影响 agent 行为的改动（description、规则、compatibility）bump minor，纯文字与格式修正 bump patch |
+| 更新日志 | 仓库根 `CHANGELOG.md` 按 [Keep a Changelog 1.1.0](https://keepachangelog.com/zh-CN/1.1.0/) 维护。改动技能内容时与版本号同批记一段，写在整个文件最前面：段头 `## [<技能名> <版本>] - <YYYY-MM-DD>`，版本取该技能 frontmatter 的 `metadata.version`，日期取写条目当天；段内按 `Added`、`Changed`、`Deprecated`、`Removed`、`Fixed`、`Security` 分组，条目写人能读的一句话，说清这次变动对使用者意味着什么，不抄提交标题，也不记与技能行为无关的仓库改动。版本与段一一对应：版本号动了就记一段，patch 级的纯文字修正也记一句；技能创建记 `Added`，改名或合并时在条目里注明原技能名 |
 | 评估 | 每个技能带 `evals/trigger-queries.json`（触发，官方 schema）与 `evals/evals.json`（输出质量，官方 schema）。评估依据只来自用户输入与本仓库，用户层技能与其他仓库的参考文件不作为依据 |
 | Gotchas | 正文保留 `## Gotchas` 段，用户每次纠正技能行为后把结论写回该段或对应步骤 |
 
@@ -94,7 +95,7 @@ claude -p "读取技能 <技能名>" --output-format stream-json --verbose | gre
 
 ### 6. 确认与总结
 
-进入评估之前先向用户总结这次改动，等用户同意再往下走：改了哪些文件、frontmatter 动了哪些字段、正文加了或改了哪些规则、版本号怎么动、接下来准备跑哪几步评估。
+进入评估之前先向用户总结这次改动，等用户同意再往下走：改了哪些文件、frontmatter 动了哪些字段、正文加了或改了哪些规则、版本号怎么动、更新日志记了哪一条、接下来准备跑哪几步评估。
 
 - 提问与改动分开：用户问「行不行」「能不能」这类问题时只回答问题，不动文件；有明确的改动要求之后才写文件。
 - 用户提出修改就改完重新总结，不进入评估。
@@ -181,6 +182,8 @@ python3 scripts/quality_eval.py <技能名> --agent <名字> [--iteration 1] [--
 ### 9. 提交与部署
 
 第 7 步与第 8 步的评估流程走完之后才进入本步。有未通过的用例、证据不足的运行或评分失败时，先回报结果与下一轮准备改什么，等用户决定。
+
+提交前核对本次改动已经按「仓库约定」的更新日志一项记进仓库根 `CHANGELOG.md`：段头的技能名与该技能 frontmatter 的 `metadata.version` 与改动内容一致，条目落在新版本段里，多技能一起改时每个技能各一段。
 
 提交并推送后，部署用 `npx -y skills add Kielas520/kie-skills -g -y`。
 

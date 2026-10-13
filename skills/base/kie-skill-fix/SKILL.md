@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要 python3 与 unshare（评估沙箱隔离）、uvx（skills-ref 校验器），以及一个可无头驱动的 agent CLI（评估脚本内置 omp 与 claude 的适配，用 --list-agents 看本机有哪些）
 metadata:
   author: Kielas
-  version: "0.3.0"
+  version: "0.4.0"
 ---
 
 # 技能修复
@@ -15,6 +15,8 @@ metadata:
 ## 与 kie-skill-dev 的分工
 
 frontmatter 与正文的写法、`skills-ref` 校验、软链接接入、评估脚本与用例 schema、总结确认、提交部署，按 `skill://kie-skill-dev` 的第 2 至 5 步与第 6 至 9 步执行。本文件只写开发流程里没有的那一段：从现象查到根因，再出修复方案与回归用例。
+
+改完技能内容要同批记更新日志：在仓库根 `CHANGELOG.md` 里给被改技能添一段，位置、段头格式、分组与时机照 kie-skill-dev 的「仓库约定」，本文件不重复写格式。
 
 ## 前置条件
 
@@ -67,7 +69,7 @@ description 的四块指做什么、何时用、边界、反例排除。
 
 ### 5. 改完验证
 
-批准后按方案改，改完按 kie-skill-dev 第 6 步总结等用户确认，再跑评估：description 动过必须跑第 7 步（正例与负例都跑），正文动过跑第 8 步，两者都动就都跑。
+批准后按方案改，改完按 kie-skill-dev 第 6 步总结等用户确认，再跑评估：description 动过必须跑第 7 步（正例与负例都跑），正文动过跑第 8 步，两者都动就都跑。改动与它的更新日志同批写，提交前按 kie-skill-dev 第 9 步核对。
 
 ### 6. 留下回归用例
 

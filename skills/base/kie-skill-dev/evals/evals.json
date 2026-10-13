@@ -30,6 +30,19 @@
         "改后的 log-triage/SKILL.md 保留了取材边界的表述，来源侧只列用户给的输入与本仓库已固化的约定，没有把 AGENTS.md 列为技能内容的来源",
         "允许读取的范围限于本仓库内的文件与用户显式提供的文件、链接，没有引入新的外部来源"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "当前工作目录里是本仓库的一份副本。`skills/base/changelog-target/SKILL.md` 里「提交超过 500 行改动才需要单独成节」这条判定条件不对，改成按改动的主题拆节，不按行数。改完给我看，先别提交，也先别跑评估。",
+      "expected_output": "改后的 SKILL.md 把那条判定条件换成按改动的主题拆节；frontmatter 的 metadata.version 从 0.1.0 升到 0.2.0；仓库根 CHANGELOG.md 顶部新增 `## [changelog-target 0.2.0] - <YYYY-MM-DD>` 段，段内条目按变动类型分组；给出改动总结并停在等用户确认这一步。",
+      "files": ["evals/files/skills/base/changelog-target/SKILL.md", "evals/files/CHANGELOG.md"],
+      "assertions": [
+        "该 SKILL.md 的 metadata.version 从 0.1.0 升到 0.2.0",
+        "仓库根 CHANGELOG.md 的最前面新增了 `## [changelog-target 0.2.0] - <YYYY-MM-DD>` 形式的段，段头同时带技能名与版本，日期写成 YYYY-MM-DD",
+        "新增段里的条目归在 Added、Changed、Deprecated、Removed、Fixed、Security 之一的分组下，条目说的是这次判定条件改成按改动主题拆节、不再按行数",
+        "CHANGELOG.md 原有的表头与格式声明保留，没有被重写或替换掉",
+        "改动总结里列出了这次的更新日志条目，并说明评估还没跑、等用户确认后再启动"
+      ]
     }
   ]
 }
