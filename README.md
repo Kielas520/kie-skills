@@ -1,19 +1,68 @@
 # kie-skills
 
-个人日常开发使用的 Agent Skills 集合。技能在仓库里统一维护，通过 skills CLI 安装到用户目录，在多个项目和多个 Agent 中复用同一份内容。
+个人日常开发使用的一套 Agent Skills，面向注重代码质量与软件架构设计的人。全部技能遵守同一条主张：**人是决策者，Agent 是执行者**。
 
-## 部署
+现在的 Agent 都很喜欢把一件事自己做完，从修改文件一路做到提交推送，业界也在强调这种自主能力。模型能力越强，「谁来决定、做到哪一步」越需要提前写下来。这套技能把这些约定固化成文本，让 Agent 在动手之前先把边界讲清楚。
+
+## 为什么要约束 Agent
+
+根源在 LLM 的指令遵循倾向：外部输入进来，倾向直接执行，跳过判断环节。问题集中在五个环节：
+
+| 环节 | 表现 |
+| --- | --- |
+| 越权执行 | 没经要求就 `git commit`、`git push`，询问类的请求被当成改动指令执行 |
+| 跳过决策 | 需求没调研就给出实现，方案还没定稿就开始写代码 |
+| 质量门禁靠自觉 | 格式化、lint、测试、验收标准全凭 Agent 记得执行 |
+| 产出物散乱 | 方案、设计、测试报告、临时脚本落在各处，事后找不到 |
+| 经验不沉淀 | 纠正只留在单次会话里，换一个项目重新出现 |
+
+## 设计原则
+
+- **指令分型**：咨询类请求只分析、不改文件，改动类请求只改文件。授权以明确的改动要求为准，讨论与询问都不构成授权。
+- **不可逆动作等授权**：提交、推送、合并、发布评论、删除文件都在用户授权后执行，技能只列出命令与执行顺序。
+- **先方案再实现**：调研出全部候选方案交用户拍板，方案定稿后写设计文档，设计确认后生成计划，再逐条实现到可运行。
+- **质量门禁前置**：提交前跑格式化与自动修复，推送前按影响范围选出最小测试集，验收标准写成测试报告。
+- **落点固定**：源仓库、工作区、任务文档各有一处固定位置，文档与临时产物不会散在项目目录里。
+- **技能可评估**：每个技能带正负例触发查询与输出质量用例，改动之后先跑评估，再提交与部署。
+
+## 技能
+
+| 分类 | 技能 | 用途 |
+| --- | --- | --- |
+| `base/` | [`kie-agent-rules`](skills/base/kie-agent-rules) | 协作准则：回答语言、咨询与改动的分型、提交与回退的边界、工作空间落点、文件删除方式 |
+| | [`kie-doc-style`](skills/base/kie-doc-style) | 文档文风的检查与生成：中英文规范、去冗余、对外文档的读者边界 |
+| | [`kie-env-setup`](skills/base/kie-env-setup) | 本机环境的体检与补齐：工作空间、仓库落位、工具链、系统与网络 |
+| | [`kie-skill-dev`](skills/base/kie-skill-dev) | 技能全流程开发：新建、改写、字段与目录约定、触发评估与输出质量评估 |
+| | [`kie-skill-fix`](skills/base/kie-skill-fix) | 已装技能行为异常的排查与修复：越界、该做没做、输出走样、不触发或误触发 |
+| `dev/` | [`kie-dev-solution`](skills/dev/kie-dev-solution) | 开工前的调研与多方案选型，产出选型文档交用户拍板 |
+| | [`kie-dev-design`](skills/dev/kie-dev-design) | 方案选定后写技术设计文档，含数据链路图与具体设计 |
+| | [`kie-dev-execute`](skills/dev/kie-dev-execute) | 按设计文档生成计划，逐条实现到可运行，先写测试再实现 |
+| | [`kie-dev-test`](skills/dev/kie-dev-test) | 推送前的本地验收测试与测试报告，缺陷单附对照实验 |
+| `git/` | [`kie-git-worktree`](skills/git/kie-git-worktree) | 为单个任务新建独立工作区与分支，分支名、落位与基线先确认 |
+| | [`kie-commit-pr`](skills/git/kie-commit-pr) | 生成提交信息与 PR 正文，用户确认后执行提交与建 PR |
+| | [`kie-pr-review-fix`](skills/git/kie-pr-review-fix) | 处理 PR 评审意见到推送更新并逐条回复 |
+| | [`kie-pr-ci-test`](skills/git/kie-pr-ci-test) | PR 的 CI 跑完后验收远端产物，出测试报告并回写 PR |
+| `languages/` | [`kie-python-style`](skills/languages/kie-python-style) | Python 约定：uv、类型注解、pathlib、rich、loguru |
+| | [`kie-rust-gates`](skills/languages/kie-rust-gates) | Rust 门禁：提交前 fmt 与 clippy，推送前最小受影响测试集 |
+
+## 安装
+
+全局安装，所有项目可用：
 
 ```bash
 npx -y skills add Kielas520/kie-skills -g -y
 ```
 
-`-g` 安装到用户目录，`-y` 跳过全部确认。CLI 自动检测本机已安装的 Agent，按各自的技能目录建立链接，安装记录写入 `~/.agents/.skill-lock.json`。
+只装其中一个：
+
+```bash
+npx -y skills add Kielas520/kie-skills -s kie-agent-rules -g -y
+```
 
 只列出仓库里的技能，不安装：
 
 ```bash
-npx -y skills add Kielas520/kie-skills --list
+npx -y skills add Kielas520/kie-skills -l
 ```
 
 更新已安装的技能：
@@ -22,48 +71,11 @@ npx -y skills add Kielas520/kie-skills --list
 npx skills update -g
 ```
 
-## 目录布局
+`-g` 安装到用户目录，`-y` 跳过全部确认。CLI 会探测本机已安装的 Agent，按各自的技能目录建立链接。
 
-| 路径 | 用途 |
-| --- | --- |
-| `skills/<分类>/<技能名>/SKILL.md` | 技能元数据与操作说明，唯一发布源 |
-| `skills/<分类>/<技能名>/references/` | 按需读取的参考资料 |
-| `skills/<分类>/<技能名>/scripts/` | 技能执行所需的脚本 |
-| `skills/<分类>/<技能名>/assets/` | 模板与静态资源 |
-| `skills/<分类>/<技能名>/evals/` | 评估用例：`trigger-queries.json` 用于触发评估，`evals.json` 与 `files/` 用于输出质量评估 |
+## 约定
 
-skills CLI 从 `skills/` 开始向下扫描，深度上限三层，`skills/<技能名>/` 与 `skills/<分类>/<技能名>/` 都能被发现。分类目录只影响源文件组织，技能 `name` 在整个仓库内唯一。每个技能目录独立安装，只携带自身运行所需内容，引用自身目录内的相对路径。
-
-## 新增技能
-
-1. 新建目录 `skills/<分类>/<技能名>/`，在其中写 `SKILL.md`。
-2. frontmatter 至少包含 `name` 与 `description`，`name` 与目录名一致。
-3. 正文写清前置条件、步骤、决策条件、输出要求与验证方法。篇幅较长的细节放进 `references/`，正文说明何时读取。
-4. 写 `evals/trigger-queries.json`，正负例查询各约十条；需要评估输出质量时再写 `evals/evals.json` 与 `evals/files/` 下的输入文件。
-5. 校验：按下一节把技能接入本地会话，让 Agent 读取 `skill://<技能名>`，能取到内容即解析通过。
-
-完整的编写流程与两个评估的操作见 `skills/base/kie-skill-dev`。
-
-字段约束与格式细节以 [Agent Skills Specification](https://agentskills.io/specification) 为准。
-
-## 评估
-
-触发评估与输出质量评估都在仓库内跑，脚本随 `kie-skill-dev` 提供，沙箱建在 `~/kie-ws/test/` 下，结果写在仓库的 `.scratch/` 里：
-
-```bash
-python3 skills/base/kie-skill-dev/scripts/trigger_eval.py <技能名> --agent <名字>
-python3 skills/base/kie-skill-dev/scripts/quality_eval.py <技能名> --agent <名字> --iteration 1
-```
-
-评估会话由 `--agent` 指定的 agent CLI 驱动，先用 `--list-agents` 看本机有哪些（内置 omp 与 claude 的适配）。触发评估默认 `--runs 1` 粗筛，只对结果翻转的用例补 `--runs 3`。`kie-skill-dev` 规定两道确认：写完技能要总结改动并等用户同意才进入评估，评估走完才进入提交与部署。
-
-## 本地维护
-
-技能位于分类目录下，Agent 只发现技能根目录下一层的 `<根>/<技能名>/SKILL.md`，分类层不参与扫描。改了技能要让它立刻对仓库内的会话生效，把技能链接进 `.agents/skills/`：
-
-```bash
-mkdir -p .agents/skills
-ln -s ../../skills/<分类>/<技能名> .agents/skills/<技能名>
-```
-
-`.agents/skills/` 随仓库入库，只保留开发技能所需的 base 链接：`kie-agent-rules`、`kie-doc-style`、`kie-skill-dev`、`kie-skill-fix`，克隆后无需手工建立。
+- 技能格式遵循 [agentskills.io](https://agentskills.io) 规范，统一 `kie-` 前缀，按 `skills/<分类>/<技能名>/` 组织，分类只用于整理源文件，不参与技能发现。
+- 触发靠 frontmatter 的 `description` 匹配，每个技能带 `evals/trigger-queries.json`（正负例触发查询）与 `evals/evals.json`（输出质量用例）。
+- 新增或修改技能走 `kie-skill-dev` 的流程：字段与目录约定、校验、两道确认、触发评估与输出质量评估、提交与部署。评估脚本在 `skills/base/kie-skill-dev/scripts/`，运行记录落在 `.scratch/`。
+- 本地开发时把技能链接进 `.agents/skills/`，改动对仓库内的会话即时生效。
