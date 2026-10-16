@@ -36,7 +36,3 @@ gh pr edit <pr> --body-file <改好的 body 文件>
 ```
 
 `gh pr edit` 只改传入的字段，用 `--body-file` 更新正文不会动标题与 reviewer。
-
-## 版本差异
-
-本机 `gh` 为 2.46.0，`gh pr checks` 不支持 `--json`，结构化状态用 `gh pr view --json statusCheckRollup` 取。

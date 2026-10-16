@@ -4,6 +4,8 @@
 
 ## 非特权 user namespace
 
+需要跑技能评估（kie-skill-dev 的 `trigger_eval.py` 与 `quality_eval.py`）时才检查这一项，日常环境体检只报现状，不列为待补齐的差异；探测时带 `--eval` 才计入待确认项。
+
 判据：
 
 ```bash

@@ -1,31 +1,34 @@
 ---
 name: kie-env-setup
 description: |
-  建立与核对本机开发环境的前提条件：工作空间根是否建好、kie-skills 仓库是否就位、命令行工具链是否齐全、系统与网络是否可用（非特权 user namespace、代理、git 身份、gh 登录、SSH 连通）。用户说「配一下环境」「新机器初始化」「环境体检」「工作空间还没建」「工具不全」「装一下 uv」「评估脚本报隔离条件不成立」「kie-skills 仓库该放哪」时使用，包括只要求看现状、不要求执行的情况。本技能只做探测与补齐，不处置工作空间里已有的内容；单个项目的依赖安装走 kie-python-style 与 kie-rust-gates，技能本身的编写与修改走 kie-skill-dev，某个工具怎么用的知识性问题不加载本技能。
+  建立与核对本机开发环境的前提条件：工作空间根是否建好、kie-skills 仓库是否就位、命令行工具链是否齐全、系统与网络是否可用（代理、git 身份、gh 登录、SSH 连通，以及技能评估要用的非特权 user namespace）。用户说「配一下环境」「新机器初始化」「环境体检」「工作空间还没建」「工具不全」「装一下 uv」「技能评估脚本因为 unshare 受限跑不起来」「kie-skills 仓库该放哪」时使用，包括只要求看现状、不要求执行的情况。本技能只做探测与补齐，不处置工作空间里已有的内容；单个项目的依赖安装走 kie-python-style 与 kie-rust-gates，技能的编写、修改、接入与部署走 kie-skill-dev，某个工具怎么用的知识性问题不加载本技能。
 license: MIT
 compatibility: 需要 Linux、python3 与 git；补齐系统层配置需要用户具备 sudo 权限；联网探测需要代理或直连可用
 metadata:
   author: Kielas
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # 环境初始化技能
 
-把本机调到技能集假定的状态：工作空间目录骨架、技能仓库落位、命令行工具齐全、系统与网络配置可用。产出是一份分组差异清单，加上逐项执行后的验证结果。
+把本机调到技能集假定的状态：工作空间目录骨架、技能仓库落位、命令行工具齐全、系统与网络配置可用。
 
-## 前置条件
+## 子能力
 
-- 会话已加载 `kie-agent-rules`：工作空间路径约定、提交纪律、删除规则都取自它，正文不重复。
-- uv 缺失时本技能照常可用：探测脚本只用 Python 标准库。
+| 子能力 | 产出 | 改不改本机 |
+| --- | --- | --- |
+| 探测 | `scripts/env_probe.py` 的输出 | 不改 |
+| 报告差异 | 按四组列出的差异清单 | 不改 |
+| 逐项补齐 | 每条差异执行后的验证结果 | 改，每条都等用户确认 |
+
+用户只要求看现状时，做到报告差异为止。
 
 ## 纪律
 
-- 默认只探测与报告。差异清单逐项等用户确认，确认一条执行一条，不批量执行，不做清单以外的动作。
+- 补齐时确认一条执行一条，不批量执行，不做清单以外的动作。
 - 系统层动作不代跑：`sudo sysctl`、`sudo apt`、安装 linuxbrew、写 shell 配置文件这类改系统状态或要密码的操作，只给命令、影响与回退方式，由用户自己执行。用户要求整批代办时，也先把命令逐条列出再动手。
-- 探测到的取值不作示例，也不写进 `SKILL.md` 与 `references/`：代理地址与端口、git 身份、已有克隆的路径、工具是否已装与版本、系统开关状态，一律按本次 `scripts/env_probe.py` 的输出写。参考文件只写判定方式与安装内容（探测命令、期望、安装命令、执行者、依赖顺序）。
-- 目录移动用 `mv`，不使用 `rm`。
-- 每条差异都要有依据：附上探测到的命令与原始输出，不写「可能缺失」这类无依据结论。
-- 报告现状时不评价工作量，不预告后续轮次要做的事。
+- 本机取值只取本次探测输出：代理地址与端口、git 身份、已有克隆的路径、工具是否已装与版本、系统开关状态，都按本次 `scripts/env_probe.py` 的输出写，不写进 `SKILL.md` 与 `references/`，也不引用历史会话里的取值。参考文件只写判定方式与安装内容。
+- 每条差异都附上探测命令与原始输出，不写「可能缺失」这类无依据结论。
 
 ## 步骤 1：探测
 
@@ -33,13 +36,14 @@ metadata:
 python3 scripts/env_probe.py            # 本机检查，不联网
 python3 scripts/env_probe.py --net      # 追加联网检查，各域名取一次状态码
 python3 scripts/env_probe.py --json     # 只输出 JSON，便于前后比对
+python3 scripts/env_probe.py --eval     # 要跑技能评估时使用，user namespace 相关项计入待确认
 ```
 
 脚本只读：不创建、不修改、不删除任何文件，也不执行安装。退出码 0 表示探测完成，不代表环境合格。
 
 ## 步骤 2：报告差异清单
 
-按五组输出，每条给「现状 / 期望 / 建议动作」，标出该动作是否需要用户确认。
+按脚本输出的四组列出，每条给「现状 / 期望 / 建议动作」，标出该动作是否需要用户自己执行。
 
 ```markdown
 探测: scripts/env_probe.py  <时间>
@@ -56,14 +60,11 @@ python3 scripts/env_probe.py --json     # 只输出 JSON，便于前后比对
 
 系统与网络
 | 项 | 现状 | 期望 | 建议动作 |
-
-部署与接入
-| 项 | 现状 | 期望 | 建议动作 |
 ```
 
-清单末尾附一行总结：待确认项数、用户需要自己执行的命令数。缺失工具的命令按 `references/tools.md` 的安装顺序给，一次给一条可执行命令加一条验证命令。
+清单末尾写一行计数：待确认几项、用户需要自己执行几条命令。缺失工具的命令按 `references/tools.md` 的安装顺序给，一次给一条可执行命令加一条验证命令。
 
-## 步骤 3：逐项执行
+## 步骤 3：逐项补齐
 
 ### 3.1 工作空间骨架
 
@@ -110,21 +111,13 @@ git -C ~/kie-ws/kie-skills remote -v
 git -C ~/kie-ws/kie-skills status --short
 ```
 
-移动前先看 `worktree list`：仓库带 worktree 时，`.git/worktrees/*/gitdir` 记的是绝对路径，整体移动会让工作区失效。
-
 ### 3.3 工具链
 
-以探测输出为准逐个确认缺失项，再按 `references/tools.md` 的安装顺序给命令。装完一个验证一个，不把安装命令攒成一段脚本执行。
-
-缺失项里的 linuxbrew、uv / uvx、paper-search 三项有依赖顺序，且执行者不同：linuxbrew 由用户执行（官方脚本内部要用 sudo），uv / uvx 与 paper-search 由 agent 执行；命令、验证方式与 linuxbrew 装完后的 `brew shellenv` 落点见 `references/tools.md`。
+以探测输出为准逐个确认缺失项，再按 `references/tools.md` 的安装顺序与执行者给命令。装完一个验证一个，不把安装命令攒成一段脚本执行。
 
 ### 3.4 系统与网络
 
-条目、判据、命令与影响见 `references/system-network.md`：非特权 user namespace（评估脚本隔离的前提）、代理环境变量、git 身份、gh 登录、SSH 连通。需要 sudo 的一律交给用户执行。
-
-### 3.5 部署与接入
-
-用户明确要求时才做，命令见 `references/tools.md` 末节：仓库内建本地维护软链，或用 skills CLI 安装到用户层。
+条目、判据、命令与影响见 `references/system-network.md`：代理环境变量、git 身份、gh 登录、SSH 连通，以及需要跑技能评估时才检查的非特权 user namespace。需要 sudo 的一律交给用户执行。
 
 ## 验证
 
@@ -151,12 +144,8 @@ git -C ~/kie-ws/kie-skills status --short
 
 ## Gotchas
 
-- 判断工具是否装上要用真实可执行文件，不用 agent shell 的判断结果：agent 的 shell 内置了 `rg`、`fd`、`jq`，`command -v rg` 能命中但这个命令在其真实终端里不存在。用 `bash -c 'command -v <工具>'` 或直接看 `shutil.which` 的返回值。
-- `crates.io` 的 API 不带 User-Agent 时返回 403，带上 `-A 'cargo <版本>'` 才 200。拿到 403 不代表断网，别据此下结论。
-- 代理变量可能只存在于 agent 运行时进程里，用户自己的交互终端拿不到。判断「用户终端有没有代理」要单独看 `/etc/environment`、`/etc/profile.d/*`、`~/.bashrc` 与 `~/.profile`，不能只看当前进程的环境变量。
-- 非特权 user namespace 受限时，`unshare -rm` 报 `write failed /proc/self/uid_map: Operation not permitted`，kie-skill-dev 的 `trigger_eval.py` 与 `quality_eval.py` 直接退出码 2（隔离条件不成立）。先查 `kernel.apparmor_restrict_unprivileged_userns`，不要在描述或用例上找原因。
-- 全局 git 身份为空时 `git config --global user.name` 无输出，但提交未必失败：身份也可能由 agent 运行时注入，也可能完全没有，本会话就遇到过 `git var GIT_AUTHOR_IDENT` 直接报 `Author identity unknown`。判据用 `git var GIT_AUTHOR_IDENT`，按本次输出结论，不预设注入存在。
-- uv 缺失时 kie-skill-dev 的校验命令 `uvx --from skills-ref agentskills validate` 跑不了；skills CLI（`npx -y skills`）没有 validate 子命令，不要拿它顶替。
-- 正文与参考文件里记的本机取值会过期（别的技能的 Gotchas 里就有记着旧版本号的例子）：以本次探测输出为准，不引用参考文件里的历史取值，发现过期的记录报给用户。
-- `context7` 的包名未确认：npm 上 `context7`、`ctx7`、`@upstash/context7-mcp` 都存在，含义不同。缺失时报给用户，按用户给的命令安装，不自行挑一个。
-- 移动仓库前先确认 `~/.agents/skills/` 里是实拷贝还是软链：skills CLI 装的是实拷贝时移动不影响已装技能，是软链时移动后会全部失效，需要重新安装；`--copy` 安装的一定是实拷贝。
+- 判断工具是否装上要看真实可执行文件：有的 agent 在自己的 shell 里内置了 `rg`、`fd`、`jq` 这类命令，`command -v` 能命中，用户的终端里却没有。用 `bash -c 'command -v <工具>'` 或 `shutil.which` 判定。
+- 移动仓库前先看 `git worktree list`：仓库带 worktree 时，`.git/worktrees/*/gitdir` 记的是绝对路径，整体移动会让工作区失效。
+- 移动仓库前先确认 `~/.agents/skills/` 里是实拷贝还是软链：实拷贝不受移动影响，软链在移动后全部失效，需要重新安装。
+- 代理变量可能只存在于 agent 运行时进程里，用户自己的终端拿不到。判断用户终端有没有代理，要单独看 `/etc/environment`、`/etc/profile.d/*`、`~/.bashrc` 与 `~/.profile`。
+- uv 缺失时 kie-skill-dev 的校验命令 `uvx --from skills-ref agentskills validate` 跑不了；skills CLI（`npx -y skills`）没有 validate 子命令，不能拿它顶替。

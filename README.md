@@ -78,4 +78,4 @@ npx skills update -g
 - 技能格式遵循 [agentskills.io](https://agentskills.io) 规范，统一 `kie-` 前缀，按 `skills/<分类>/<技能名>/` 组织，分类只用于整理源文件，不参与技能发现。
 - 触发靠 frontmatter 的 `description` 匹配，每个技能带 `evals/trigger-queries.json`（正负例触发查询）与 `evals/evals.json`（输出质量用例）。
 - 新增或修改技能走 `kie-skill-dev` 的流程：字段与目录约定、校验、两道确认、触发评估与输出质量评估、提交与部署。评估脚本在 `skills/base/kie-skill-dev/scripts/`，运行记录落在 `.scratch/`。
-- 本地开发时把技能链接进 `.agents/skills/`，改动对仓库内的会话即时生效。
+- 评估时脚本把技能复制进沙箱，并按选定的 agent 放到它能读到的位置，仓库里不需要建技能软链。

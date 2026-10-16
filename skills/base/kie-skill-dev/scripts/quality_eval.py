@@ -27,6 +27,9 @@ def parse_args():
     ap.add_argument("skill", nargs="?", help="技能名，例如 kie-skill-dev")
     ap.add_argument("--iteration", type=int, default=1, help="迭代轮次，结果写入 iteration-<N>，默认 1")
     ap.add_argument("--cases", help="只跑指定 id，逗号分隔")
+    ap.add_argument("--evals-root",
+                    help="用例根目录，布局与技能目录一致（<目录>/evals/evals.json 与 <目录>/evals/files/），"
+                         "默认取技能目录；复现时把临时用例放在 .scratch/ 下，不改技能文件")
     ap.add_argument("--skills-repo", action="store_true",
                     help="把整份 kie-skills 仓库（不含 .git 与评估结果）投到工作目录，供用例复现技能问题时使用")
     ap.add_argument("--workers", type=int, default=4, help="并发会话数，默认 4")
@@ -58,10 +61,10 @@ def find_skill(skill):
     return hits[0]
 
 
-def load_cases(skill_dir, only):
-    path = skill_dir / "evals" / "evals.json"
+def load_cases(evals_root, only):
+    path = evals_root / "evals" / "evals.json"
     if not path.is_file():
-        raise SystemExit(f"错误：缺少 {path.relative_to(REPO)}，先按官方 schema 写用例")
+        raise SystemExit(f"错误：缺少 {path}，先按官方 schema 写用例")
     cases = json.loads(path.read_text())["evals"]
     if only:
         wanted = {c.strip() for c in only.split(",")}
@@ -84,7 +87,7 @@ def input_path(rel):
     return pathlib.Path(parts[-1])
 
 
-def prepare_arm(sandbox, skill_dir, case, agent, with_skill, skills_repo=False):
+def prepare_arm(sandbox, evals_root, case, agent, with_skill, skills_repo=False):
     shutil.rmtree(sandbox, ignore_errors=True)
     work = sandbox / "work"
     work.mkdir(parents=True)
@@ -93,9 +96,9 @@ def prepare_arm(sandbox, skill_dir, case, agent, with_skill, skills_repo=False):
     # 带技能组放整份技能集：会话启动要读 ki-agent-rules，按 description 找相邻技能也可能落空
     agent.prepare(sandbox, REPO / "skills", with_skills=with_skill)
     for rel in case.get("files", []):
-        source = skill_dir / rel
+        source = evals_root / rel
         if not source.is_file():
-            raise SystemExit(f"错误：用例输入文件不存在 {source.relative_to(REPO)}")
+            raise SystemExit(f"错误：用例输入文件不存在 {source}")
         target = work / input_path(rel)
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(source.read_bytes())
@@ -195,7 +198,8 @@ def main():
         print(exc, file=sys.stderr)
         return 2
     skill_dir = find_skill(args.skill)
-    cases = load_cases(skill_dir, args.cases)
+    evals_root = pathlib.Path(args.evals_root).expanduser().resolve() if args.evals_root else skill_dir
+    cases = load_cases(evals_root, args.cases)
     workspace = REPO / ".scratch" / "quality" / args.skill / f"iteration-{args.iteration}"
     if workspace.exists():
         print(f"提示：{workspace} 已存在，本次结果覆盖同名文件")
@@ -212,7 +216,7 @@ def main():
 
     def run_arm(job):
         case, arm, sandbox = job
-        work = prepare_arm(sandbox, skill_dir, case, agent, arm == "with_skill", args.skills_repo)
+        work = prepare_arm(sandbox, evals_root, case, agent, arm == "with_skill", args.skills_repo)
         transcript, wall_ms, truncated = run_session(agent, case["prompt"], work, args.cap)
         arm_dir = workspace / slug(case) / arm
         shutil.rmtree(arm_dir, ignore_errors=True)

@@ -75,4 +75,4 @@ gh pr view 0 --json body --jq .body
 gh pr edit 0 --body-file <改好的 body 文件>
 ```
 
-本机 `gh` 为 2.46.0，`gh pr checks` 不支持 `--json`，结构化状态用 `gh pr view --json statusCheckRollup` 取。
+有的 `gh` 版本里 `gh pr checks` 不支持 `--json`，结构化状态统一用 `gh pr view --json statusCheckRollup` 取。

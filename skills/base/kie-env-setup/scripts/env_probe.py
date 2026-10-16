@@ -23,10 +23,10 @@ TOOLS = (
     ("npm", "--version", "随 node 提供"),
     ("npx", "--version", "随 node 提供，部署技能用 skills CLI"),
     ("python3", "--version", "3.10 及以上，探测脚本与评估脚本用"),
-    ("rg", "--version", "kie-agent-rules 的工具选择表要求"),
-    ("fd", "--version", "kie-agent-rules 的工具选择表要求"),
-    ("bat", "--version", "kie-agent-rules 的工具选择表要求"),
-    ("sd", "--version", "kie-agent-rules 的工具选择表要求"),
+    ("rg", "--version", "kie-agent-rules 优先使用的命令行工具，缺失时用 grep"),
+    ("fd", "--version", "kie-agent-rules 优先使用的命令行工具，缺失时用 find"),
+    ("bat", "--version", "kie-agent-rules 优先使用的命令行工具，缺失时用 cat"),
+    ("sd", "--version", "kie-agent-rules 优先使用的命令行工具，缺失时用 sed"),
     ("jq", "--version", "gh 的 --jq 用内置实现，独立 jq 只在脚本里需要"),
     ("gio", "--version", "回收站首选工具"),
     ("gomi", "--version", "回收站备选"),
@@ -161,7 +161,8 @@ def to_host_port(value):
     return host, int(port)
 
 
-def probe_system():
+def probe_system(check_eval):
+    # user namespace 只在要跑技能评估时计入待确认项，日常体检只报现状
     rows = []
     restricted = None
     for key, want, hint in SYSTEM_KEYS:
@@ -173,16 +174,16 @@ def probe_system():
             restricted = value
         rows.append(entry(key, value, f"{want}（{hint}）",
                           "" if value == want else "按 references/system-network.md 的 sysctl 命令处理，需 root", "系统与网络",
-                          todo=True))
+                          todo=check_eval))
     code, text = run(["unshare", "-rm", "true"])
     if code is None:
-        rows.append(entry("unshare -rm", f"无法执行：{text}", "退出码 0", "先补 unshare", "系统与网络", todo=True))
+        rows.append(entry("unshare -rm", f"无法执行：{text}", "退出码 0", "先补 unshare", "系统与网络", todo=check_eval))
     else:
         rows.append(entry("unshare -rm", f"退出码 {code}" + (f"，{first_line(text)}" if text else ""), "退出码 0",
-                          "" if code == 0 else "评估脚本会退出码 2，先放开 user namespace", "系统与网络", todo=True))
+                          "" if code == 0 else "评估脚本会退出码 2，先放开 user namespace", "系统与网络", todo=check_eval))
     usable = code == 0 and restricted in (None, "0")
     rows.append(entry("评估隔离可用性", "可用" if usable else "不可用", "可用（trigger_eval.py 与 quality_eval.py 才能跑）",
-                      "" if usable else "放开 user namespace 后重跑探测", "系统与网络", todo=True))
+                      "" if usable else "放开 user namespace 后重跑探测", "系统与网络", todo=check_eval))
     present = {key: os.environ[key] for key in PROXY_KEYS if os.environ.get(key)}
     if not present:
         rows.append(entry("代理变量", "未设置", "按本机网络情况设置或不设", "", "系统与网络"))
@@ -274,9 +275,10 @@ def main():
     parser.add_argument("--workspace", default=str(HOME / "kie-ws"), help="工作空间根目录，默认 ~/kie-ws")
     parser.add_argument("--net", action="store_true", help="追加联网检查，各域名取一次状态码")
     parser.add_argument("--json", action="store_true", help="只输出 JSON")
+    parser.add_argument("--eval", action="store_true", help="要跑技能评估时使用，user namespace 相关项计入待确认")
     args = parser.parse_args()
     root = Path(args.workspace).expanduser()
-    rows = probe_workspace(root) + probe_repo(root) + probe_tools() + probe_system()
+    rows = probe_workspace(root) + probe_repo(root) + probe_tools() + probe_system(args.eval)
     if args.net:
         rows += probe_network()
     if args.json:

@@ -15,7 +15,7 @@
     {
       "id": 2,
       "prompt": "工作目录里 ws/demo-p/.idea/feat/m-7000000001/solution.md 是本任务的选型文档。三个方案里按第二个来，拍板了。",
-      "expected_output": "在 solution.md 的第二个方案标题处标注选定、其余内容不动，并在同目录新增 solve.md，只记录已确认的方向，按 references/solve.md 的模板组织。",
+      "expected_output": "在 solution.md 的第二个方案标题处标注选定、其余内容不动，并在同目录新增 solve.md，只记录已确认的方向，按 assets/solve.md 的模板组织。",
       "files": ["evals/files/ws/demo-p/.idea/feat/m-7000000001/solution.md"],
       "assertions": [
         "ws/demo-p/.idea/feat/m-7000000001/solution.md 里第二个方案的标题处出现选定标记，方案一与方案三仍保留在文档中且未被加标记",

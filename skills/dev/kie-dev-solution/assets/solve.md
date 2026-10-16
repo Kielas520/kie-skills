@@ -1,6 +1,6 @@
 # <功能名称> 选定方案
 
-> 本文件由 `kie-dev-solution` 在用户拍板后产出，只记录已确认的方向，供 `kie-dev-design` 写 `design.md` 使用。
+> 本文件由 `kie-dev-solution` 在用户拍板后产出，只记录已确认的方向。
 > 取舍过程、全部候选方案与未选原因留在同目录的 `solution.md`，本文件不重复抄录。
 > 落点：`~/kie-ws/<项目名称>-p/.idea/<任务>/solve.md`。
 
