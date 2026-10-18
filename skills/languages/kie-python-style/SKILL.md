@@ -1,12 +1,12 @@
 ---
 name: kie-python-style
 description: |
-  Python 代码的写法与环境约定：环境与依赖管理、Python 版本基线、类型注解写法、路径操作、进度条、结构化输出、日志库与 import 写法。写、改、评审、重构 Python 代码，或建环境、装依赖、挑库、补类型注解、替换旧写法、写脚本与调试代码时使用，即使用户没有提到「规范」「约定」，也没有给出文件与上下文。不适用：Rust 项目与 Rust 的提交推送门禁（用 kie-rust-gates）；推送前的验收测试与测试报告（用 kie-dev-test）；与语言无关的协作规则（见 kie-agent-rules）；纯知识问答（解释 GIL、语法速查）。
+  Python 代码的写法与环境约定：环境与依赖管理、Python 版本基线、类型注解写法、路径操作、进度条、结构化输出、日志库与 import 写法。写、改、评审、重构 Python 代码，或建环境、装依赖、挑库、补类型注解、替换旧写法、写脚本与调试代码时使用；修改 `.py` 文件或 `pyproject.toml` 时同样使用，给函数加参数、改一两行这类小改动也算，动手改之前先加载本技能；即使用户没有提到 Python、「规范」「约定」，也没有给出文件与上下文。不适用：Rust 项目与 Rust 的提交推送门禁（用 kie-rust-gates）；推送前的验收测试与测试报告（用 kie-dev-test）；与语言无关的协作规则（见 kie-agent-rules）；纯知识问答（解释 GIL、语法速查）。
 license: MIT
 compatibility: 需要 uv 与 Python 3.10 及以上，推荐 3.13 及以上。
 metadata:
   author: Kielas
-  version: "0.2.0"
+  version: "0.4.0"
 ---
 
 # Python 开发约定

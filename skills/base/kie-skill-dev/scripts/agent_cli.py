@@ -70,7 +70,10 @@ def test_workspace_masks(work):
             break
     if current is None:
         return []
-    masks = [path for path in sorted(SANDBOX_ROOT.iterdir()) if path != current and path.is_dir()]
+    # 工作空间根下的项目容器、只读克隆与 .tmp/.draft 也盖住：会话在 ~/kie-ws 下翻找时能看到真实工作区
+    masks = [path for path in sorted(SANDBOX_ROOT.parent.iterdir())
+             if path.is_dir() and path != SANDBOX_ROOT and path != REPO]
+    masks += [path for path in sorted(SANDBOX_ROOT.iterdir()) if path != current and path.is_dir()]
     # 质量评估把两组放在同一轮目录下，逐层盖住兄弟目录，直到本轮沙箱根
     arm = work.parent
     while arm != current:
@@ -108,6 +111,10 @@ class Agent:
 
     def user_skill_dirs(self):
         """该 CLI 会读取的用户层技能目录。"""
+        return []
+
+    def protected_files(self):
+        """会话可能写入的用户配置文件。沙箱里用副本盖住，会话的写入只落在副本上。"""
         return []
 
     def mask_dirs(self):
@@ -164,8 +171,26 @@ class Agent:
 
     def run(self, prompt, work, cap, tools, auto_approve):
         masks = [REPO] + self.mask_dirs() + test_workspace_masks(work)
-        inner = " && ".join([f"mount -t tmpfs none {path}" for path in masks]
-                            + [f"cd {work}", "exec " + self.command(work, cap, tools, auto_approve)])
+        # 回收站留着旧沙箱的技能副本；~/.agents/skills 是另一个 agent 的用户层技能目录；
+        # ~/.claude/projects 里是历史会话记录，会话在家目录下翻找时都能读到
+        for path in (HOME / ".local" / "share" / "Trash", HOME / ".agents" / "skills",
+                     HOME / ".claude" / "projects"):
+            if path.is_dir() and path not in masks:
+                masks.append(path)
+        # unshare -r 让会话在命名空间里是 root，claude 拒绝以 root 使用 bypassPermissions；
+        # 挂完遮蔽后再套一层 user namespace，把身份映射回当前用户
+        drop_root = f"unshare -U --map-user={os.getuid()} --map-group={os.getgid()} "
+        binds = []
+        for path in self.protected_files():
+            if not path.is_file():
+                continue
+            copy = work.parent / "protected" / path.name
+            copy.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, copy)
+            binds.append(f"mount --bind {copy} {path}")
+        inner = " && ".join([f"mount -t tmpfs none {path}" for path in masks] + binds
+                            + [f"cd {work}",
+                               "exec " + drop_root + self.command(work, cap, tools, auto_approve)])
         return ["unshare", "-rm", "bash", "-c", inner, f"{self.name}-eval", prompt]
 
 
@@ -260,6 +285,10 @@ class ClaudeAgent(Agent):
         if config != HOME / ".claude":
             dirs.append(config / "skills")
         return dirs
+
+    def protected_files(self):
+        # 用户级 MCP、权限与项目信任都写在这个文件里，会话执行 claude mcp add 之类的命令会改到它
+        return [HOME / ".claude.json", HOME / ".claude" / "settings.json"]
 
     def prepare(self, sandbox, skills_source, with_skills):
         root = sandbox / "skills-root"

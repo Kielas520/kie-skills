@@ -1,11 +1,11 @@
 ---
 name: kie-skill-dev
-description: 当任务要动本仓库 `skills/` 下技能目录里的文件时才用本技能：新建技能、把已经跑通的流程沉淀成技能，以及技能本身没有出现行为异常时的正文与 description 改写，包括判断字段该怎么命名、目录该怎么组织。用户说「写个 skill」「把这套流程固化成技能」「帮我起个技能」「这个技能的 description 太笼统，改到能用」时适用，即使没提到 skill 这个词。不适用：不动任何文件、只要一段解释的问答，别人渠道装来的技能怎么装怎么卸怎么升级，编写 AGENTS.md 与 README 这类普通文档，直接回答即可；已装技能出现行为异常（越界、该做没做、做错事、输出走样、不触发或误触发）走 kie-skill-fix。
+description: 当任务要动本仓库 `skills/` 下技能目录里的文件时才用本技能：新建技能、把已经跑通的流程沉淀成技能，以及技能本身没有出现行为异常时的正文与 description 改写，包括判断字段该怎么命名、目录该怎么组织；改错别字、改一句话这类小修改也算，同样要按版本号与更新日志的约定处理。用户说「写个 skill」「把这套流程固化成技能」「帮我起个技能」「这个技能的 description 太笼统，改到能用」时适用，即使没提到 skill 这个词。不适用：不动任何文件、只要一段解释的问答，别人渠道装来的技能怎么装怎么卸怎么升级，编写 AGENTS.md 与 README 这类普通文档，直接回答即可；已装技能出现行为异常（越界、该做没做、做错事、输出走样、不触发或误触发）走 kie-skill-fix。
 license: MIT
-compatibility: 需要 python3 与 unshare（评估沙箱隔离）、uvx（skills-ref 校验器），以及一个可无头驱动的 agent CLI（用 --list-agents 看本机有哪些）
+compatibility: 需要 python3 与 unshare（评估沙箱隔离）、uv（质量评估脚本用 uv run 运行）与 uvx（skills-ref 校验器），以及一个可无头驱动的 agent CLI（用 --list-agents 看本机有哪些）
 metadata:
   author: Kielas
-  version: "0.22.0"
+  version: "0.23.0"
 ---
 
 # 技能开发
@@ -43,7 +43,7 @@ Agent Skills 的格式约束不写死在本文件里：字段、目录约定、�
 | 分类 | 只用于组织源文件，按领域划分（`base/` 元技能与协作规则，其他按实际需要新增） |
 | 版本 | `metadata.version` 用 semver，新技能从 `0.1.0` 起。影响 agent 行为的改动（description、规则、compatibility）bump minor，纯文字与格式修正 bump patch |
 | 更新日志 | 仓库根 `CHANGELOG.md` 按 [Keep a Changelog 1.1.0](https://keepachangelog.com/zh-CN/1.1.0/) 维护。改动技能内容时与版本号同批记一段，写在整个文件最前面：段头 `## [<技能名> <版本>] - <YYYY-MM-DD>`，版本取该技能 frontmatter 的 `metadata.version`，日期取写条目当天；段内按 `Added`、`Changed`、`Deprecated`、`Removed`、`Fixed`、`Security` 分组，条目写人能读的一句话，说清这次变动对使用者意味着什么，不抄提交标题，也不记与技能行为无关的仓库改动。版本与段一一对应：版本号动了就记一段，patch 级的纯文字修正也记一句；技能创建记 `Added`，改名或合并时在条目里注明原技能名 |
-| 评估 | 每个技能带 `evals/trigger-queries.json`（触发，官方 schema）与 `evals/evals.json`（输出质量，官方 schema）。评估依据只来自用户输入与本仓库 |
+| 评估 | 每个技能带 `evals/trigger-queries.json`（触发，官方 schema）与 `evals/evals.json`（输出质量，官方 schema），评估依据只来自用户输入与本仓库。新技能只写基础用例：触发用例 3 条正例加 3 条负例；质量用例 3 条，分别测主路径（依据齐全时产出物的位置与结构）、停在确认点（做完一个子能力就停下等用户）、依据缺失（按约定命名查找，找不到就问用户），没有子能力先后顺序的技能换成它自己的 3 个基础场景。每次会话都要加载的技能（如 kie-agent-rules）只写正例，不写负例。之后的用例只通过 kie-skill-fix 留下的回归用例增加 |
 | 用户纠正 | 用户纠正技能行为后，先把纠正提炼成一条判据，写进对应步骤；与已有规则说的是同一件事时合并成一条，不另加。只有提炼不出判据、不写下来就会再踩的坑才进 `## Gotchas`，写成场景加动作，不抄对话原话 |
 
 ## 流程
@@ -115,7 +115,7 @@ python3 scripts/trigger_eval.py <技能名> --agent <名字> [--runs 1] [--worke
 改了正文就跑：
 
 ```bash
-python3 scripts/quality_eval.py <技能名> --agent <名字> [--iteration 1] [--workers 4] [--cap 600] [--no-grade]
+uv run scripts/quality_eval.py <技能名> --agent <名字> [--iteration 1] [--workers 4] [--cap 600] [--no-grade]
 ```
 
 同一提示词分带技能、不带技能两组跑，`benchmark.json` 汇总两组的断言通过率与差值。带技能组通过率高于不带技能组、且自己读完 `outputs/` 没有具体意见时收工；否则改 `SKILL.md`，按第 5 步总结等确认，再用 `--iteration <N+1>` 重跑。用例写法、产物结构与常见坑见 [references/evaluation.md](references/evaluation.md)。

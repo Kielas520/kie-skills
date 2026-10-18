@@ -2,10 +2,10 @@
 name: kie-skill-fix
 description: 已装技能出现行为异常时的排查与修复：越界做了范围外的事、该做没做、做错事、输出走样，以及老是不触发或误触发，都走这里，产出根因结论、修复方案与能重复验证的回归用例。用户说「这个技能越界了」「它做了不该做的事」「明明归它管它却没反应」「这个技能的输出不对，帮我修一下」「这个技能老是不触发」时适用，即使没提到「修复」或「技能」两个字。只改本仓库 `skills/` 下自己维护的技能。不适用：新建技能、把已经跑通的流程沉淀成技能，以及技能本身没出问题、只是要重写正文或 description（用 kie-skill-dev）；代码缺陷的修复；PR 评审意见的处理（用 kie-pr-review-fix）；语言与文档写作规范（用 kie-python-style、kie-rust-gates、kie-doc-style）；技能怎么安装卸载升级，以及不动文件、只要一段解释的问答。
 license: MIT
-compatibility: 需要 python3 与 unshare（评估沙箱隔离）、uvx（skills-ref 校验器），以及一个可无头驱动的 agent CLI（用 --list-agents 看本机有哪些）
+compatibility: 需要 python3 与 unshare（评估沙箱隔离）、uv（质量评估脚本用 uv run 运行）与 uvx（skills-ref 校验器），以及一个可无头驱动的 agent CLI（用 --list-agents 看本机有哪些）
 metadata:
   author: Kielas
-  version: "0.6.0"
+  version: "0.7.0"
 ---
 
 # 技能修复
@@ -55,7 +55,7 @@ frontmatter 与正文的写法、校验、评估、总结确认、更新日志�
 - 行为类（越界、做错事、输出走样）：把当时的输入压成一条用例，写进 `.scratch/<任务>/evals/evals.json`，输入文件放在 `.scratch/<任务>/evals/files/` 下，布局与技能目录的 `evals/` 一致，单条跑：
 
   ```bash
-  python3 ~/kie-ws/kie-skills/skills/base/kie-skill-dev/scripts/quality_eval.py <技能名> --agent <名字> --evals-root .scratch/<任务> --cases <id> --no-grade
+  uv run ~/kie-ws/kie-skills/skills/base/kie-skill-dev/scripts/quality_eval.py <技能名> --agent <名字> --evals-root .scratch/<任务> --cases <id> --no-grade
   ```
 
   看带技能组的产物里有没有那个错误行为。

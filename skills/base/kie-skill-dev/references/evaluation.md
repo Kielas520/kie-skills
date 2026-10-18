@@ -7,11 +7,11 @@
 - 沙箱建在 `~/kie-ws/test/coop-<技能名哈希>/`，目录名由技能名哈希得到、不含技能名，会话翻到路径时不会顺着名字判定这是该技能的评测。
 - 整份 `skills/` 平铺复制进沙箱，并删掉各技能的 `evals/`；`work/` 作为会话工作目录。仓库里的 `.agents/`、`.claude/` 不参与复制。
 - 技能按用户选定的 agent 放到它能读到的位置，放法由 `scripts/agent_cli.py` 里该 agent 的适配类负责。仓库里不需要为评估建任何软链。
-- 每次运行套 `unshare -rm`，用 tmpfs（内存文件系统，脚本拿它盖住真实目录）盖住本仓库路径、该 agent 的用户层技能目录、测试工作区里本次运行之外的目录，以及同一轮里的兄弟目录（其他组、其他用例）。会话因此读不到真实仓库、用户层技能与旁边的其他沙箱。`unshare` 受限时脚本退出码 2，排查见 kie-env-setup 的 `references/system-network.md`。
+- 每次运行套 `unshare -rm`，用 tmpfs（内存文件系统，脚本拿它盖住真实目录）盖住本仓库路径、该 agent 的用户层技能目录、回收站 `~/.local/share/Trash`（旧沙箱删除后进回收站，里面留着技能副本）、`~/.agents/skills`（另一个 agent 的用户层技能目录）、`~/.claude/projects`（历史会话记录）、`~/kie-ws` 根下除 `test/` 以外的全部目录（项目容器、只读克隆、`.tmp/`、`.draft/`）、测试工作区里本次运行之外的目录，以及同一轮里的兄弟目录（其他组、其他用例）。会话因此读不到真实仓库、真实工作区、用户层技能与旁边的其他沙箱。`~/kie-ws` 根与 `test/` 下的单个文件盖不住，会话仍看得到文件名。会话可能写入的用户配置文件（claude 是 `~/.claude.json` 与 `~/.claude/settings.json`）先复制一份进沙箱，再用 `mount --bind` 把副本盖在原路径上，会话执行 `claude mcp add` 这类命令只改到副本。挂完遮蔽后，脚本再套一层 `unshare -U --map-user=<当前 uid> --map-group=<当前 gid>`，让会话以当前用户身份运行，不以命名空间里的 root 运行。`unshare` 受限时脚本退出码 2，排查见 kie-env-setup 的 `references/system-network.md`。
 
 ## 触发评估（trigger_eval.py）
 
-用例写在技能的 `evals/trigger-queries.json`，官方 schema `[{"query": "...", "should_trigger": true}]`，约 20 条：
+用例写在技能的 `evals/trigger-queries.json`，官方 schema `[{"query": "...", "should_trigger": true}]`，基础用例 3 条正例加 3 条负例，之后只通过 kie-skill-fix 的回归用例增加：
 
 - 正例覆盖不同表述：明说与不明说、简短与带上下文、正式与口语。
 - 负例取关键词重合但任务不同的近似场景，无关查询测不出边界。
@@ -48,6 +48,7 @@
 
 - 同一提示词跑两组：带技能组的沙箱放整份技能集，不带技能组的沙箱技能目录为空，其余条件一致。会话与评分都走 `--agent` 选定的 agent CLI。
 - 结果落在 `.scratch/quality/<技能名>/iteration-<N>/<用例>/<组>/`：`outputs/` 是会话产物，`transcript.jsonl` 是完整输出，`timing.json` 记耗时、token、用量与本次实际加载的技能，`grading.json` 记逐条断言判定与证据；`benchmark.json` 汇总两组的断言通过率与差值。
+- 收集产物与交给评分时跳过 `.venv`、`node_modules`、`target`、`__pycache__` 这类依赖与构建目录，避免它们占满评分输入、把真正的产物挤掉。评分输出不是合法 JSON 时先用 `json_repair` 修复，修不出来再重试一次，两次都失败才记评分失败；修复过的评分在 `grading.json` 里带 `"repaired": true`。脚本用 `uv run` 运行，`json_repair` 由脚本开头的依赖声明装好。
 - 撞到 `--cap` 被截断的组在 `timing.json` 里标 `truncated`，并记进 `benchmark.json` 的 `truncated_runs`，这一组的通过率不能当结论，换个上限重跑。有运行没有事件输出、有截断、或有评分失败时退出码为 1。
 - `--evals-root <目录>` 从别的目录读用例，目录布局与技能目录一致（`<目录>/evals/evals.json` 与 `<目录>/evals/files/`）。kie-skill-fix 复现时用它把临时用例放在 `.scratch/` 下，不改被修技能的文件。
 - 第一轮先不加 `assertions`，用 `--no-grade` 看产物长什么样，再补断言。两组都过说明断言测不出技能价值，删掉或换掉；两组都不过说明断言写错或用例过难；带技能组过、不带技能组不过说明技能在这里起作用。评分完自己读一遍 `outputs/`。
@@ -71,6 +72,7 @@ kie-skill-dev 自身的评估里出过一次事故：质量用例的提示词把
 - 沙箱要装整份技能集：会话启动要读 `kie-agent-rules`，按 description 找相邻技能也可能落空，两者都会退而加载沙箱里唯一的那一个，负例被全部计成触发。
 - 只靠配置加工具白名单挡不住会话读到真实仓库、用户层技能与其他沙箱，必须套 `unshare -rm` 加 tmpfs 遮蔽。沙箱自身不能放在仓库里，否则会被同一层 tmpfs 一起盖掉。
 - 会话查不到题目里提到的技能时会翻文件系统：测试工作区里留着旧沙箱，它会翻进去接着答；质量评估同一轮的两组也在彼此视野里，不带技能组会翻进带技能组的沙箱抄技能文件。所以每次评估完都要删掉沙箱，遮蔽也要盖住兄弟目录。
+- claude 拒绝以 root 身份使用 `--permission-mode bypassPermissions`，报 `--dangerously-skip-permissions cannot be used with root/sudo privileges`，预检 0.2 秒就失败。会话必须以当前用户身份运行，不能停在 `unshare -r` 给的 root 身份上；适配层改动时保留遮蔽之后的那层身份映射。
 - agent CLI 以 Windows 进程运行时（例如在 WSL 里调用 Windows 版 claude），`unshare` 的 tmpfs 遮蔽对它无效，它读得到真实仓库；判定只认沙箱路径。它的用户层技能目录在 Windows 侧，非空时脚本报错退出，先清空再跑。
 - claude 的 `--restricted` 会连沙箱技能一起停掉，不能拿它当隔离手段。
 - claude 的会话会主动翻找文件系统，负例常要一两分钟才停下，跑 claude 时把 `--cap` 抬到 120 以上。也不要靠调低 `--cap` 让负例跑快：截断会把本该触发的正例记成未触发。

@@ -1,6 +1,11 @@
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["json-repair"]
+# ///
 """技能输出质量评估：同一提示词分别带技能与不带技能运行，按 assertions 评分并汇总。
 
 会话与评分都由 --agent 指定的 agent CLI 驱动，适配细节见同目录的 agent_cli.py。
+用 `uv run scripts/quality_eval.py ...` 运行，依赖由 uv 按上面的脚本元数据装好。
 """
 
 import argparse
@@ -14,11 +19,20 @@ import subprocess
 import sys
 import time
 
+import json_repair
+
 import agent_cli
 from agent_cli import REPO, SANDBOX_ROOT, HarnessError
 
 FILE_LIMIT = 8000
 TOTAL_LIMIT = 60000
+# 依赖与构建目录不收进产物：文件数量多，会占满评分输入，把真正的产物挤掉
+SKIP_DIRS = {".venv", "venv", "node_modules", "target", "__pycache__", ".pytest_cache",
+             ".mypy_cache", ".ruff_cache"}
+
+
+def skipped(path, base):
+    return any(part in SKIP_DIRS for part in path.relative_to(base).parts)
 
 
 def parse_args():
@@ -128,7 +142,7 @@ def dump_outputs(directory):
     parts = []
     total = 0
     for path in sorted(directory.rglob("*")):
-        if not path.is_file():
+        if not path.is_file() or skipped(path, directory):
             continue
         try:
             text = path.read_text(encoding="utf-8")
@@ -159,18 +173,30 @@ def grade(case, arm_dir, agent, cap):
         f"会话最后一条回复：\n{reply[:FILE_LIMIT]}\n\n"
         f"工作目录里的文件（含任务给的输入文件的最终状态）：\n{outputs}\n\n"
         "逐条判定断言是否成立，判定为通过必须给出产物中的具体证据，找不到证据记不通过。\n"
+        "evidence 里引用原文时用「」括起来，不要用英文双引号，保证输出是合法 JSON。\n"
         '输出格式：{"assertion_results":[{"text":"断言原文","passed":true,"evidence":"证据"}],'
         '"summary":{"passed":0,"failed":0,"total":0,"pass_rate":0}}\n'
     )
-    text = agent.ask(prompt, cap)
-    start = text.find("{")
-    end = text.rfind("}")
-    if start < 0 or end < start:
-        return {"error": "评分输出里没有 JSON", "raw": text[-2000:]}
-    try:
-        return json.loads(text[start:end + 1])
-    except json.JSONDecodeError as exc:
-        return {"error": f"评分输出不是合法 JSON：{exc}", "raw": text[start:start + 2000]}
+    # 评分输出偶尔不是合法 JSON（多是证据里引用了带英文双引号的原文），先用 json_repair 修复，
+    # 修不出含 assertion_results 的对象再重试一次
+    result = None
+    for attempt in range(2):
+        text = agent.ask(prompt, cap)
+        start = text.find("{")
+        end = text.rfind("}")
+        if start < 0 or end < start:
+            result = {"error": "评分输出里没有 JSON", "raw": text[-2000:]}
+            continue
+        raw = text[start:end + 1]
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError as exc:
+            repaired = json_repair.loads(raw)
+            if isinstance(repaired, dict) and isinstance(repaired.get("assertion_results"), list):
+                repaired["repaired"] = True
+                return repaired
+            result = {"error": f"评分输出不是合法 JSON：{exc}", "raw": raw[:2000]}
+    return result
 
 
 def normalized_rate(result):
@@ -223,7 +249,7 @@ def main():
         (arm_dir / "outputs").mkdir(parents=True)
         (arm_dir / "transcript.jsonl").write_text(transcript)
         for path in sorted(work.rglob("*")):
-            if not path.is_file():
+            if not path.is_file() or skipped(path, work):
                 continue
             # 任务给的输入文件按最终状态一并收进产物，改动就发生在这个文件上
             target = arm_dir / "outputs" / path.relative_to(work)
