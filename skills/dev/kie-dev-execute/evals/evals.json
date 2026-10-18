@@ -3,12 +3,12 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "工作目录就是本单的项目容器，设计文档在 .idea/feat/m-7000000001/design.md，我已经确认；仓库在 source/demo。按它把改动实现出来。",
-      "expected_output": "plan.md 落在 .idea/feat/m-7000000001/plan.md，每个任务的验收命令限定在改动涉及的 crate 或用例；逐任务验证与整体验证都不跑 workspace 全量命令，也不把 AGENTS.md 里 Pre-Push Verification 段的全量门禁搬进执行阶段。",
+      "prompt": "这次的项目容器就当当前目录，设计文档在 .idea/feat/m-7000000001/design.md，我已经确认了；仓库在 source/demo。按它出一份实现计划给我看。",
+      "expected_output": "读 design.md 后按 assets/plan.md 模板在 .idea/feat/m-7000000001/plan.md 写出计划：任务按依赖排，每个任务写改动的文件与符号和一条限定在改动范围的验收命令，覆盖第 4、5、8 节的改动点与两个测试用例；写完停下，把路径与任务清单交用户批准。",
       "files": [
         "evals/files/.idea/feat/m-7000000001/design.md",
-        "evals/files/source/demo/Cargo.toml",
         "evals/files/source/demo/AGENTS.md",
+        "evals/files/source/demo/Cargo.toml",
         "evals/files/source/demo/.gitignore",
         "evals/files/source/demo/crates/logfmt/Cargo.toml",
         "evals/files/source/demo/crates/logfmt/src/lib.rs",
@@ -17,9 +17,54 @@
         "evals/files/source/demo/crates/cli/src/main.rs"
       ],
       "assertions": [
-        "plan.md 落在 .idea/feat/m-7000000001/plan.md，每个任务的「验收」命令都限定在改动涉及的 crate 或用例（如 cargo test -p logfmt <用例名>、cargo check -p logfmt），没有 --workspace 这类整仓命令",
-        "会话最后一条回复「整体验证」行列出的命令都限定在改动涉及的 crate 或用例范围，没有出现 cargo test --all-features --workspace、cargo build --workspace 这类整仓命令",
-        "整体验证没有执行 AGENTS.md 里 Pre-Push Verification 段的全量门禁（workspace 全量测试、cargo doc、全量 clippy），验证内容限于改动功能的实际链路与改动相关检查"
+        "plan.md 落在 .idea/feat/m-7000000001/plan.md，开头写明设计文档是同目录的 design.md",
+        "每个任务是 `- [ ]` 勾选项，并写有「改动」（文件与符号）与「验收」（命令）两项",
+        "任务覆盖 `crates/logfmt/src/lib.rs` 的 `export_buffered`，以及 `export_buffered_writes_all_bytes` 与 `export_buffered_reports_missing_directory` 两个测试用例",
+        "验收命令都限定在 logfmt 这个包或具体用例（如 `cargo test -p logfmt ...`），没有 `--workspace` 这类整仓命令",
+        "plan.md 里没有模板的「填写要求」",
+        "source/demo 下的代码文件与输入一致，没有被修改"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "这次的项目容器就当当前目录，设计文档 .idea/feat/m-7000000001/design.md 我已经确认了，仓库在 source/demo。设计定了，开始动工，把它实现出来。",
+      "expected_output": "先生成 .idea/feat/m-7000000001/plan.md，然后停下来把计划路径与任务清单给用户，等用户批准后才开始改代码；本轮不修改 source/demo 下的任何文件。",
+      "files": [
+        "evals/files/.idea/feat/m-7000000001/design.md",
+        "evals/files/source/demo/AGENTS.md",
+        "evals/files/source/demo/Cargo.toml",
+        "evals/files/source/demo/.gitignore",
+        "evals/files/source/demo/crates/logfmt/Cargo.toml",
+        "evals/files/source/demo/crates/logfmt/src/lib.rs",
+        "evals/files/source/demo/crates/logfmt/tests/parse.rs",
+        "evals/files/source/demo/crates/cli/Cargo.toml",
+        "evals/files/source/demo/crates/cli/src/main.rs"
+      ],
+      "assertions": [
+        ".idea/feat/m-7000000001/plan.md 存在，里面的任务都还没有勾选",
+        "source/demo/crates/logfmt/src/lib.rs 里没有 `export_buffered`，source/demo 下没有新增测试文件，代码文件与输入一致",
+        "回复给出 plan.md 路径与任务清单，请用户批准后再开始实现"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "这次的项目容器就当当前目录，仓库在 source/demo。日志导出到文件这个功能的设计文档已经确认了，按设计文档开始开发吧。",
+      "expected_output": "在 .idea/ 下找不到这次任务的 design.md，问用户实现依据在哪里（设计文档或任务号）；依据到手之前不生成计划、不改代码，也不要求用户先去执行另一个技能。",
+      "files": [
+        "evals/files/source/demo/AGENTS.md",
+        "evals/files/source/demo/Cargo.toml",
+        "evals/files/source/demo/.gitignore",
+        "evals/files/source/demo/crates/logfmt/Cargo.toml",
+        "evals/files/source/demo/crates/logfmt/src/lib.rs",
+        "evals/files/source/demo/crates/logfmt/tests/parse.rs",
+        "evals/files/source/demo/crates/cli/Cargo.toml",
+        "evals/files/source/demo/crates/cli/src/main.rs"
+      ],
+      "assertions": [
+        "工作目录里没有生成 plan.md",
+        "source/demo 下的代码文件与输入一致，没有被修改",
+        "回复说明没有找到这次任务的 design.md，并问用户实现依据在哪里",
+        "回复没有要求用户先去走另一个技能（例如先走 kie-dev-design）再回来"
       ]
     }
   ]

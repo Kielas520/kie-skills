@@ -54,7 +54,7 @@
     {
       "user": "reviewer-c",
       "state": "CHANGES_REQUESTED",
-      "body": "整体没问题，但 parse() 现在遇到 `key=` 这种没有值的字段会抛异常，历史日志里有这类行，麻烦一起处理。"
+      "body": "整体没问题，但 parse() 现在遇到 `url=a=b` 这种值里带等号的字段会抛异常，历史日志里有这类行，麻烦一起处理。"
     }
   ],
   "issue_comments": [

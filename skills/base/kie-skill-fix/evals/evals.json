@@ -3,28 +3,39 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "issue-logger 这个技能越界了。我让它记一份当天的问题日志，它写完之后自己 git commit 还 push 了，还把我当天的分支合到 main 上。我只想让它写日志文件，帮我修一下。",
-      "expected_output": "判定为正文里写了越界动作，先给出「现象 / 实际行为 / 期望行为」与根因归类，再出修复方案交用户批准，不直接改 SKILL.md；方案写明删掉越界的那两步、版本号怎么走、改完跑哪步评估、留哪条回归用例。",
-      "files": ["evals/files/issue-logger/SKILL.md"],
+      "prompt": "当前工作目录是本仓库的一份副本，skills/base/logfmt-report 是我维护的一个技能，我明明说的就是它管的事，它老是不触发。我当时说的是「帮我把 app.log 按 logfmt 格式解析一下，统计每个 level 出现多少次」。复现我已经用评估脚本跑过了，结果在 复现结果-logfmt-report.json，这台机器上不用再跑脚本。帮我修一下。",
+      "expected_output": "读复现结果，把现象写成三行，判定为触发类问题、根因在 description 覆盖不足，给出覆盖做什么、何时用、边界、不适用的 description 改写方案（从技能正文推不出的部分标明要用户确认），说明改完要跑触发评估（正例与负例都跑）；先出方案等用户批准，不改技能文件。",
+      "files": ["evals/files/skills/base/logfmt-report/SKILL.md", "evals/files/复现结果-logfmt-report.json"],
       "assertions": [
-        "把根因归到正文写了越界动作，而不是只归到 description 的触发范围",
-        "先出修复方案并等用户批准，产物里没有已经被改好的 SKILL.md",
-        "方案写明改哪一段、改完的预期行为、metadata.version 怎么走",
-        "说明改完要跑输出质量评估，并把这次的越界现象留成回归用例",
-        "给出复现结论：复现出越界行为，或说明复现不出的原因与已经排除的假设"
+        "回复把现象写成现象、实际行为、期望行为三项",
+        "把问题判定为触发类（该触发时不触发）、根因归到 description 覆盖不足；给出的 description 改写写了做什么与何时用，边界与不适用要么写出具体内容，要么标明从技能正文推不出、需要用户确认",
+        "方案说明改完要跑触发评估且正例与负例都跑；skills/base/logfmt-report/SKILL.md 与输入逐字一致"
       ]
     },
     {
       "id": 2,
-      "prompt": "logfmt-report 这个技能装上了老是不触发，我明明说的就是它管的事，帮我看看问题出在哪。",
-      "expected_output": "判定为触发问题，定位到 description 覆盖不足，给出覆盖做什么、何时用、边界、反例排除四块的改写方案，并说明改完要重跑触发评估、正例与负例都要跑。",
-      "files": ["evals/files/logfmt-report/SKILL.md"],
+      "prompt": "当前工作目录是本仓库的一份副本。skills/base/issue-logger 这个技能越界了：我让它记一份当天的问题日志，它写完自己 git commit 还 push 了，还把当天的分支合到 main 上。我只想让它写日志文件，帮我修一下。这台机器上跑不了评估脚本，复现就按技能正文分析。",
+      "expected_output": "按正文分析复现，把根因归到正文第 4、5 步写了提交、推送与合并，出修复方案（改哪一段、预期行为、版本号怎么走、回归用例、跑输出质量评估），停下来等用户批准；「帮我修一下」不算批准，不改技能文件。",
+      "files": ["evals/files/skills/base/issue-logger/SKILL.md"],
       "assertions": [
-        "把问题判定为触发问题、根因在 description 覆盖不足，不是输出质量问题",
-        "给出的 description 改写覆盖做什么、何时用、边界、反例排除",
-        "说明改完要重跑触发评估，正例与负例都要跑",
-        "先出方案等用户批准，产物里没有已经被改好的 SKILL.md",
-        "给出复现结论：复现出该触发时没触发，或说明复现不出的原因与已经排除的假设"
+        "根因归到正文步骤里写了提交、推送与合并这类越界动作（第 4、5 步），而不是只归到 description",
+        "方案写明改哪一段、改完的预期行为、`metadata.version` 怎么走、回归用例怎么留，并说明改完要跑输出质量评估",
+        "skills/base/issue-logger/SKILL.md 与输入逐字一致，skills/base/issue-logger/ 下没有新增 evals/ 目录或用例文件；回复停在方案，等用户批准"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "当前工作目录是本仓库的一份副本。有个技能老是自己把东西提交上去，帮我修一下。",
+      "expected_output": "工作目录里 issue-logger 与 weekly-report 两个技能的正文都写了提交步骤，确认不了是哪一个；先问用户是哪个技能（技能名、目录或那次会话的表现），不靠猜，也不改任何文件。",
+      "files": [
+        "evals/files/skills/base/issue-logger/SKILL.md",
+        "evals/files/skills/base/weekly-report/SKILL.md",
+        "evals/files/skills/base/logfmt-report/SKILL.md"
+      ],
+      "assertions": [
+        "回复问用户是哪个技能，或请用户给出技能名、技能目录或那次会话的表现",
+        "回复没有直接认定是 issue-logger 或 weekly-report 中的某一个，并给出只针对它的修复方案",
+        "工作目录里的三份 SKILL.md 都与输入逐字一致，没有新增文件"
       ]
     }
   ]

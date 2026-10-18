@@ -1,0 +1,14 @@
+{
+  "说明": "trigger_eval.py 对 logfmt-report 的单条复现结果，agent claude，--runs 1",
+  "summary": {"positives_passed": 0, "positives_total": 1},
+  "cases": [
+    {
+      "query": "帮我把 app.log 按 logfmt 格式解析一下，统计每个 level 出现多少次",
+      "should_trigger": true,
+      "runs": 1,
+      "rate": 0.0,
+      "passed": false,
+      "loaded_skills": ["kie-agent-rules"]
+    }
+  ]
+}

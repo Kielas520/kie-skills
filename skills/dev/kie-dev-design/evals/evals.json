@@ -3,31 +3,49 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "工作目录里 ws/demo-p/.idea/feat/m-7000000001/solve.md 是本任务已确认的方向。按它写设计文档，落到同目录。",
-      "expected_output": "按 assets/design.md 的章节写出 ws/demo-p/.idea/feat/m-7000000001/design.md，选定方案来自 solve.md，未改 solve.md。",
+      "prompt": "工作目录里 ws/demo-p 是这次的项目容器，m-7000000001 已经拍板，方向记在 ws/demo-p/.idea/feat/m-7000000001/solve.md。按它把技术设计文档写出来，写完给我看。",
+      "expected_output": "按 assets/design.md 模板在 ws/demo-p/.idea/feat/m-7000000001/design.md 写出设计文档：变更记录（只有 v1.0、带排序规则与状态行）加第 1 至 8 节，不含第 9 节 Review；第 8 节表头是「测试层级」；详细设计里有 mermaid 数据链路图；选定方案来自 solve.md；不抄填写要求；solve.md 不动；交用户审核。",
       "files": [
         "evals/files/ws/demo-p/.idea/feat/m-7000000001/solve.md"
       ],
       "assertions": [
-        "ws/demo-p/.idea/feat/m-7000000001/ 下新增 design.md，且 solve.md 内容未被改动",
-        "design.md 的章节恰好是「变更记录」+ 1 至 8 节：不出现第 0 节或第 9 节 Review，§1 不拆 1.1/1.2 这类模板外小节，§8 表头是「测试层级」",
-        "design.md 的变更记录只有初始版本 v1.0 一行，没有照抄模板里的 v1.1 示例行；不含「填写要求」与「本地补充要求」",
-        "design.md 的「方案与取舍」把 solve.md 里的选定方案（全量读进内存再一次性写）作为选定项展开，未选方案只留一行及不选原因"
+        "ws/demo-p/.idea/feat/m-7000000001/design.md 存在，solve.md 内容与输入一致",
+        "design.md 的章节是「变更记录」加第 1 至 8 节，不含第 9 节 Review；变更记录下有「状态」行，第 8 节表头第一列是「测试层级」",
+        "变更记录表只有 v1.0 一行，没有照抄模板里的 v1.1 示例行；design.md 里没有「填写要求」与「本地补充要求」",
+        "「4. 详细设计」里有一张 mermaid 数据链路图",
+        "「3. 方案与取舍」把全量读进内存再一次性写作为选定方案，流式写入与外部打包工具各一行写不选原因",
+        "design.md 全文不超过 250 行，`export_buffered` 的完整签名（含参数列表）在全文只出现一次"
       ]
     },
     {
       "id": 2,
-      "prompt": "工作目录里 ws/demo-p/.idea/feat/m-7000000001/solve.md 是本任务已确认的方向。按它写设计文档，落到同目录；接口变更清单、详细设计、测试用例都写全，我好一次性评审。",
-      "expected_output": "按 assets/design.md 写出 design.md：章节、表头与状态行与模板一致，不含第 9 节 Review；全文按本地补充要求去重并控制在 250 行以内，同一符号的签名不重复出现；solve.md 未被改动。",
+      "prompt": "工作目录里 ws/demo-p 是这次的项目容器，m-7000000001 的设计文档在 ws/demo-p/.idea/feat/m-7000000001/design.md。评审意见：第 2 节把内存缓冲上限写成 64 MiB，超过上限返回错误、不落盘。改完给我看。",
+      "expected_output": "直接改 design.md 第 2 节写明 64 MiB 上限，一次改到位，不写新旧对照；变更记录不擅自追加 v1.1，问用户要不要给设计方案打新版本；solve.md 与其他文件不动。",
       "files": [
-        "evals/files/ws/demo-p/.idea/feat/m-7000000001/solve.md"
+        "evals/files/ws/demo-p/.idea/feat/m-7000000001/solve.md",
+        "evals/files/ws/demo-p/.idea/feat/m-7000000001/design.md"
       ],
       "assertions": [
-        "design.md 的章节恰好是「变更记录」+ 1 至 8 节：不含第 0 节与第 9 节 Review、不含「已有设计」段，变更记录下有「状态」行，§8 表头是「测试层级」",
-        "design.md 的「4. 详细设计」里有一张 mermaid 数据链路图",
-        "design.md 全文不超过 250 行",
-        "`export_buffered` 的完整签名（含参数列表）在全文只出现一次",
-        "solve.md 内容未被改动"
+        "design.md 第 2 节写明内存缓冲上限是 64 MiB，超过上限返回错误、不落盘",
+        "design.md 变更记录表仍然只有 v1.0 一行，没有自行追加新版本记录",
+        "design.md 里没有「原先写的是」「改为」这类新旧对照说明",
+        "回复问用户要不要给设计方案打新版本（或说明不打版本就不记变更记录），交用户审核",
+        "solve.md 内容与输入一致，工作目录里没有生成 plan.md"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "工作目录里 ws/demo-p 是这次的项目容器，m-7000000001 的设计文档在 ws/demo-p/.idea/feat/m-7000000001/design.md。评审意见：别全量读进内存了，改成边读边写的流式写入，省内存。按这条意见把设计改了给我看。",
+      "expected_output": "识别出这条意见把选定方案从「全量读进内存再一次性写」换成了 solve.md 里列为未选的「流式写入」，说明设计依据变了，问用户要不要先更新依据文档；不改 solve.md，也不新建或改 solution.md；变更记录不擅自追加。",
+      "files": [
+        "evals/files/ws/demo-p/.idea/feat/m-7000000001/solve.md",
+        "evals/files/ws/demo-p/.idea/feat/m-7000000001/design.md"
+      ],
+      "assertions": [
+        "回复指出流式写入是 solve.md 里列为未选的方案，这条意见改变了选定方案或设计依据",
+        "回复问用户要不要先更新依据文档（solve.md 或选型文档），而不是只问要不要改 design.md",
+        "solve.md 内容与输入一致，工作目录里没有新建 solution.md",
+        "design.md 的变更记录表仍然只有 v1.0 一行"
       ]
     }
   ]

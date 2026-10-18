@@ -1,0 +1,10 @@
+$ cargo build -p demo-cli
+   Compiling demo-schema v0.3.0 (/work/crates/demo-schema)
+error: failed to run custom build command for `demo-schema v0.3.0`
+
+Caused by:
+  process didn't exit successfully: `/work/target/debug/build/demo-schema-1f2e/build-script-build` (exit status: 101)
+  --- stderr
+  thread 'main' panicked at gen/schema.rs:42:10:
+  environment variable `DEMO_SDK_ROOT` is not set; it must point to the directory that contains `idl/`
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

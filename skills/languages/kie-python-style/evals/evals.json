@@ -4,25 +4,45 @@
     {
       "id": 1,
       "prompt": "work/legacy_script.py 是之前别人写的，按我们的 Python 约定改一遍，改完的文件留在当前目录下。",
-      "expected_output": "改写后的脚本：用 pathlib、`|` 联合类型、内置小写容器、collections.abc 抽象容器、loguru 日志，语义明确的键值对用 namedtuple 类。",
-      "files": ["evals/files/legacy_script.py"],
+      "expected_output": "整份按约定改写：联合类型用 |、容器用内置小写泛型、抽象容器从 collections.abc 取、去掉 from __future__ import annotations、键值对用继承 typing.NamedTuple 的类、路径用 pathlib、日志用 loguru；文件开头不加 docstring 与 shebang。",
+      "files": [
+        "evals/files/legacy_script.py"
+      ],
       "assertions": [
-        "不再使用 typing.Optional、typing.Union、typing.Dict，联合类型写 `|`、容器写内置小写泛型",
-        "抽象容器注解从 collections.abc 取，并去掉 `from __future__ import annotations`",
-        "键值对用 namedtuple 类表达语义，不再返回裸 tuple",
-        "路径与文件操作改用 pathlib，不再使用 os.path",
-        "日志改用 loguru，不再使用标准库 logging"
+        "改后的文件不再使用 typing.Optional、typing.Union、typing.Dict、typing.List，联合类型写 `|`，容器写内置小写泛型",
+        "Iterable 从 collections.abc 导入，文件里没有 `from __future__ import annotations`",
+        "parse_entry 返回继承 typing.NamedTuple 的类的实例，不再返回裸 tuple",
+        "路径与文件操作改用 pathlib，不再使用 os.path 与 os.listdir",
+        "日志改用 loguru，不再 import logging",
+        "文件开头没有模块 docstring 与 shebang，import 没有被 try-except 包住"
       ]
     },
     {
       "id": 2,
-      "prompt": "work/legacy_project 这个项目要加个日志依赖 loguru，依赖和环境按我们的约定弄好，顺便把 main.py 的日志改成 loguru。",
-      "expected_output": "依赖用 uv 管理并写进 pyproject.toml，运行说明用 uv run，main.py 的日志改用 loguru。",
-      "files": ["evals/files/legacy_project/main.py", "evals/files/legacy_project/requirements.txt"],
+      "prompt": "work/legacy_project 这个项目要加个日志依赖 loguru，依赖和环境按我们的约定弄好，顺便把 main.py 里的 print 改成用 loguru 记日志。",
+      "expected_output": "依赖用 uv 管理，写进 pyproject.toml（没有就用 uv init 建），用 uv add loguru 或等价方式加入依赖，说明用 uv run 运行；main.py 改用 loguru。",
+      "files": [
+        "evals/files/legacy_project/main.py",
+        "evals/files/legacy_project/requirements.txt"
+      ],
       "assertions": [
-        "依赖用 uv 管理：写进 pyproject.toml 的 dependencies 或用 uv add，而不是只在 requirements.txt 里追加一行",
-        "运行方式说明用 uv run 或 uv 管理的虚拟环境，不用全局 pip 安装",
-        "main.py 的日志改用 loguru"
+        "legacy_project 下有 pyproject.toml，loguru 写在它的 dependencies 里，而不是只在 requirements.txt 里追加一行",
+        "回复给出的运行方式是 uv run，没有用全局 pip install",
+        "main.py 用 loguru 记日志"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "work/report_tool.py 里的 load_config 要加一个参数 filename，默认值是 config.ini，读取的文件名从这个参数来。改完的文件留在当前目录下。",
+      "expected_output": "load_config 加上 filename 参数，并在这个函数里把旧写法一起改掉（pathlib、内置小写泛型、类型注解）；find_reports 里的 os.listdir 与 Optional 不改，只在回复里指出。",
+      "files": [
+        "evals/files/report_tool.py"
+      ],
+      "assertions": [
+        "load_config 有参数 filename，默认值 \"config.ini\"，读取的文件名来自这个参数",
+        "load_config 函数体不再使用 os.path，返回值注解写成 dict[str, str]",
+        "find_reports 的函数体与签名保持原样，仍然使用 os.listdir 与 Optional",
+        "回复指出 find_reports 里还有旧式写法，没有改"
       ]
     }
   ]

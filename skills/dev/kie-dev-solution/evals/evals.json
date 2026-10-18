@@ -3,37 +3,50 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "工作目录里 ws/demo-p 是项目容器（源仓库在 source/myrepo 下），draft/offline-solve-data-flow.md 是我之前整理的链路说明。你看看要不要在里面做一些修改或者加一些东西，先和我确认一下要改什么。另外这些东西是不是应该整理成方案选型文档？",
-      "expected_output": "只回答该改哪些内容，以及产出物形态：选型文档叫 solution.md，列出项目现状与全部候选方案，用户拍板时在对应方案标题处标注选定，拍板后另出一份 solve.md 交 kie-dev-design。不创建 .idea/ 目录，不写任何文件。",
-      "files": ["evals/files/draft/offline-solve-data-flow.md", "evals/files/ws/demo-p/source/myrepo/README.md"],
+      "prompt": "工作目录里的 ws/demo-p 是这次的项目容器，源仓库是 ws/demo-p/source/myrepo，就用现在这份，不用克隆也不用同步。需求单 m-7000000002：给 log export 子命令加按时间范围筛选的能力，只导出起止时间之间的记录。你先调研现有代码，出一份方案文档给我选。",
+      "expected_output": "读 source/myrepo 的 export.rs 与 parser.rs 后，在 ws/demo-p/.idea/feat/m-7000000002/solution.md 写出选型文档：要实现的功能、项目现状（原有设计与相关现状）、按风险从低到高排列的候选方案，每个方案写到文件与符号并带四项风险评估；不带选定标记，不出 solve.md，把路径与方案摘要交用户选。",
+      "files": [
+        "evals/files/ws/demo-p/source/myrepo/README.md",
+        "evals/files/ws/demo-p/source/myrepo/src/cli/export.rs",
+        "evals/files/ws/demo-p/source/myrepo/src/parser.rs"
+      ],
       "assertions": [
-        "工作目录里除输入文件 draft/offline-solve-data-flow.md 与 ws/demo-p/source/myrepo/README.md 外没有新增或修改的文件，尤其没有 .idea/ 目录，也没有 solution.md / solve.md / solver.md",
-        "回复没有把选型文档接到 design.md 上：没有出现「定稿后就是设计文档的内容」这类说法；提到后续步骤时只指向拍板后另出 solve.md",
-        "回复只列出准备修改的内容并等用户确认，没有声称已经写出、正在写或准备写文档"
+        "ws/demo-p/.idea/feat/m-7000000002/solution.md 存在，不是平铺在 .idea/ 根下或 .idea/m-7000000002/ 下",
+        "solution.md 含「要实现的功能」「项目现状」两节，「项目现状」写出现有 log export 读取全部记录再逐条打印、parser 按时间戳升序返回这类原有设计，不只是文件清单",
+        "每个方案都有「涉及的改动位置」表，写到 export.rs 或 parser.rs 里的具体符号（如 run、ExportArgs、read_entries），并有改动量、实现复杂度、可维护性、风险四项风险评估",
+        "solution.md 里没有任何方案标题带「已选定」，ws/demo-p/.idea/ 下没有 solve.md 与 design.md，source/myrepo 下的代码文件未被修改",
+        "回复给出 solution.md 路径与方案摘要，请用户选定，没有替用户选方案"
       ]
     },
     {
       "id": 2,
-      "prompt": "工作目录里 ws/demo-p/.idea/feat/m-7000000001/solution.md 是本任务的选型文档。三个方案里按第二个来，拍板了。",
-      "expected_output": "在 solution.md 的第二个方案标题处标注选定、其余内容不动，并在同目录新增 solve.md，只记录已确认的方向，按 assets/solve.md 的模板组织。",
-      "files": ["evals/files/ws/demo-p/.idea/feat/m-7000000001/solution.md"],
+      "prompt": "工作目录里 ws/demo-p 是这次的项目容器，m-7000000001 的选型文档在 ws/demo-p/.idea/feat/m-7000000001/solution.md。三个方案里按第二个来，拍板了。",
+      "expected_output": "在 solution.md 第二个方案的标题处加「已选定」，其余内容不动；按 solve.md 模板在同目录新建 solve.md，只记录选定方向；把路径交用户确认，不写设计文档。",
+      "files": [
+        "evals/files/ws/demo-p/.idea/feat/m-7000000001/solution.md"
+      ],
       "assertions": [
-        "ws/demo-p/.idea/feat/m-7000000001/solution.md 里第二个方案的标题处出现选定标记，方案一与方案三仍保留在文档中且未被加标记",
-        "ws/demo-p/.idea/feat/m-7000000001/ 下新增 solve.md，内容只涉及第二个方案，没有把另外两个方案作为备选抄进去",
-        "solve.md 含「要实现的功能」与「选定方案」两节，并写明它由 solution.md 的选定结论而来",
-        "工作目录里没有生成 design.md：用户只拍板，没有要求写设计文档"
+        "solution.md 里第二个方案的标题带「已选定」标记，方案一与方案三仍在文档中且没有标记，其余正文与输入一致",
+        "同目录新增 solve.md，含「要实现的功能」与「选定方案」两节，选定方案是全量读进内存再一次性写，另外两个方案只出现在「取舍」表里",
+        "工作目录里没有生成 design.md 与 plan.md",
+        "回复给出 solve.md 路径请用户确认，没有声称已经开始或准备直接写设计文档"
       ]
     },
     {
       "id": 3,
-      "prompt": "工作目录里 ws/demo-p 是项目容器（源仓库在 source/myrepo 下），draft/glove-offline-data-flow.md 是我之前整理的离线解算链路说明，以这份素材为准。把它整理成正式的任务文档 ws/demo-p/.idea/feat/m-7000000001/solution.md，工单是给 C SDK 加离线解算接口。",
-      "expected_output": "solution.md 的「项目现状」开头讲清既有实现的技术原理：离线解算的定义与覆盖/不覆盖边界、实时链路与离线链路的对应关系、数据经过哪些环节与每层职责；随后才是与本次改动位置相关的现状。",
-      "files": ["evals/files/draft/glove-offline-data-flow.md", "evals/files/ws/demo-p/source/myrepo/README.md"],
+      "prompt": "工作目录里的 ws/demo-p 是这次的项目容器，源仓库是 ws/demo-p/source/myrepo，就用现在这份，不用克隆也不用同步。这次没有工单，分支梗概叫 export-gzip：想让 log export 支持把导出结果压缩成 gzip。你先调研现有代码，出一份方案文档给我选。",
+      "expected_output": "无工单时任务目录取梗概单层目录，选型文档写到 ws/demo-p/.idea/export-gzip/solution.md；按 assets/solution.md 的结构写：项目现状分「原有设计」与「与本次相关的现状」，每个方案标题带风险等级、按风险从低到高排，风险评估固定写改动量、实现复杂度、可维护性、风险四项；不带选定标记，不出 solve.md，请用户选定方案。",
+      "files": [
+        "evals/files/ws/demo-p/source/myrepo/README.md",
+        "evals/files/ws/demo-p/source/myrepo/src/cli/export.rs",
+        "evals/files/ws/demo-p/source/myrepo/src/parser.rs"
+      ],
       "assertions": [
-        "solution.md 的「项目现状」一节讲清原有设计的技术原理，不是只有文件与符号清单：写出离线解算是什么（不连设备、不建订阅、调用方逐帧传入、与实时链路共用同一套求解器，差别只在帧来源）与覆盖/不覆盖边界，并写出实时链路与离线链路的对应（实时 `emf_raw_data` → `emf_poses` → `hand_joint_angles` → `tip_poses` / `hand_skeleton`，`imu_raw/<指>` → `imu_data/<指>`；离线把 `EmfPoseArray` 当入口）",
-        "solution.md 写到函数与环节职责这一级：构造期读该 SN 的参数存储、按「显式 URDF 路径 → 标定文件 → 内置默认」三级选 URDF、建 `HandSolver` 与 `ImuFusionSolver`；`input_wire` 与 `ensure_latest_frame` 按 postcard 字节决定是否重新解算、手部三类共用一次解算；`materialize_tip_poses` 用 pipeline 自增 `seq` 而 `materialize_hand_skeleton` 用输入的 `seq`",
-        "solution.md 保留素材里的数值边界与跳过条件：IMU 融合在相邻帧时间戳差为 0 或超过 5 秒时不积分也不修正、加速度模长不在 `[1.0, 30.0]` 时跳过倾斜修正、关节角超出 URDF 限位超过 `1e-6 rad` 时限流告警而角度本身不截断",
-        "solution.md 保留了素材里的使用须知与一致性验证现状：SN 必须是采集该数据的设备或已完成标定的设备的 SN（填了不存在的 SN 不报错，但会静默使用内置默认 URDF）、录像要保存 `emf_poses` 的输出而不是 `emf_raw_data`、实时录制再离线重放时两边从空状态开始且每帧对同一组资源各调一次；`offline_pipeline_parity.rs`、仓内 `#[cfg(test)]` 段、Python 测试与 `online_offline_mcap_parity.py` 各自覆盖的内容"
+        "选型文档写在 ws/demo-p/.idea/export-gzip/solution.md，不是写在 .idea/ 根下、仓库目录里或当前目录",
+        "solution.md 的「项目现状」下分「原有设计」与「与本次相关的现状」两个小节",
+        "每个方案标题形如「方案一：<名称>（风险 低/中/高）」，方案一的风险等级不高于后面的方案",
+        "每个方案的风险评估都写了「改动量」「实现复杂度」「可维护性」「风险」四项",
+        "solution.md 没有「已选定」标记，工作目录里没有新建 solve.md，回复请用户选定方案"
       ]
     }
   ]

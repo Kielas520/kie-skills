@@ -3,57 +3,38 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "这台机器看着什么都没配好，我想把开发环境弄起来。先别动手，把差异清单给我看，我要一条条过。",
-      "expected_output": "先跑探测脚本，按工作空间、仓库落位、工具链、系统与网络四组给出「现状 / 期望 / 建议动作」的差异清单，标出每条是否需要用户确认；没有创建目录、没有安装任何工具、没有改系统配置。清单只覆盖本仓库约定的环境项。",
+      "prompt": "帮我给这台机器做个环境体检，把差异清单给我看。",
+      "expected_output": "运行探测脚本或等价的只读命令，按工作空间、仓库落位、工具链、系统与网络四组列出差异，每条给现状、期望与建议动作；只报告，不执行任何改动。",
       "files": [],
       "assertions": [
-        "清单按工作空间、仓库落位、工具链、系统与网络分组，每组给出「现状 / 期望 / 建议动作」或等价的逐条信息",
-        "报出的现状与探测结果一致：工作空间与固定用途目录的存在状态、kie-skills 克隆的当前位置、工具链各项的已装与缺失状态及版本，至少覆盖其中三类；状态取本次探测输出，不套用参考文件里记载的历史取值",
-        "清单没有把与本仓库约定无关的环境项（Go、Java、Maven、VS Code、编辑器选型一类）算成缺口，也没有执行 mkdir、安装或 sysctl 等改动动作"
+        "差异清单按工作空间、仓库落位、工具链、系统与网络四组列出，每条都有现状、期望与建议动作（或等价的逐条信息）",
+        "清单里的现状有本次命令输出作依据：记录里能看到 env_probe.py 或对应只读探测命令的实际执行",
+        "没有执行 mkdir、apt、brew、uv tool install、sysctl、git clone 或 mv 这类改动本机的命令"
       ]
     },
     {
       "id": 2,
-      "prompt": "工作空间还没建，按咱们的约定要建哪些目录？先列出来我看看，别动手。",
-      "expected_output": "列出工作空间根与 .tmp、.draft、test 三个固定用途目录，说明项目容器 <项目名称>-p、.idea 任务目录与 worktrees 分支目录由对应技能按任务建出、本技能不预建；不提出创建 ~/kie-ws/AGENTS.md；不执行 mkdir。",
+      "prompt": "工作空间还没建。这次把当前目录下的 kie-ws/ 当作工作空间根（代替 ~/kie-ws），按我们的约定把工作空间骨架建出来，定好直接建，不用等我确认。",
+      "expected_output": "只建工作空间根与三个固定用途目录：kie-ws/.tmp、kie-ws/.draft、kie-ws/test；不建项目容器、.idea、worktrees，也不建 AGENTS.md，说明项目容器等由其他技能按任务建出；用 ls -d 验证三个目录。",
       "files": [],
       "assertions": [
-        "列出工作空间根与 .tmp、.draft、test 三个固定用途目录",
-        "说明 <项目名称>-p 项目容器、.idea 任务目录、worktrees 分支目录由其他技能按任务建出，本次不预建",
-        "没有提出创建 ~/kie-ws/AGENTS.md，且没有执行 mkdir 等创建动作"
+        "kie-ws/ 下建出了 .tmp、.draft、test 三个目录",
+        "kie-ws/ 下除这三个目录外没有其他文件或目录：没有 AGENTS.md、README、*-p/ 项目容器、.idea、worktrees、projects 之类",
+        "回复说明项目容器、.idea 任务目录、worktrees 由其他技能按任务建出，本次不预建",
+        "回复给出了验证结果：三个目录都存在（例如 ls -d 的输出）"
       ]
     },
     {
       "id": 3,
-      "prompt": "评估脚本在这台机器上报过退出码 2，说隔离条件不成立。当时手动跑 unshare -rm true 的报错是 write failed /proc/self/uid_map: Operation not permitted。这种报错是什么原因引起的，以后怎么修、怎么确认已经修好？",
-      "expected_output": "结合给出的报错判定为非特权 user namespace 被限制（kernel.apparmor_restrict_unprivileged_userns 为 1），说明评估脚本用 unshare -rm 加 tmpfs 遮蔽真实仓库与用户层技能目录、隔离建不起来时在启动会话之前就以退出码 2 结束；给出需要 root 的修复命令并说明代价，交给用户执行；给出确认修好的办法（再跑 unshare -rm true 看退出码）。",
-      "files": [],
+      "prompt": "这台机器刚跑过的探测输出在 探测结果.txt，按它把命令行工具的差异清单列给我：缺哪些、各自的安装命令、谁来执行、装完怎么验证。先别装，也不用再探测。",
+      "expected_output": "按探测输出列出缺失的 brew、rg、fd、bat、sd；安装顺序按 linuxbrew > cargo binstall > apt > 官方安装脚本 > cargo install，linuxbrew 由用户执行，apt 这类要 sudo 的命令也交给用户；Ubuntu 上 fd、bat 的二进制名是 fdfind、batcat，需要自建软链；每个工具的验证命令用 bash -c 'command -v <工具>'；不执行任何安装。",
+      "files": ["evals/files/探测结果.txt"],
       "assertions": [
-        "把退出码 2 归因于非特权 user namespace 受限，并引用给出的 uid_map 报错或 kernel.apparmor_restrict_unprivileged_userns",
-        "说明评估脚本的隔离由 unshare -rm 加 tmpfs 遮蔽真实仓库与用户层技能目录组成，隔离建不起来时在启动会话之前就退出码 2",
-        "给出的修复命令含把 kernel.apparmor_restrict_unprivileged_userns 置 0，标明需要 root、由用户执行，没有代跑 sudo"
-      ]
-    },
-    {
-      "id": 4,
-      "prompt": "帮我把命令行工具按我们的约定过一遍：缺哪些、各自的安装命令、装完怎么验证。先别装，我要先看清单。",
-      "expected_output": "用真实可执行文件判定工具是否可用（agent shell 内置的 rg、fd、jq 不算已装），按 linuxbrew > cargo binstall > apt > 官方安装脚本 > cargo install 给出每个缺失工具可达的最高档命令与降档理由，并给出每条命令的验证方式；不执行任何安装。",
-      "files": [],
-      "assertions": [
-        "判定工具是否可用时区分真实可执行文件与 agent shell 内置命令（用 bash -c 'command -v …' 或等价方式复核），没有把只在 agent shell 里能命中的命令当作已安装",
-        "对档位顺序中有可达档位的缺失工具给出该工具可达的最高档命令并说明降档理由；包名或来源未确认、本就没有可达档位的工具明确报给用户确认，不强行套档位",
-        "给出每条安装命令的验证方式，且没有执行任何安装（没有 apt、cargo binstall、官方安装脚本、uv tool install 的执行痕迹）"
-      ]
-    },
-    {
-      "id": 5,
-      "prompt": "我这台机器的 git 全局身份配好了吗？要是没配，提交时会报什么错？",
-      "expected_output": "用本次执行的命令（git var GIT_AUTHOR_IDENT、git config --global user.name/user.email）取证，给出本机实际生效的身份与是否已配置；不以参考文件里记的历史结论作答；只探测，不改配置。",
-      "files": [],
-      "assertions": [
-        "身份结论有本次命令输出支撑，产物或记录里能看到 git var GIT_AUTHOR_IDENT 或 git config --global 的实际执行与输出",
-        "结论与本次输出一致：本次命令有值时不得报「全局身份缺失」，也不得引用带日期的历史结论（如某天探测过什么）",
-        "没有执行 git config --global 写入，没有改动任何配置"
+        "清单列出缺失的 brew（linuxbrew）、rg、fd、bat、sd，没有把探测结果里已有的 uv、jq、gh 列成缺失",
+        "回复写明 linuxbrew 由用户自己执行，并把它排在其他缺失工具之前，说明装好后其余工具优先用 brew install",
+        "回复提到 Ubuntu 上 apt 装出的 fd、bat 二进制名是 fdfind、batcat，需要自建软链",
+        "每个工具的验证命令写成 `bash -c 'command -v <工具>'` 这类看真实可执行文件的形式",
+        "记录里没有执行 apt、brew、cargo、curl 安装脚本这类安装命令"
       ]
     }
   ]

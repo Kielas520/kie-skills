@@ -1,0 +1,19 @@
+$ cat /etc/os-release | head -2
+PRETTY_NAME="Ubuntu 26.04 LTS"
+NAME="Ubuntu"
+
+$ for t in git gh uv uvx python3 node npx brew rg fd bat sd jq gio; do printf "%s: " $t; bash -c "command -v $t" || echo 缺失; done
+git: /usr/bin/git
+gh: /usr/bin/gh
+uv: /home/dev/.local/bin/uv
+uvx: /home/dev/.local/bin/uvx
+python3: /usr/bin/python3
+node: /home/dev/.nvm/versions/node/v24.21.0/bin/node
+npx: /home/dev/.nvm/versions/node/v24.21.0/bin/npx
+brew: 缺失
+rg: 缺失
+fd: 缺失
+bat: 缺失
+sd: 缺失
+jq: /usr/bin/jq
+gio: /usr/bin/gio

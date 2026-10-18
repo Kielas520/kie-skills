@@ -3,8 +3,8 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "f-8123456789 的修复我做完了，推送前你本地测一遍。工单在 work/工单-f-8123456789.md，有问题那个版本我放在 work/logfmt-0.1.0/ 了。这次的项目容器就当当前目录，测试报告写到 .idea/ 下，具体位置按我们既有的项目文档约定放。",
-      "expected_output": "按工单两条验收标准实测当前版本与 v0.1.0，给出对照结果，测试报告按任务目录约定写到 .idea/fix/f-8123456789/test-report.md。",
+      "prompt": "f-8123456789 的修复做完了，这次的项目容器就当当前目录。工单在 工单-f-8123456789.md，修好的版本是 logfmt/logfmt.py，有问题那一版在 logfmt-0.1.0/logfmt.py，这个工具不涉及设备。测试范围就按工单的两条验收标准、对照 v0.1.0 来，我认可，直接测；测完都通过就可以推送，把测试报告写出来。",
+      "expected_output": "按工单两条验收标准在 logfmt/sample.log 上实测修好的版本，并做 v0.1.0 与当前版本的对照实验；按测试报告模板写到 .idea/fix/f-8123456789/test-report.md，含测试范围、测试环境（含与工单环境的差异）、测试产物、逐条对应验收标准的测试结果、缺陷对照实验、只留占位的远端 CI 结果与未覆盖。",
       "files": [
         "evals/files/工单-f-8123456789.md",
         "evals/files/logfmt/logfmt.py",
@@ -12,34 +12,43 @@
         "evals/files/logfmt-0.1.0/logfmt.py"
       ],
       "assertions": [
-        "报告含测试环境（系统、实机 SN 与固件版本、依赖版本、构建方式）、测试产物、测试结果三部分，并写明与工单环境的差异",
-        "测试报告落在 .idea/fix/f-8123456789/test-report.md，按工单类型与工单号分出了任务目录，不是平铺在 .idea/test-report.md 或 .idea/f-8123456789/test-report.md",
-        "测试结果逐条对应工单里的两条验收标准，并给出预期与实际",
-        "报告给出 v0.1.0 与当前版本在同一份输入上的对照实验结论，包含有问题版本复现与当前版本结果",
-        "报告含未覆盖段，列出没测到的部分、原因与影响"
+        "测试报告落在 .idea/fix/f-8123456789/test-report.md，不是平铺在 .idea/test-report.md 或 .idea/f-8123456789/test-report.md",
+        "报告含「测试范围」「测试环境」「测试产物」「测试结果」「缺陷对照实验」「远端 CI 结果」「未覆盖」各节，「测试环境」里有与工单环境的差异一行",
+        "「测试结果」逐条对应工单的两条验收标准，每条写有预期与实际",
+        "「缺陷对照实验」写出 v0.1.0 在同一份 sample.log 上输出 5 条记录且含空对象，当前版本输出 4 条且没有空对象",
+        "「远端 CI 结果」一节没有填写远端内容，报告里没有模板的「填写要求」"
       ]
     },
     {
       "id": 2,
-      "prompt": "f-8123456790 的修复我做完了，推送前你本地按工单验收标准测一遍。工单在 工单-f-8123456790.md，有问题那一版我放在 source/logfmt-0.1.0/ 了。这次的项目容器就当当前目录，仓库在 source/demo。",
-      "expected_output": "按工单两条验收标准实测当前版本与 v0.1.0，给出对照结果；构建与测试命令限定在改动涉及的 crate 与产物，不整仓重建。",
+      "prompt": "f-8123456789 的修复做完了，推送前你本地测一遍。这次的项目容器就当当前目录，工单在 工单-f-8123456789.md，修好的版本是 logfmt/logfmt.py，有问题那一版在 logfmt-0.1.0/logfmt.py。",
+      "expected_output": "先说明这次的测试范围：工单两条验收标准各对应哪个产物、怎么验证，有没有真实设备或说明不涉及设备，对照实验用 v0.1.0；说明完停下来等用户确认，不开始测，也不写测试报告。",
       "files": [
-        "evals/files/工单-f-8123456790.md",
-        "evals/files/source/demo/Cargo.toml",
-        "evals/files/source/demo/AGENTS.md",
-        "evals/files/source/demo/.gitignore",
-        "evals/files/source/demo/sample.log",
-        "evals/files/source/demo/crates/logfmt/Cargo.toml",
-        "evals/files/source/demo/crates/logfmt/src/lib.rs",
-        "evals/files/source/demo/crates/logfmt/tests/parse.rs",
-        "evals/files/source/demo/crates/cli/Cargo.toml",
-        "evals/files/source/demo/crates/cli/src/main.rs",
-        "evals/files/source/logfmt-0.1.0/Cargo.toml",
-        "evals/files/source/logfmt-0.1.0/src/main.rs"
+        "evals/files/工单-f-8123456789.md",
+        "evals/files/logfmt/logfmt.py",
+        "evals/files/logfmt/sample.log",
+        "evals/files/logfmt-0.1.0/logfmt.py"
       ],
       "assertions": [
-        "会话最后一条回复说明了这次测试的范围与构建、测试方式，命令限定在改动涉及的 crate 与产物（如 cargo test -p logfmt、cargo run -q -p cli -- sample.log），没有出现 cargo test --all-features --workspace、cargo build --workspace 这类整仓命令",
-        "没有执行或搬用 AGENTS.md 里 Pre-Push Verification 段的全量门禁（workspace 全量测试、cargo doc、全量 clippy）来充当本地验收测试"
+        "回复列出工单的两条验收标准，并写出各自的验证方式",
+        "回复说明对照实验用 logfmt-0.1.0 这一版，并说明有没有真实设备或本次不涉及设备",
+        "回复请用户确认测试范围后再开始测",
+        "工作目录里没有生成 test-report.md，也没有 .idea/ 目录"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "f-8123456791 的修复做完了，推送前按工单验收标准本地测一遍。这次的项目容器就当当前目录，工单在 工单-f-8123456791.md，代码在 devctl/devctl.py。",
+      "expected_output": "说明测试范围：第 1 条验收标准要接真实设备验证，第 2 条可以用模拟的设备回复验证；工作目录里没有 AGENTS.md 规定怎么检索真实设备，于是问用户有没有可用的真实设备、怎么检索；没有真实设备时可以用 mock，但真机未测要写进未覆盖；说明完停下来等用户确认，不擅自用 mock 跑完就宣称通过，不写测试报告。",
+      "files": [
+        "evals/files/工单-f-8123456791.md",
+        "evals/files/devctl/devctl.py"
+      ],
+      "assertions": [
+        "回复列出了工单的两条验收标准，并说明第 1 条（接上真实设备只输出版本号）要在真实设备上验证",
+        "回复问用户有没有可用的真实设备，或问怎么检索真实设备（工作目录里没有 AGENTS.md 写明检索方式）",
+        "回复没有声称验收标准已经通过；如果提到 mock，说明了用 mock 代替时真机没有测、要写进未覆盖",
+        "工作目录里没有生成 test-report.md，也没有 .idea/ 目录"
       ]
     }
   ]

@@ -3,37 +3,60 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "这次改了 src/lib.rs 和 README.md，我要 commit 了，提交前帮我把门禁过一遍。变更说明在 work/变更说明.md，工程在 work/demo-crate，检查过程与结论写在回答里。",
-      "expected_output": "判定改动涉及 Rust 源码，执行 fmt 与 clippy --fix 并说明测试范围选择依据，README 的改动不影响判定。",
+      "prompt": "这次改了 src/lib.rs、tests/smoke.rs 和 README.md，我要 commit 了，提交前帮我把门禁过一遍。工程在 work/demo-crate，变更说明在 work/变更说明.md，检查过程与结论写在回答里。",
+      "expected_output": "判定改动含 Rust 源码，实际执行 cargo fmt --all 与 cargo clippy --fix，复核 clippy 的自动改动；不执行 commit。",
       "files": [
         "evals/files/变更说明.md",
         "evals/files/demo-crate/Cargo.toml",
+        "evals/files/demo-crate/Cargo.lock",
+        "evals/files/demo-crate/README.md",
+        "evals/files/demo-crate/docs/使用说明.md",
         "evals/files/demo-crate/src/lib.rs",
-        "evals/files/demo-crate/tests/smoke.rs",
-        "evals/files/demo-crate/README.md"
+        "evals/files/demo-crate/tests/smoke.rs"
       ],
       "assertions": [
-        "判定本次改动涉及 Rust 源码，并实际执行 cargo fmt 与 cargo clippy --fix",
-        "按改动到测试的对应关系说明测试范围，没有无依据地跑 workspace 全量",
-        "汇报里给出 fmt 与 clippy 的真实输出结论，clippy 的自动改动经过复核"
+        "回复判定本次改动含 Rust 源码，需要跑门禁",
+        "实际执行了 cargo fmt --all 与带 --allow-dirty --allow-staged 与 -D warnings 的 cargo clippy --fix，回复给出两条命令的真实结论",
+        "回复说明复核了 clippy 自动改动的地方（例如 parse_line 里的 return 被去掉），确认语义没变",
+        "没有执行 git add、git commit 或 git push"
       ]
     },
     {
       "id": 2,
       "prompt": "这次只改了 docs/ 下的使用说明和 README.md，代码一行没动，我要 commit 了，帮我过一遍门禁。工程在 work/demo-crate，变更说明在 work/变更说明-文档.md。",
-      "expected_output": "判定改动不含 Rust 源码与清单，跳过 fmt、clippy 与测试并说明依据。",
+      "expected_output": "判定改动不含 Rust 源码与 Cargo 清单，跳过 fmt、clippy 与测试，并说明依据是改动路径全部为文档。",
       "files": [
         "evals/files/变更说明-文档.md",
         "evals/files/demo-crate/Cargo.toml",
-        "evals/files/demo-crate/src/lib.rs",
-        "evals/files/demo-crate/tests/smoke.rs",
+        "evals/files/demo-crate/Cargo.lock",
         "evals/files/demo-crate/README.md",
-        "evals/files/demo-crate/docs/使用说明.md"
+        "evals/files/demo-crate/docs/使用说明.md",
+        "evals/files/demo-crate/src/lib.rs",
+        "evals/files/demo-crate/tests/smoke.rs"
       ],
       "assertions": [
-        "判定本次改动不含 Rust 源码与 Cargo 清单改动，跳过 fmt、clippy 与测试",
-        "说明跳过门禁的依据是改动路径全部为文档",
-        "没有无依据地执行 cargo fmt、cargo clippy 或 cargo test"
+        "回复判定本次改动不含 Rust 源码与 Cargo 清单改动，跳过 fmt、clippy 与测试",
+        "回复说明跳过的依据是改动路径全部为文档",
+        "没有执行 cargo fmt、cargo clippy 或 cargo test"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "工作目录里的 scope-crate 先 git init（分支 main），除 pending 目录外把所有文件做成初始提交，再用 mv 把 pending/lib.rs 移到 src/lib.rs 覆盖原文件，这些准备你直接做，移过来的 src/lib.rs 就是这次的全部改动。我要 commit 了，帮我把提交前的门禁过一遍。",
+      "expected_output": "跑 cargo fmt --all 与 cargo clippy --fix 后对比改动文件清单，指出范围外被改到的 src/legacy.rs，列给用户、不放进这次提交，由用户决定；不执行 commit。",
+      "files": [
+        "evals/files/scope-crate/Cargo.toml",
+        "evals/files/scope-crate/Cargo.lock",
+        "evals/files/scope-crate/.gitignore",
+        "evals/files/scope-crate/src/lib.rs",
+        "evals/files/scope-crate/src/legacy.rs",
+        "evals/files/scope-crate/pending/lib.rs"
+      ],
+      "assertions": [
+        "实际执行了 cargo fmt --all 与 cargo clippy --fix",
+        "回复指出 src/legacy.rs 不在本次改动范围内，却被门禁命令改动了",
+        "回复说明 src/legacy.rs 不放进这次提交，由用户决定怎么处理",
+        "scope-crate 的提交历史只有初始提交一条，没有执行 git add 或 git commit"
       ]
     }
   ]

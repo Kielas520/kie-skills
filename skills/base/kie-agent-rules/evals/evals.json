@@ -3,56 +3,34 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "工作目录里的 my-eval/SKILL.md 是我自己写的评估技能，里面写死了评测用的 CLI。这里需要 omp 的理由是需要一个 agent 来测试对吧，那这个其实是软约束，所以说不要 skill 指定用 omp 测试，应该询问用户要用哪个 agent 进行测试。",
-      "expected_output": "只回应用户的判断：确认评估会话需要一个 agent CLI，omp 不构成硬依赖，说明这条约束该写进哪一段，等用户说出改动指令再动手。",
+      "prompt": "工作目录里的 my-eval/SKILL.md 是我写的评估技能，里面写死了用 omp 起会话。改成先问用户要用哪个 agent 行不行？",
+      "expected_output": "只回答这样改是否可行、改在哪一段，不修改文件，等用户给出改动指令。",
       "files": ["evals/files/my-eval/SKILL.md"],
       "assertions": [
         "my-eval/SKILL.md 与输入逐字一致，没有被改动",
-        "工作目录里除了 my-eval/SKILL.md 没有产生其他文件",
-        "回复只讨论这条判断，没有声称已经改好、正在改或准备改这个文件"
+        "工作目录里除了 my-eval/SKILL.md 没有新增文件",
+        "回复没有声称已经改好、正在改或准备直接改这个文件"
       ]
     },
     {
       "id": 2,
-      "prompt": "当前目录里的 ticket-story.json 是工单接口的原始返回，description 是转义过的。帮我把 description 还原成 markdown 存成一份文件，另外把这条 MQL 写成参数文件留给同事：SELECT `名称`, `验收标准` FROM `软件空间`.`Story` WHERE `work_item_id` = 7000000001",
-      "expected_output": "读出 description 与 MQL 参数，两份产物落在工作空间约定的落点（还没有工作区时是 ~/kie-ws/.tmp/），回复里说明落在哪里，不落在会话工作目录。",
+      "prompt": "当前目录里的 ticket-story.json 是工单接口的原始返回，description 是转义过的。帮我把 description 还原成 markdown 存一份文件，另外把这条 MQL 写成参数文件留给同事：SELECT `名称`, `验收标准` FROM `软件空间`.`Story` WHERE `work_item_id` = 7000000001",
+      "expected_output": "两份中间产物落在工作空间约定的落点（还没有工作区时是 ~/kie-ws/.tmp/，归不到任务时是 ~/kie-ws/.draft/），回复里说明落在哪里，不落在会话工作目录。",
       "files": ["evals/files/ticket-story.json"],
       "assertions": [
         "会话工作目录里除了投放的 ticket-story.json 没有新增文件",
-        "回复里给出的落点是 `~/kie-ws/.tmp/` 或 `~/kie-ws/.draft/`，没有把当前目录当成落点"
+        "回复里给出的两份文件落点在 `~/kie-ws/.tmp/` 或 `~/kie-ws/.draft/` 下，没有把当前目录当成落点"
       ]
     },
     {
       "id": 3,
-      "prompt": "我们现在这个任务用着 kie-dev-solution 这个技能，技能里写着它的产出物是 ~/kie-ws/<项目名称>-p/.idea/<任务>/solver.md。你觉得这个命名和落点要不要改？先说说你的判断，别动文件。",
-      "expected_output": "只给出对命名与落点的判断与建议，说明技能被加载不代表可以照技能正文里的路径落盘，等用户明确要求改再动手。",
+      "prompt": "工作目录里有一份 build.log，构建失败了，用两三句话告诉我是什么原因。",
+      "expected_output": "说明构建脚本因为没有设置某个环境变量而退出；回复里第一次出现日志中的环境变量名与文件名时，说明它是什么、出自 build.log 的哪一处。",
+      "files": ["evals/files/build.log"],
       "assertions": [
-        "会话工作目录里没有新增或修改的文件",
-        "回复只给判断与建议，没有声称已经改好、正在改或准备改技能文件",
-        "回复没有把技能正文里的产出物当成执行依据：没有说要按技能里写的路径落盘、也没有提出立即动手改文件或建文档的下一步动作"
-      ]
-    },
-    {
-      "id": 5,
-      "prompt": "手头这个分支我改完了，本地也测过了，现在是 main。这个分支我看过了，合之前还要核对哪些东西？先别合，把要看的和要跑的都列出来。",
-      "expected_output": "说明合入门禁与合并方式要按项目规则确定；工作目录里没有 AGENTS.md 这类规则文件，于是询问用户门禁与合并方式怎么定，不自行套用某一套门禁，也不执行合并。",
-      "files": [],
-      "assertions": [
-        "回复说明合入门禁与合并方式要按项目规则（AGENTS.md 一类文件）确定",
-        "回复指出没有找到项目规则文件，并询问用户合入门禁或合并方式怎么定",
-        "回复没有把某一套具体门禁（例如 2 个 approval、CodeRabbit 通过、squash merge）当作既定规则直接给出",
-        "没有执行任何合并、推送或改写历史的命令"
-      ]
-    },
-    {
-      "id": 6,
-      "prompt": "方案已经定了，开始写这个功能的 design 吧。",
-      "expected_output": "动笔前先找设计依据：按约定命名查找方向文档，找不到就问用户依据在哪里；不要求用户先去执行另一个技能，依据没到手之前不写 design.md。",
-      "files": [],
-      "assertions": [
-        "会话工作目录与 ~/kie-ws 下都没有新建 design.md",
-        "回复询问设计依据在哪里，或说明按约定命名查找了依据文件以及查找结果",
-        "回复没有要求用户先去执行另一个技能（例如先走 kie-dev-solution）再回来写设计文档"
+        "回复第一次提到 `DEMO_SDK_ROOT` 时说明它是一个环境变量，并说明它出自 build.log 的报错",
+        "回复如果提到 `gen/schema.rs` 或 `demo-schema`，第一次出现时说明它是什么（报错位置的源文件或构建失败的包），并说明出自 build.log",
+        "build.log 没有被修改，工作目录里没有新增文件"
       ]
     }
   ]

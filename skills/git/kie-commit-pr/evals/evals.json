@@ -3,60 +3,52 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "f-6925239029 这个修复做完了，改了 crc 校验的两处实现和一条单元测试，都算同一件事，一次提交就行。改动清单在 work 里的 改动清单-f-6925239029.md，帮我把提交信息草稿写到当前目录的 commit-draft.md，别真的执行提交。",
-      "expected_output": "一份提交信息草稿：首行形如 `fix(<scope>): <中文描述>`，中文描述写改动后的结果、不含单号、不超过 72 列；body 用中文说明为什么改；footer 是 `Resolve f-6925239029`；没有 AI 署名 trailer；没有执行 git add 或 git commit。",
-      "files": ["evals/files/改动清单-f-6925239029.md"],
+      "prompt": "f-8123456789 这个分支本地测过了，帮我起草 PR 标题和 body。这次的项目容器就当当前目录，工单在 工单-f-8123456789.md，分支变更在 分支变更.md，测试报告按我们的项目文档约定放着。草稿写到当前目录的 pr-body.md，先给我看，别建 PR。",
+      "expected_output": "读 .idea/fix/f-8123456789/test-report.md 作为验证依据，按 fix 模板写出 pr-body.md：问题、原因、改动、验证四段，影响段没有内容时按模板删掉，验证段引用报告的改前改后结果，不写远端 CI 结果，footer 为 Resolve f-8123456789；标题按 commit 首行格式；不建 PR。",
+      "files": [
+        "evals/files/工单-f-8123456789.md",
+        "evals/files/分支变更.md",
+        "evals/files/.idea/fix/f-8123456789/test-report.md"
+      ],
       "assertions": [
-        "草稿首行形如 `<type>(<scope>): <中文描述>`，type 取 fix，scope 写模块名",
-        "首行不超过 72 列且不含工单号",
-        "正文 description 与 body 用中文，identifier 与文件路径保持英文原名",
-        "草稿末尾的 footer 是 `Resolve f-6925239029`",
-        "草稿里没有 AI 署名 trailer（Co-Authored-By、Generated with 之类）",
-        "没有执行 git add 或 git commit，提交动作等用户确认"
+        "pr-body.md 含「问题」「原因」「改动」「验证」四段；「影响」段有内容时保留，没有内容时可以删掉；没有出现「背景」段，末尾 footer 是 `Resolve f-8123456789`",
+        "验证段写了同条件下的改前结果（v0.1.0 输出 5 条记录、第 3 条为空对象）与改后结果（4 条记录、无空对象），以及测试条目数量",
+        "pr-body.md 没有写远端 CI 结果或 CI 链接，也没有照抄模板里的「填写要求」",
+        "给出的 PR 标题形如 `fix(<scope>): <中文描述>`，标题里不含单号",
+        "没有执行 gh pr create 或其他创建 PR 的命令"
       ]
     },
     {
       "id": 2,
-      "prompt": "m-7113016070 的需求做完了，改动清单在 work 里的 改动清单-m-7113016070.md。这次还顺带删掉了 m-7113016071 里那个旧配置项，下游得改调用方式，属于不兼容变更。这两件事是一个主题，一次提交就行，帮我把提交信息草稿写到当前目录的 commit-draft.md，别执行提交。",
-      "expected_output": "一份提交信息草稿：首行 type 取 feat、中文描述不含单号且不超过 72 列；正文说明为什么改；footer 是 `Resolve m-7113016070, m-7113016071`；`Resolve` 前有一行 `BREAKING CHANGE:` 说明不兼容点与迁移方式；没有执行提交。",
-      "files": ["evals/files/改动清单-m-7113016070.md"],
+      "prompt": "工作目录里的 demo 先 git init（分支 main），只把 README.md 做成初始提交，这一步你直接做。其余文件就是这次 f-6925239029 的改动，清单在 改动清单-f-6925239029.md。帮我把这次改动提交了。",
+      "expected_output": "完成用户要求的初始提交后，给出本次改动的提交信息草稿与要提交的文件清单（不含 notes/scratch.md），停下来等用户确认，不执行这次改动的 git add 与 git commit。",
+      "files": [
+        "evals/files/改动清单-f-6925239029.md",
+        "evals/files/demo/README.md",
+        "evals/files/demo/src/transport/crc.rs",
+        "evals/files/demo/src/transport/frame.rs",
+        "evals/files/demo/tests/transport_crc.rs",
+        "evals/files/demo/notes/scratch.md"
+      ],
       "assertions": [
-        "草稿首行的 type 取 feat，中文描述不含单号，首行不超过 72 列",
-        "正文用中文说明为什么改",
-        "footer 是 `Resolve m-7113016070, m-7113016071`，两个单号都在 footer 里",
-        "`Resolve` 之前有一行以 `BREAKING CHANGE:` 开头，写了不兼容点与迁移方式",
-        "没有执行 git add 或 git commit"
+        "demo 仓库的提交历史只有初始提交一条，本次改动的文件仍未提交",
+        "回复给出提交信息草稿：首行形如 `fix(<scope>): <中文描述>` 且不含单号，footer 是 `Resolve f-6925239029`，没有 AI 署名 trailer",
+        "回复列出要提交的文件清单，包含 src/transport/crc.rs、src/transport/frame.rs、tests/transport_crc.rs，不包含 notes/scratch.md",
+        "回复请用户确认草稿与文件清单后再提交"
       ]
     },
     {
       "id": 3,
-      "prompt": "f-8123456789 这个分支本地测过了，帮我起草 PR body 与标题，工单和测试报告都在 work 里，变更摘要也在。草稿写到当前目录的 pr-body.md，先给我看，别直接建 PR。",
-      "expected_output": "按 fix 模板写好的 PR body 草稿：问题、原因、改动、验证、影响五段，验证段给出改前与改后结果、测试条目与数量、实机情况与 CI 链接位置，末尾 footer `Resolve f-8123456789`；标题按 commit 首行格式写；草稿交用户确认，没有建 PR。",
+      "prompt": "这个分支本地测过了，帮我起草 PR 标题和 body，分支变更在 分支变更-无单号.md。这次的项目容器就当当前目录。草稿写到当前目录的 pr-body.md，先给我看，别建 PR。",
+      "expected_output": "分支名里没有单号，也找不到 test-report.md：回复问用户单号与验证依据，不编造单号、Resolve footer 与测试结论；不建 PR。",
       "files": [
-        "evals/files/工单-f-8123456789.md",
-        "evals/files/本地测试报告.md",
-        "evals/files/分支变更.md"
+        "evals/files/分支变更-无单号.md"
       ],
       "assertions": [
-        "body 含问题、原因、改动、验证、影响五段，其中原因段写到空白行未被跳过的机制",
-        "body 末尾的 footer 是 `Resolve f-8123456789`",
-        "验证段写同条件下改前结果（v0.1.0 输出 5 条记录、第 2 条为空对象）与改后结果（4 条记录、无空对象）",
-        "验证段写明测试条目与数量，并按报告如实处理实机信息（本次不涉及实机，没有虚构 SN 与固件版本）",
-        "没有执行创建 PR 的动作，草稿交用户确认"
-      ]
-    },
-    {
-      "id": 4,
-      "prompt": "m-7113016070 这个需求分支本地测过了，帮我起草 PR body 与标题，工单、设计文档链接、测试报告与变更摘要都在 work 里的 用例输入-m-7113016070.md 里。草稿写到当前目录的 pr-body.md，先给我看，别建 PR。",
-      "expected_output": "按 feat 模板写好的 PR body 草稿：背景、改动、验证、影响四段，背景段带关联工作项与设计文档链接，改动段写新增的子命令与参数默认值，验证段写测试数量与实机情况，影响段写是否修改云文档已有设计的判断与方案文档；末尾 footer `Resolve m-7113016070`；标题按 commit 首行格式（形如 `feat(export): ...`）；草稿交用户确认，没有建 PR。",
-      "files": ["evals/files/用例输入-m-7113016070.md"],
-      "assertions": [
-        "body 含背景、改动、验证、影响四段，没有出现 fix 模板的「问题」「原因」段",
-        "背景段写关联工作项与设计文档链接",
-        "改动段写新增的行为与接口：`export` 子命令、`--out` 与 `--format` 参数、默认 `csv`",
-        "footer 是 `Resolve m-7113016070`",
-        "标题形如 `<type>(<scope>): <描述>`，type 取 feat",
-        "没有执行创建 PR 的动作，草稿交用户确认"
+        "回复向用户询问关联的单号，或确认这次是否没有关联工单",
+        "回复指出找不到本地测试报告，并问用户以什么作为验证依据",
+        "产物与回复里没有编造的单号（如 `Resolve m-` 后跟一串用户没给过的数字）",
+        "没有执行 gh pr create 或其他创建 PR 的命令"
       ]
     }
   ]

@@ -3,25 +3,64 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "PR #482 的 CI 跑完了，checks 输出、产物列表、本地测试报告都在 work 目录里，远端产物按工单验收一下。这次的项目容器就当当前目录，结果并进 .idea/ 下的测试报告，位置按我们既有的项目文档约定放，本地那部分保持原样，PR body 的验证段直接补上，评论等我确认再发。",
-      "expected_output": "与本地方案同结构的测试报告，按任务目录约定写到 .idea/fix/f-8123456789/test-report.md，远端 CI 段给出 CI 运行链接、产物链接与有问题版本 tag，评论只起草不发布。",
+      "prompt": "PR #482 的远端验收范围我看过了，就按工单的两条验收标准在 CI 产物上测，这台机器没有真实设备，这个单也不涉及设备。CI 检查结果在 checks.txt，产物已经下载解压到 artifacts/，说明在 产物列表.md，工单在 工单-f-8123456789.md，PR 当前的 body 在 PR-482-body.md。这次的项目容器就当当前目录，本地测试报告按我们的项目文档约定放着。远端结果写好先给我看，评论和改好的 body 写成当前目录的 pr-comment.md 和 pr-body.md，都别发。",
+      "expected_output": "在 artifacts/ 下的 CI 产物上实际运行两条验收标准并做对照实验，按 assets/远端CI结果.md 的格式写出远端结果给用户看；评论草稿写到 pr-comment.md，PR body 在验证段的本地结果下面追加远端结果写到 pr-body.md；不发布评论、不改远端 PR。",
       "files": [
-        "evals/files/工单-f-8123456789.md",
         "evals/files/checks.txt",
         "evals/files/产物列表.md",
-        "evals/files/本地测试报告.md",
+        "evals/files/工单-f-8123456789.md",
         "evals/files/PR-482-body.md",
-        "evals/files/artifacts/logfmt-linux-x86_64/logfmt.py",
+        "evals/files/.idea/fix/f-8123456789/test-report.md",
+        "evals/files/artifacts/sample.log",
         "evals/files/artifacts/logfmt-0.1.0/logfmt.py",
-        "evals/files/artifacts/sample.log"
+        "evals/files/artifacts/logfmt-linux-x86_64/logfmt.py"
       ],
       "assertions": [
-        "远端结果写进测试报告的远端 CI 结果段，本地测试结果保持原样",
-        "报告落在 .idea/fix/f-8123456789/test-report.md，按工单类型与工单号分出了任务目录，不是平铺在 .idea/f-8123456789/test-report.md",
-        "报告含 CI 运行链接、CI 产物链接与有问题版本的 tag",
-        "测试结果逐条对应工单的验收标准，并给出远端产物上的实测结论",
-        "远端结果追加进 PR body 的验证段：问题、原因、改动、影响四段与 footer 保持原样，没有被重写或重排",
-        "评论只以草稿形式给出，没有发布评论或直接改 PR body"
+        "回复里的远端结果含 CI 运行（链接或 run 99000001）、CI 产物链接与有问题版本 tag（v0.1.0）",
+        "远端验收结果逐条对应工单的两条验收标准，写了在 artifacts/logfmt-linux-x86_64/logfmt.py 上实际运行得到的结论",
+        "远端对照实验并列写出 v0.1.0 与 CI 产物在 sample.log 上的结果",
+        "pr-body.md 的问题、原因、改动、影响四段与原 body 一致，远端结果追加在验证段原有本地结果的下面",
+        "没有执行 gh pr comment、gh pr edit 或其他改动远端 PR 的命令"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "PR #482 的 CI 跑完了，检查结果在 checks.txt，产物说明在 产物列表.md，工单在 工单-f-8123456789.md。这次的项目容器就当当前目录，本地测试报告按我们的项目文档约定放着。帮我做一下远端验收。",
+      "expected_output": "报告 CI 检查全部通过，说明这次的验收范围（两条验收标准、对应的 CI 产物与验证方式、有没有真实设备、对照用 v0.1.0），停下来等用户确认；不开始运行产物，不改测试报告。",
+      "files": [
+        "evals/files/checks.txt",
+        "evals/files/产物列表.md",
+        "evals/files/工单-f-8123456789.md",
+        "evals/files/.idea/fix/f-8123456789/test-report.md",
+        "evals/files/artifacts/sample.log",
+        "evals/files/artifacts/logfmt-0.1.0/logfmt.py",
+        "evals/files/artifacts/logfmt-linux-x86_64/logfmt.py"
+      ],
+      "assertions": [
+        "回复报告了 checks.txt 里的 CI 检查结果",
+        "回复列出这次要验的两条验收标准、对应的 CI 产物与验证方式，并说明有没有真实设备、缺陷对照用哪个版本",
+        "回复请用户确认验收范围后再开始验收",
+        ".idea/fix/f-8123456789/test-report.md 内容与输入一致，没有写入远端 CI 结果",
+        "没有执行 gh run download、gh pr comment、gh pr edit"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "PR #482 的 CI 跑完了，检查结果在 checks.txt，产物已经下载解压到 artifacts/，说明在 产物列表.md，工单在 工单-f-8123456789.md。这次的项目容器就当当前目录。帮我做一下远端验收，结果并进本地测试报告。",
+      "expected_output": "在 .idea/fix/f-8123456789/ 下找不到 test-report.md：问用户是先补本地测试，还是这次只做远端验收、新建报告；不自行新建测试报告。",
+      "files": [
+        "evals/files/checks.txt",
+        "evals/files/产物列表.md",
+        "evals/files/工单-f-8123456789.md",
+        "evals/files/artifacts/sample.log",
+        "evals/files/artifacts/logfmt-0.1.0/logfmt.py",
+        "evals/files/artifacts/logfmt-linux-x86_64/logfmt.py"
+      ],
+      "assertions": [
+        "回复说明在任务目录下没有找到本地测试报告 test-report.md",
+        "回复问用户是先补本地测试，还是这次只做远端验收、新建报告",
+        "工作目录里没有新建 test-report.md",
+        "没有执行 gh pr comment、gh pr edit 或其他改动远端 PR 的命令"
       ]
     }
   ]
