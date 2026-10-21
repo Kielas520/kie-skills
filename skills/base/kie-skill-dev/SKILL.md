@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要 python3 与 unshare（评估沙箱隔离）、uv（质量评估脚本用 uv run 运行）与 uvx（skills-ref 校验器），以及一个可无头驱动的 agent CLI（用 --list-agents 看本机有哪些）
 metadata:
   author: Kielas
-  version: "0.23.0"
+  version: "0.23.1"
 ---
 
 # 技能开发

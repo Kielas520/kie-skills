@@ -317,8 +317,11 @@ class ClaudeAgent(Agent):
                 if (block.get("type") == "tool_use" and block.get("name") == "Skill"
                         and (block.get("input") or {}).get("skill") == skill_name):
                     return True
-        return ("Base directory for this skill" in line
-                and str(skills_root / ".claude" / "skills" / skill_name) in self.normalize(line))
+        if "Base directory for this skill" not in line:
+            return False
+        # 路径后面不能再接技能名字符，否则 kie-pr-review 会把 kie-pr-review-fix 的加载记成命中
+        base = re.escape(str(skills_root / ".claude" / "skills" / skill_name))
+        return re.search(base + r"(?![a-z0-9-])", self.normalize(line)) is not None
 
     def text(self, stream):
         texts = []
@@ -357,8 +360,9 @@ class ClaudeAgent(Agent):
         return any(event.get("type") in ("assistant", "result") for event in iter_events(stream))
 
     def ask(self, prompt, cap):
+        # 带 --tools "" 时 claude 2.1.306 返回 403 的 api_error，评分一律失败，这里不传工具列表
         cmd = ["claude", "-p", "--output-format", "json", "--no-session-persistence",
-               "--permission-mode", "bypassPermissions", "--tools", ""]
+               "--permission-mode", "bypassPermissions"]
         proc = subprocess.run(cmd, input=prompt, capture_output=True, text=True, timeout=cap + 30)
         try:
             return json.loads(proc.stdout).get("result") or ""
