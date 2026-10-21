@@ -1,0 +1,55 @@
+{
+  "skill_name": "kie-pr-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "有人让我审 PR #317。先别碰远端：PR 信息我导出到 pr-317-export.json 了，diff 在 pr-317.diff，head 版本的代码就是 uploader.py 与 tests/test_uploader.py，项目约定在 AGENTS.md，仓库不用再检出。这次的项目容器就当当前目录。先把评审报告写出来给我看。",
+      "expected_output": "按 assets/pr-report.md 在 .idea/feat/m-7301122334/pr-317-report.md 写出评审报告：一致性表把 `--retry` 参数与失败非零退出码两条声称标为没有做到；问题清单列出 main 失败仍返回 0、except Exception 吞掉失败原因、`resp.status == 200` 与服务返回 202 不符，每条带 head 行号与依据；reviewer-a 已提的退避问题不重复列；「定夺」列留空。写完停在流程一等用户定夺，不写评论草稿，不发送任何评论。",
+      "files": [
+        "evals/files/pr-317-export.json",
+        "evals/files/pr-317.diff",
+        "evals/files/uploader.py",
+        "evals/files/tests/test_uploader.py",
+        "evals/files/AGENTS.md"
+      ],
+      "assertions": [
+        "评审报告落在 .idea/feat/m-7301122334/pr-317-report.md，含「改动与声称的一致性」「问题清单」「测试覆盖」「待确认的疑问」四节",
+        "「改动与声称的一致性」把 `--retry` 参数可配与全部失败时非零退出码两条声称标为没有做到",
+        "问题清单包含 main 失败仍返回 0、except Exception 吞掉失败原因、`resp.status == 200` 与服务返回 202 不符三条，每条写了 head 文件里的行号与代码依据",
+        "问题清单没有把 reviewer-a 已提的最后一轮失败后仍 sleep 的问题再列一遍",
+        "问题清单的「定夺」列为空，工作目录里没有 pr-317-comments.md，也没有执行 gh api 或 gh pr comment 发送评论"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "PR #317 的评审报告我定夺完了，在 .idea/feat/m-7301122334/pr-317-report.md，定夺列都填好了。这次的项目容器就当当前目录，diff 在 pr-317.diff，PR 信息在 pr-317-export.json，先别碰远端。把评论草稿起草出来给我看，我来定每条发行内还是全局。",
+      "expected_output": "按 assets/pr-comments.md 在 .idea/feat/m-7301122334/pr-317-comments.md 写出评论草稿：只收定夺为要提或改成的问题 1 至 5，问题 6 不收；问题 4 的正文用用户改后的 `200 <= resp.status < 300`；问题 1 所在的第 36 行不在 diff hunk 里，建议位置不是行内 `uploader.py:36`；正文里没有严重度标签与报告序号。写完把路径给用户确认，不发送。",
+      "files": [
+        "evals/files/.idea/feat/m-7301122334/pr-317-report.md",
+        "evals/files/pr-317.diff",
+        "evals/files/pr-317-export.json",
+        "evals/files/uploader.py"
+      ],
+      "assertions": [
+        "评论草稿落在 .idea/feat/m-7301122334/pr-317-comments.md，评论清单覆盖报告里的问题 1、2、3、4、5，没有问题 6",
+        "问题 4 对应的评论正文采用 `200 <= resp.status < 300` 这一用户改后的建议，不是报告原来的 `== 202`",
+        "问题 1 对应评论的建议位置不是行内 `uploader.py:36`，而是全局或同文件 diff hunk 内的改动行",
+        "评论正文里没有「必须修」「建议修」「可选」这类严重度标签，也没有「问题 1」这类报告序号",
+        "回复给出草稿路径请用户确认，没有执行 gh api、gh pr comment 或 gh pr review 发送评论"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "PR #317 的评论草稿起草一下。这次的项目容器就当当前目录，PR 信息在 pr-317-export.json，先别碰远端。",
+      "expected_output": "按 head 分支名推出任务目录 .idea/feat/m-7301122334/，在里面找不到 pr-317-report.md，停下来问用户定夺过的评审报告在哪里；不自行写评审报告，也不凭 PR 信息直接起草评论。",
+      "files": [
+        "evals/files/pr-317-export.json"
+      ],
+      "assertions": [
+        "回复说明在 .idea/feat/m-7301122334/ 下没有找到 pr-317-report.md，并询问用户评审报告的位置",
+        "工作目录里没有新建 pr-317-report.md，也没有新建 pr-317-comments.md",
+        "没有执行 gh api、gh pr comment 或 gh pr review 发送评论"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "pull_request": {
+    "number": 317,
+    "url": "https://github.com/example/tailq/pull/317",
+    "title": "feat(upload): 上传失败自动重试",
+    "author": "dev-b",
+    "baseRefName": "main",
+    "headRefName": "feat/m-7301122334/upload-retry",
+    "headRefOid": "4f1c9a2e7b3d5c6f8a9b0c1d2e3f4a5b6c7d8e9f",
+    "additions": 23,
+    "deletions": 3,
+    "body": "## 背景\n\n关联工作项：m-7301122334\n\n上传在网络抖动时直接失败，一批日志就丢了。\n\n## 改动\n\n- `upload()` 失败后按指数退避重试，重试次数可通过 `--retry` 参数配置，默认 3 次。\n- 全部重试失败时命令以非零退出码结束。\n\n## 验证\n\n- 新增 `tests/test_uploader.py`，`pytest` 通过。\n\n## 影响\n\n不影响成功路径。",
+    "commits": [
+      {"oid": "a81d3e5", "messageHeadline": "feat(upload): 上传失败后指数退避重试"},
+      {"oid": "4f1c9a2", "messageHeadline": "test(upload): 补上传成功的用例"}
+    ],
+    "files": [
+      {"path": "uploader.py", "additions": 12, "deletions": 3},
+      {"path": "tests/test_uploader.py", "additions": 11, "deletions": 0}
+    ],
+    "statusCheckRollup": [
+      {"name": "pytest", "status": "COMPLETED", "conclusion": "SUCCESS", "detailsUrl": "https://github.com/example/tailq/actions/runs/1"}
+    ],
+    "reviewDecision": ""
+  },
+  "reviews": [],
+  "review_threads": [
+    {
+      "isResolved": false,
+      "isOutdated": false,
+      "path": "uploader.py",
+      "line": 27,
+      "comments": [
+        {"author": "reviewer-a", "body": "最后一轮失败之后也会 sleep 一次吧？白等 8 秒。"}
+      ]
+    }
+  ]
+}

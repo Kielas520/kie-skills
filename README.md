@@ -41,6 +41,7 @@
 | `git/` | [`kie-git-worktree`](skills/git/kie-git-worktree) | 为单个任务新建独立工作区与分支，分支名、落位与基线先确认 |
 | | [`kie-commit-pr`](skills/git/kie-commit-pr) | 生成提交信息与 PR 正文，用户确认后执行提交与建 PR |
 | | [`kie-pr-review-fix`](skills/git/kie-pr-review-fix) | 处理 PR 评审意见到推送更新并逐条回复 |
+| | [`kie-pr-review`](skills/git/kie-pr-review) | 作为 reviewer 评审别人的 PR：评审报告、评论草稿、逐条确认后一次发送 |
 | | [`kie-pr-ci-test`](skills/git/kie-pr-ci-test) | PR 的 CI 跑完后验收远端产物，出测试报告并回写 PR |
 | `languages/` | [`kie-python-style`](skills/languages/kie-python-style) | Python 约定：uv、类型注解、pathlib、rich、loguru |
 | | [`kie-rust-gates`](skills/languages/kie-rust-gates) | Rust 门禁：提交前 fmt 与 clippy，推送前最小受影响测试集 |

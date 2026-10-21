@@ -1,0 +1,53 @@
+diff --git a/uploader.py b/uploader.py
+index 3a1f2c4..9b7e0d1 100644
+--- a/uploader.py
++++ b/uploader.py
+@@ -1,9 +1,11 @@
+ """把日志批次上传到采集服务。"""
+
+ import json
++import time
+ import urllib.request
+
+ ENDPOINT = "https://collect.example.com/v1/logs"
++RETRY_TIMES = 3
+
+
+ def build_request(batch: list[dict]) -> urllib.request.Request:
+@@ -14,9 +16,16 @@ def build_request(batch: list[dict]) -> urllib.request.Request:
+
+
+ def upload(batch: list[dict]) -> bool:
+-    """上传一批日志，返回是否成功。"""
+-    with urllib.request.urlopen(build_request(batch), timeout=5) as resp:
+-        return resp.status == 200
++    """上传一批日志，失败时重试，返回是否成功。"""
++    attempt = 0
++    while attempt < RETRY_TIMES:
++        try:
++            with urllib.request.urlopen(build_request(batch), timeout=5) as resp:
++                return resp.status == 200
++        except Exception:
++            attempt += 1
++            time.sleep(2 ** attempt)
++    return False
+
+
+ def main(path: str) -> int:
+diff --git a/tests/test_uploader.py b/tests/test_uploader.py
+new file mode 100644
+index 0000000..5c2d8e3
+--- /dev/null
++++ b/tests/test_uploader.py
+@@ -0,0 +1,11 @@
++from unittest import mock
++
++import uploader
++
++
++def test_upload_success():
++    resp = mock.MagicMock()
++    resp.status = 200
++    resp.__enter__.return_value = resp
++    with mock.patch("urllib.request.urlopen", return_value=resp):
++        assert uploader.upload([{"msg": "a"}]) is True

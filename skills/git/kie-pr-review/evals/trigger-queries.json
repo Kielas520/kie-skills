@@ -1,0 +1,8 @@
+[
+  {"query": "同事让我审他的 PR，https://github.com/example/logfmt/pull/317，先出份评审报告我看看", "should_trigger": true},
+  {"query": "看看 #317 这个 PR 能不能合，有问题的地方列出来", "should_trigger": true},
+  {"query": "317 那个 PR 我看完了，报告里标的几条我都定夺好了，把要发的评论起草出来，先别发", "should_trigger": true},
+  {"query": "reviewer 在我的 PR 上提了几条意见，帮我处理一下然后回复", "should_trigger": false},
+  {"query": "帮我评审一下这段代码的并发部分，还没开 PR", "should_trigger": false},
+  {"query": "这个 PR 的 CI 跑完了，产物帮我验一下", "should_trigger": false}
+]
