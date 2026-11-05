@@ -20,7 +20,7 @@
 
 - **指令分型**：咨询类请求只分析、不改文件，改动类请求只改文件。授权以明确的改动要求为准，讨论与询问都不构成授权。
 - **不可逆动作等授权**：提交、推送、合并、发布评论、删除文件都在用户授权后执行，技能只列出命令与执行顺序。
-- **先方案再实现**：调研出全部候选方案交用户拍板，方案定稿后写设计文档，设计确认后生成计划，再逐条实现到可运行。
+- **先方案再实现**：调研候选方案交用户拍板，依据选定方向编写设计，并按设计完成开发和验收。
 - **质量门禁前置**：提交前跑格式化与自动修复，推送前按影响范围选出最小测试集，验收标准写成测试报告。
 - **落点固定**：源仓库、工作区、任务文档各有一处固定位置，文档与临时产物不会散在项目目录里。
 - **技能可评估**：每个技能带正负例触发查询与输出质量用例，改动之后先跑评估，再提交与部署。
@@ -36,13 +36,11 @@
 | | [`kie-skill-fix`](skills/base/kie-skill-fix) | 已装技能行为异常的排查与修复：越界、该做没做、输出走样、不触发或误触发 |
 | `dev/` | [`kie-dev-solution`](skills/dev/kie-dev-solution) | 开工前的调研与多方案选型，产出选型文档交用户拍板 |
 | | [`kie-dev-design`](skills/dev/kie-dev-design) | 方案选定后写技术设计文档，含数据链路图与具体设计 |
-| | [`kie-dev-execute`](skills/dev/kie-dev-execute) | 按设计文档生成计划，逐条实现到可运行，先写测试再实现 |
-| | [`kie-dev-test`](skills/dev/kie-dev-test) | 推送前的本地验收测试与测试报告，缺陷单附对照实验 |
+| | [`kie-dev-exec`](skills/dev/kie-dev-exec) | 按设计完成开发与验收，按验收内容编写测试报告 |
+| | [`kie-dev-review`](skills/dev/kie-dev-review) | 评审本地分支或他人的 PR，输出评审建议 |
+| | [`kie-dev-fix`](skills/dev/kie-dev-fix) | 处理 PR 评论或指定评审文件中的问题，跟进修复记录 |
 | `git/` | [`kie-git-worktree`](skills/git/kie-git-worktree) | 为单个任务新建独立工作区与分支，分支名、落位与基线先确认 |
-| | [`kie-commit-pr`](skills/git/kie-commit-pr) | 生成提交信息与 PR 正文，用户确认后执行提交与建 PR |
-| | [`kie-pr-review-fix`](skills/git/kie-pr-review-fix) | 处理 PR 评审意见到推送更新并逐条回复 |
-| | [`kie-pr-review`](skills/git/kie-pr-review) | 作为 reviewer 评审别人的 PR：评审报告、评论草稿、逐条确认后一次发送 |
-| | [`kie-pr-ci-test`](skills/git/kie-pr-ci-test) | PR 的 CI 跑完后验收远端产物，出测试报告并回写 PR |
+| | [`kie-commit-pr`](skills/git/kie-commit-pr) | 生成提交信息、创建 PR 与发送评审评论 |
 | `languages/` | [`kie-python-style`](skills/languages/kie-python-style) | Python 约定：uv、类型注解、pathlib、rich、loguru |
 | | [`kie-rust-gates`](skills/languages/kie-rust-gates) | Rust 门禁：提交前 fmt 与 clippy，推送前最小受影响测试集 |
 

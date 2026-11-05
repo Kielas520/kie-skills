@@ -1,0 +1,58 @@
+{
+  "skill_name": "kie-dev-exec",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "当前目录是项目容器，log-export 是这次工作目录，log-export/design.md 已确认，代码在 log-export/branch_source。按设计实现并按设计验收，写测试报告；不涉及额外设备。",
+      "expected_output": "实现设计中的导出接口，运行相关测试并按设计逐条验收，在 log-export/.tmp/test-1/test-report-1.md 写本轮验收报告。",
+      "files": [
+        "evals/files/log-export/design.md",
+        "evals/files/log-export/branch_source/AGENTS.md",
+        "evals/files/log-export/branch_source/Cargo.toml",
+        "evals/files/log-export/branch_source/.gitignore",
+        "evals/files/log-export/branch_source/crates/logfmt/Cargo.toml",
+        "evals/files/log-export/branch_source/crates/logfmt/src/lib.rs",
+        "evals/files/log-export/branch_source/crates/logfmt/tests/parse.rs",
+        "evals/files/log-export/branch_source/crates/cli/Cargo.toml",
+        "evals/files/log-export/branch_source/crates/cli/src/main.rs"
+      ],
+      "assertions": [
+        "实现 export_buffered，成功时写入 render 的完整结果并返回字节数，目录不存在时返回错误",
+        "实际执行设计中的成功及缺失目录验收，并在报告中分别记录预期、实际结果和证据",
+        "报告路径为 log-export/.tmp/test-1/test-report-1.md，报告只记录设计验收，不记录开发过程自行验证的测试",
+        "如编写 Python 测试脚本，先读取 kie-python-style；无法读取时停止编写并询问用户"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "当前目录是项目容器，device-check 是工作目录，device-check/design.md 已确认。按设计进行最终验收，本机没有设备，需要额外设备。",
+      "expected_output": "检查 device-check/devices.md；文件不存在，询问用户是否继续以及如何提供设备和执行验收，在确认前不执行需要设备的测试。",
+      "files": ["evals/files/device-check/design.md"],
+      "assertions": [
+        "说明未找到工作目录的 devices.md，并询问用户是否继续及如何提供设备和执行测试",
+        "用户确认前不执行需要额外设备的最终验收，不声称真实设备验收通过",
+        "不以模拟结果代替真实设备的验收结果"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "当前目录是项目容器，log-export 是工作目录，代码在 log-export/branch_source。按已确认的设计开发并验收。",
+      "expected_output": "查找工作目录的 design.md；未找到后询问用户实现和验收依据在哪里，不改代码，不编造验收标准。",
+      "files": [
+        "evals/files/log-export/branch_source/AGENTS.md",
+        "evals/files/log-export/branch_source/Cargo.toml",
+        "evals/files/log-export/branch_source/.gitignore",
+        "evals/files/log-export/branch_source/crates/logfmt/Cargo.toml",
+        "evals/files/log-export/branch_source/crates/logfmt/src/lib.rs",
+        "evals/files/log-export/branch_source/crates/logfmt/tests/parse.rs",
+        "evals/files/log-export/branch_source/crates/cli/Cargo.toml",
+        "evals/files/log-export/branch_source/crates/cli/src/main.rs"
+      ],
+      "assertions": [
+        "说明在工作目录没有找到 design.md，询问用户设计依据在哪里",
+        "没有修改代码、执行验收或编造设计验收标准",
+        "没有要求用户必须先执行其他技能"
+      ]
+    }
+  ]
+}

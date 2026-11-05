@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要支持 Agent Skills 的 agent 会话；GitHub 交互用内置工具或已登录的 gh CLI；命令行优先使用 rg、fd、bat、sd；删除文件需要 gio trash、gomi 或 trash-cli 之一
 metadata:
   author: Kielas
-  version: "0.14.0"
+  version: "0.15.0"
 ---
 
 # agent 协作技能

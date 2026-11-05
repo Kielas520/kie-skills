@@ -6,7 +6,7 @@ license: MIT
 compatibility: 需要 Linux、python3 与 git；补齐系统层配置需要用户具备 sudo 权限；联网探测需要代理或直连可用
 metadata:
   author: Kielas
-  version: "0.3.0"
+  version: "0.4.0"
 ---
 
 # 环境初始化技能
@@ -74,7 +74,7 @@ python3 scripts/env_probe.py --eval     # 要跑技能评估时使用，user nam
 mkdir -p ~/kie-ws/.tmp ~/kie-ws/.draft ~/kie-ws/test
 ```
 
-`<项目名称>-p/` 项目容器、`.idea/<任务>/`、`worktrees/<分支名>/` 由对应技能按任务建出，本技能不预先创建。不创建 `~/kie-ws/AGENTS.md`。
+每个仓库的主克隆位于 `~/kie-ws/<仓库名>/source/`，每项工作位于同级的 `~/kie-ws/<仓库名>/<name>/`；仓库容器与工作目录由对应技能按需创建，本技能不预先创建。不创建 `~/kie-ws/AGENTS.md`。
 
 验证：
 
@@ -84,31 +84,41 @@ ls -d ~/kie-ws/.tmp ~/kie-ws/.draft ~/kie-ws/test
 
 ### 3.2 技能仓库落位
 
-目标路径固定 `~/kie-ws/kie-skills`：`kie-skill-fix` 等技能按这个路径引用脚本。按下面顺序判定，三条互斥：
+目标路径固定为 `~/kie-ws/kie-skills/source`，与其他仓库遵循同一目录约定。按下面顺序判定：
 
-1. 目标路径已是 `Kielas520/kie-skills` 的克隆：不动它，报告分支、commit 与工作区是否干净。
-2. 家目录其他位置已有克隆：移动过去，不重新克隆。
+1. 目标路径已是 `Kielas520/kie-skills` 的克隆：不动它，报告分支、commit 与工作区是否干净。目标路径已存在但不是该克隆时，停下报告，不覆盖。
+2. 家目录其他位置已有该仓库克隆：确认工作区干净、只有主仓库且远端正确后移动，不重新克隆；目标父目录已有内容时保留这些内容。
 
 ```bash
 git -C <已有克隆> status --short                 # 输出必须为空
 git -C <已有克隆> worktree list                  # 只允许主仓库一行
 git -C <已有克隆> remote -v                      # 确认远端是 Kielas520/kie-skills
-mv <已有克隆> ~/kie-ws/kie-skills
+mkdir -p ~/kie-ws/kie-skills
+mv -T <已有克隆> ~/kie-ws/kie-skills/source
 ```
 
-3. 都没有：克隆。
+若已有克隆恰好是 `~/kie-ws/kie-skills`，不能直接移入自身。确认 `~/kie-ws/kie-skills-move` 不存在后，先移到该临时路径，再创建容器并移入 `source`；遇到已存在的临时路径就停下询问用户：
 
 ```bash
-git clone git@github.com:Kielas520/kie-skills.git ~/kie-ws/kie-skills
+mv -T ~/kie-ws/kie-skills ~/kie-ws/kie-skills-move
+mkdir -p ~/kie-ws/kie-skills
+mv -T ~/kie-ws/kie-skills-move ~/kie-ws/kie-skills/source
+```
+
+3. 没有已有克隆时，创建容器并克隆：
+
+```bash
+mkdir -p ~/kie-ws/kie-skills
+git clone git@github.com:Kielas520/kie-skills.git ~/kie-ws/kie-skills/source
 ```
 
 验证：
 
 ```bash
-git -C ~/kie-ws/kie-skills rev-parse --abbrev-ref HEAD
-git -C ~/kie-ws/kie-skills rev-parse --short HEAD
-git -C ~/kie-ws/kie-skills remote -v
-git -C ~/kie-ws/kie-skills status --short
+git -C ~/kie-ws/kie-skills/source rev-parse --abbrev-ref HEAD
+git -C ~/kie-ws/kie-skills/source rev-parse --short HEAD
+git -C ~/kie-ws/kie-skills/source remote -v
+git -C ~/kie-ws/kie-skills/source status --short
 ```
 
 ### 3.3 工具链
@@ -124,7 +134,7 @@ git -C ~/kie-ws/kie-skills status --short
 | 动作 | 验证命令 | 通过判据 |
 | --- | --- | --- |
 | 建工作空间目录 | `ls -d ~/kie-ws/.tmp ~/kie-ws/.draft ~/kie-ws/test` | 三条路径都列出 |
-| 移动或克隆仓库 | `git -C ~/kie-ws/kie-skills status --short` | 无报错，输出为空或只有未跟踪文件 |
+| 移动或克隆仓库 | `git -C ~/kie-ws/kie-skills/source status --short` | 无报错，输出为空或只有未跟踪文件 |
 | 装补工具 | `bash -c 'command -v <工具>'` | 输出真实可执行文件路径 |
 | 放开 user namespace | `unshare -rm true` | 无输出且退出码 0 |
 | 代理可用 | `curl -s -o /dev/null -w '%{http_code}' https://api.github.com` | 输出 200 |
@@ -135,7 +145,7 @@ git -C ~/kie-ws/kie-skills status --short
 
 ```
 工作空间: ~/kie-ws（.tmp/ .draft/ test/ 已建 / 已存在）
-仓库: ~/kie-ws/kie-skills <分支> <commit>（新克隆 / 移动自 <旧路径> / 未动）
+仓库: ~/kie-ws/kie-skills/source <分支> <commit>（新克隆 / 移动自 <旧路径> / 未动）
 工具: 已补齐 <工具列表>；仍缺 <工具列表>
 系统与网络: <改动的项与结果>
 验证: <命令> -> <结果>

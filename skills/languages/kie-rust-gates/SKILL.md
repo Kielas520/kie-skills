@@ -1,12 +1,12 @@
 ---
 name: kie-rust-gates
 description: |
-  Rust 项目里提交与推送前的质量门禁：判定本次改动是否涉及 Rust，commit 前跑格式化与 clippy 自动修复，push 前按影响范围选出最小受影响测试集并说明选择依据。当用户在含 Cargo.toml 的项目里准备 add、commit、push，或说「提交前检查一遍」「推送前要测什么」「这次改动涉及哪些测试要跑」「只测本分支相对 main 的改动」「最小化测试范围」「别跑全量」、提到修 CI 的 clippy 与 fmt 报错时使用，即使用户没有提到检查或测试。不适用：非 Rust 项目；改动不影响 Rust 构建与测试（纯文档、纯资源）；执行 commit 与 push 本身（用 kie-commit-pr）；按工单验收标准做的交付测试与测试报告（用 kie-dev-test）；PR 上 CI 与远端产物的验收（用 kie-pr-ci-test）；Rust 代码写法风格以外的语言约定（Python 用 kie-python-style）。
+  Rust 项目里提交与推送前的质量门禁：判定本次改动是否涉及 Rust，commit 前跑格式化与 clippy 自动修复，push 前按影响范围选出最小受影响测试集并说明选择依据。当用户在含 Cargo.toml 的项目里准备 add、commit、push，或说「提交前检查一遍」「推送前要测什么」「这次改动涉及哪些测试要跑」「只测本分支相对 main 的改动」「最小化测试范围」「别跑全量」、提到修 CI 的 clippy 与 fmt 报错时使用，即使用户没有提到检查或测试。不适用：非 Rust 项目；改动不影响 Rust 构建与测试（纯文档、纯资源）；执行 commit 与 push 本身（用 kie-commit-pr）；交付测试与测试报告、PR 上 CI 与远端产物的验收（用 kie-dev-exec）；Rust 代码写法风格以外的语言约定（Python 用 kie-python-style）。
 license: MIT
 compatibility: 需要 cargo 工具链（含 rustfmt、clippy 组件，缺时用 `rustup component add rustfmt clippy` 安装）与 git。
 metadata:
   author: Kielas
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # Rust 提交与推送门禁

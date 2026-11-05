@@ -1,8 +1,0 @@
-[
-  {"query": "reviewer 在 PR 上提了几条意见，帮我处理一下", "should_trigger": true},
-  {"query": "reviewer 提的意见里有一条我不打算采纳，帮我按处理评审的流程起草回复，写清技术理由，先别发", "should_trigger": true},
-  {"query": "comments 处理掉，先出审核文档我看", "should_trigger": true},
-  {"query": "帮我评审一下这段代码的并发部分，还没开 PR", "should_trigger": false},
-  {"query": "PR 和 main 冲突了，帮我解决一下合并冲突", "should_trigger": false},
-  {"query": "这个 PR 的 CI 产物帮我验一下", "should_trigger": false}
-]

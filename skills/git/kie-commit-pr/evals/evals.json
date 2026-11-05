@@ -4,11 +4,11 @@
     {
       "id": 1,
       "prompt": "f-8123456789 这个分支本地测过了，帮我起草 PR 标题和 body。这次的项目容器就当当前目录，工单在 工单-f-8123456789.md，分支变更在 分支变更.md，测试报告按我们的项目文档约定放着。草稿写到当前目录的 pr-body.md，先给我看，别建 PR。",
-      "expected_output": "读 .idea/fix/f-8123456789/test-report.md 作为验证依据，按 fix 模板写出 pr-body.md：问题、原因、改动、验证四段，影响段没有内容时按模板删掉，验证段引用报告的改前改后结果，不写远端 CI 结果，footer 为 Resolve f-8123456789；标题按 commit 首行格式；不建 PR。",
+      "expected_output": "读 .tmp/test-1/test-report-1.md 作为验证依据，按 fix 模板写出 pr-body.md：问题、原因、改动、验证四段，影响段没有内容时按模板删掉，验证段引用报告的改前改后结果，不写远端 CI 结果，footer 为 Resolve f-8123456789；标题按 commit 首行格式；不建 PR。",
       "files": [
         "evals/files/工单-f-8123456789.md",
         "evals/files/分支变更.md",
-        "evals/files/.idea/fix/f-8123456789/test-report.md"
+        "evals/files/.tmp/test-1/test-report-1.md"
       ],
       "assertions": [
         "pr-body.md 含「问题」「原因」「改动」「验证」四段；「影响」段有内容时保留，没有内容时可以删掉；没有出现「背景」段，末尾 footer 是 `Resolve f-8123456789`",

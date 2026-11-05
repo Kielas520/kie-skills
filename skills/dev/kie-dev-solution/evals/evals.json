@@ -3,50 +3,50 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "工作目录里的 ws/demo-p 是这次的项目容器，源仓库是 ws/demo-p/source/myrepo，就用现在这份，不用克隆也不用同步。需求单 m-7000000002：给 log export 子命令加按时间范围筛选的能力，只导出起止时间之间的记录。你先调研现有代码，出一份方案文档给我选。",
-      "expected_output": "读 source/myrepo 的 export.rs 与 parser.rs 后，在 ws/demo-p/.idea/feat/m-7000000002/solution.md 写出选型文档：要实现的功能、项目现状（原有设计与相关现状）、按风险从低到高排列的候选方案，每个方案写到文件与符号并带四项风险评估；不带选定标记，不出 solve.md，把路径与方案摘要交用户选。",
+      "prompt": "工作目录里 ws/demo 是仓库目录，源仓库是 ws/demo/source，就用现在这份，不用克隆也不用同步。需求单 m-7000000002，工作名称 export-time：给 log export 子命令加按时间范围筛选的能力，只导出起止时间之间的记录。你先调研现有代码，出一份方案文档给我选。",
+      "expected_output": "读 source 的 export.rs 与 parser.rs 后，在 ws/demo/export-time/solution.md 写出选型文档：要实现的功能、项目现状、按风险从低到高排列的候选方案，每个方案写到文件与符号并带四项风险评估；不带选定标记，把路径与方案摘要交用户选。",
       "files": [
-        "evals/files/ws/demo-p/source/myrepo/README.md",
-        "evals/files/ws/demo-p/source/myrepo/src/cli/export.rs",
-        "evals/files/ws/demo-p/source/myrepo/src/parser.rs"
+        "evals/files/ws/demo/source/README.md",
+        "evals/files/ws/demo/source/src/cli/export.rs",
+        "evals/files/ws/demo/source/src/parser.rs"
       ],
       "assertions": [
-        "ws/demo-p/.idea/feat/m-7000000002/solution.md 存在，不是平铺在 .idea/ 根下或 .idea/m-7000000002/ 下",
+        "ws/demo/export-time/solution.md 存在，文档不放在源仓库或工单编号目录中",
         "solution.md 含「要实现的功能」「项目现状」两节，「项目现状」写出现有 log export 读取全部记录再逐条打印、parser 按时间戳升序返回这类原有设计，不只是文件清单",
         "每个方案都有「涉及的改动位置」表，写到 export.rs 或 parser.rs 里的具体符号（如 run、ExportArgs、read_entries），并有改动量、实现复杂度、可维护性、风险四项风险评估",
-        "solution.md 里没有任何方案标题带「已选定」，ws/demo-p/.idea/ 下没有 solve.md 与 design.md，source/myrepo 下的代码文件未被修改",
+        "solution.md 里没有任何方案标题带「已选定」，没有拍板方向，没有生成其他方向文档或 design.md，source 下的代码文件未被修改",
         "回复给出 solution.md 路径与方案摘要，请用户选定，没有替用户选方案"
       ]
     },
     {
       "id": 2,
-      "prompt": "工作目录里 ws/demo-p 是这次的项目容器，m-7000000001 的选型文档在 ws/demo-p/.idea/feat/m-7000000001/solution.md。三个方案里按第二个来，拍板了。",
-      "expected_output": "在 solution.md 第二个方案的标题处加「已选定」，其余内容不动；按 solve.md 模板在同目录新建 solve.md，只记录选定方向；把路径交用户确认，不写设计文档。",
+      "prompt": "工作目录里 ws/demo 是仓库目录，工作名称 export-file，m-7000000001 的选型文档在 ws/demo/export-file/solution.md。三个方案里按第二个来，拍板了。",
+      "expected_output": "在 solution.md 第二个方案的标题处加「已选定」，保留其他方案，在同一文档记录拍板方向与取舍，把路径交用户确认，不写设计文档。",
       "files": [
-        "evals/files/ws/demo-p/.idea/feat/m-7000000001/solution.md"
+        "evals/files/ws/demo/export-file/solution.md"
       ],
       "assertions": [
-        "solution.md 里第二个方案的标题带「已选定」标记，方案一与方案三仍在文档中且没有标记，其余正文与输入一致",
-        "同目录新增 solve.md，含「要实现的功能」与「选定方案」两节，选定方案是全量读进内存再一次性写，另外两个方案只出现在「取舍」表里",
-        "工作目录里没有生成 design.md 与 plan.md",
-        "回复给出 solve.md 路径请用户确认，没有声称已经开始或准备直接写设计文档"
+        "solution.md 里第二个方案的标题带「已选定」标记，方案一与方案三仍在文档中且没有标记",
+        "solution.md 的拍板方向记录全量读进内存再一次性写、关键边界、风险以及其他方案不选的原因",
+        "没有生成单独的方向文档和 design.md",
+        "回复给出 solution.md 路径请用户确认，没有直接写设计文档"
       ]
     },
     {
       "id": 3,
-      "prompt": "工作目录里的 ws/demo-p 是这次的项目容器，源仓库是 ws/demo-p/source/myrepo，就用现在这份，不用克隆也不用同步。这次没有工单，分支梗概叫 export-gzip：想让 log export 支持把导出结果压缩成 gzip。你先调研现有代码，出一份方案文档给我选。",
-      "expected_output": "无工单时任务目录取梗概单层目录，选型文档写到 ws/demo-p/.idea/export-gzip/solution.md；按 assets/solution.md 的结构写：项目现状分「原有设计」与「与本次相关的现状」，每个方案标题带风险等级、按风险从低到高排，风险评估固定写改动量、实现复杂度、可维护性、风险四项；不带选定标记，不出 solve.md，请用户选定方案。",
+      "prompt": "工作目录里的 ws/demo 是仓库目录，源仓库是 ws/demo/source，就用现在这份，不用克隆也不用同步。这次没有工单，工作名称叫 export-gzip：想让 log export 支持把导出结果压缩成 gzip。你先调研现有代码，出一份方案文档给我选。",
+      "expected_output": "选型文档写到 ws/demo/export-gzip/solution.md；按 assets/solution.md 的结构写项目现状与各候选方案，按风险从低到高排列并写四项风险评估；不带选定标记，请用户选定方案。",
       "files": [
-        "evals/files/ws/demo-p/source/myrepo/README.md",
-        "evals/files/ws/demo-p/source/myrepo/src/cli/export.rs",
-        "evals/files/ws/demo-p/source/myrepo/src/parser.rs"
+        "evals/files/ws/demo/source/README.md",
+        "evals/files/ws/demo/source/src/cli/export.rs",
+        "evals/files/ws/demo/source/src/parser.rs"
       ],
       "assertions": [
-        "选型文档写在 ws/demo-p/.idea/export-gzip/solution.md，不是写在 .idea/ 根下、仓库目录里或当前目录",
+        "选型文档写在 ws/demo/export-gzip/solution.md，不是写在仓库目录或当前目录",
         "solution.md 的「项目现状」下分「原有设计」与「与本次相关的现状」两个小节",
         "每个方案标题形如「方案一：<名称>（风险 低/中/高）」，方案一的风险等级不高于后面的方案",
         "每个方案的风险评估都写了「改动量」「实现复杂度」「可维护性」「风险」四项",
-        "solution.md 没有「已选定」标记，工作目录里没有新建 solve.md，回复请用户选定方案"
+        "solution.md 没有「已选定」标记，没有生成单独的方向文档，回复请用户选定方案"
       ]
     }
   ]

@@ -1,5 +1,8 @@
 [
   { "query": "把这个循环优化一下", "should_trigger": true },
   { "query": "看看 src/transport.rs 这个重试逻辑有没有问题，先别改", "should_trigger": true },
-  { "query": "帮我删掉这个目录里的构建产物", "should_trigger": true }
+  { "query": "帮我删掉这个目录里的构建产物", "should_trigger": true },
+  { "query": "解释一下什么是 CAP 定理", "should_trigger": false },
+  { "query": "推荐几本讲分布式系统的书", "should_trigger": false },
+  { "query": "你好，今天天气怎么样", "should_trigger": false }
 ]

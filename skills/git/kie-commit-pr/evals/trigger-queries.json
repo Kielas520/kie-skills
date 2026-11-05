@@ -1,8 +1,8 @@
 [
-  {"query": "f-6925239029 改完了，帮我写个提交信息，单号放 footer", "should_trigger": true},
-  {"query": "这几个文件提交掉，按主题拆成两次", "should_trigger": true},
-  {"query": "分支做完了要交评审，先把 PR 描述写出来我看看", "should_trigger": true},
-  {"query": "帮我为 m-7113016070 新开一个分支和工作区", "should_trigger": false},
-  {"query": "PR 上评审提了三条意见，帮我看看怎么回", "should_trigger": false},
-  {"query": "解释一下这条 commit 为什么要这么改", "should_trigger": false}
+  { "query": "f-6925239029 改完了，帮我写个提交信息，单号放 footer", "should_trigger": true },
+  { "query": "把 src/main.rs 和 src/cli.rs 提交掉，按主题拆成两次", "should_trigger": true },
+  { "query": "分支做完了要交评审，先把 PR 描述写出来我看看", "should_trigger": true },
+  { "query": "帮我为 m-7113016070 新开一个分支和工作区", "should_trigger": false },
+  { "query": "PR 上评审提了三条意见，帮我看看怎么回", "should_trigger": false },
+  { "query": "解释一下这条 commit 为什么要这么改", "should_trigger": false }
 ]

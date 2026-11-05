@@ -319,7 +319,7 @@ class ClaudeAgent(Agent):
                     return True
         if "Base directory for this skill" not in line:
             return False
-        # 路径后面不能再接技能名字符，否则 kie-pr-review 会把 kie-pr-review-fix 的加载记成命中
+        # 路径后面不能再接技能名字符，否则技能名是另一技能名前缀时会误判加载
         base = re.escape(str(skills_root / ".claude" / "skills" / skill_name))
         return re.search(base + r"(?![a-z0-9-])", self.normalize(line)) is not None
 

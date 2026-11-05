@@ -1,0 +1,26 @@
+{
+  "skill_name": "kie-dev-fix",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "处理 PR #482 的评审意见，三类评论导出在 评审导出.json，当前实现为 当前实现.py。当前目录是工作项目录。先写方案，不改代码。",
+      "expected_output": "在 .tmp/fix/fix-1.md 记录三类评论、判断、修复方案及验收方式，交用户确认；不写独立审核文档或改代码。",
+      "files": ["evals/files/评审导出.json", "evals/files/当前实现.py"],
+      "assertions": [".tmp/fix/fix-1.md 涵盖 threads、review body 与会话评论并结合代码判断", "需要解决的问题有方案及验收方式", "没有独立审核文档，没有修改代码或发送评论"]
+    },
+    {
+      "id": 2,
+      "prompt": "按 .tmp/comment/comment-review-2.md 处理评审意见。当前目录是工作项目录，已有 fix-1.md 和 fix-3.md，问题在 fix-1.md 中出现过，notes.md 引用了该文件。只更新方案，不改代码。",
+      "expected_output": "继续更新已有问题文档，将 fix-1.md 改为 fix-4.md，同步内部编号与 notes.md 引用，保留原跟进记录。",
+      "files": ["evals/files/.tmp/comment/comment-review-2.md", "evals/files/.tmp/fix/fix-1.md", "evals/files/.tmp/fix/fix-3.md", "evals/files/notes.md"],
+      "assertions": ["已有问题写入 .tmp/fix/fix-4.md，保留历史记录", "文档内部编号和 notes.md 中指向 fix-1.md 的引用更新为 fix-4", "不创建独立审核文档、不修改代码或发送评论"]
+    },
+    {
+      "id": 3,
+      "prompt": "按照我指定的 .tmp/comment/comment-review-9.md 处理评审，但这个文件不存在，也没有提供 PR。当前目录是工作项目录。",
+      "expected_output": "说明找不到指定评审文件并询问位置，不猜测问题或创建修复方案。",
+      "files": [],
+      "assertions": ["询问缺失评审文件的位置", "没有编造问题或修改代码", "没有发送评论"]
+    }
+  ]
+}

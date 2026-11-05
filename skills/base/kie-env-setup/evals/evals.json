@@ -15,12 +15,12 @@
     {
       "id": 2,
       "prompt": "工作空间还没建。这次把当前目录下的 kie-ws/ 当作工作空间根（代替 ~/kie-ws），按我们的约定把工作空间骨架建出来，定好直接建，不用等我确认。",
-      "expected_output": "只建工作空间根与三个固定用途目录：kie-ws/.tmp、kie-ws/.draft、kie-ws/test；不建项目容器、.idea、worktrees，也不建 AGENTS.md，说明项目容器等由其他技能按任务建出；用 ls -d 验证三个目录。",
+      "expected_output": "只建工作空间根与三个固定用途目录：kie-ws/.tmp、kie-ws/.draft、kie-ws/test；不预建仓库容器、工作目录或 AGENTS.md，说明仓库主克隆使用 <仓库名>/source，工作目录使用 <仓库名>/<name>，由其他技能按任务建出；用 ls -d 验证三个目录。",
       "files": [],
       "assertions": [
         "kie-ws/ 下建出了 .tmp、.draft、test 三个目录",
-        "kie-ws/ 下除这三个目录外没有其他文件或目录：没有 AGENTS.md、README、*-p/ 项目容器、.idea、worktrees、projects 之类",
-        "回复说明项目容器、.idea 任务目录、worktrees 由其他技能按任务建出，本次不预建",
+        "kie-ws/ 下除这三个目录外没有其他文件或目录，包括 AGENTS.md 与仓库容器",
+        "回复说明仓库主克隆位于 <仓库名>/source、工作目录位于 <仓库名>/<name>，由其他技能按任务建出，本次不预建",
         "回复给出了验证结果：三个目录都存在（例如 ls -d 的输出）"
       ]
     },

@@ -1,9 +1,8 @@
 [
-  {"query": "给这个 Python 脚本加个进度条，日志也换成 loguru", "should_trigger": true},
-  {"query": "帮我新建一个 Python 工具项目，依赖和环境怎么弄你按规矩来", "should_trigger": true},
-  {"query": "这段代码的类型注解补一下，Optional 那些改成新写法", "should_trigger": true},
-  {"query": "report_tool.py 里的 load_config 要加一个参数 filename，默认值是 config.ini，读取的文件名从这个参数来", "should_trigger": true},
-  {"query": "解释一下 Python 的 GIL 是什么", "should_trigger": false},
-  {"query": "这个 Rust crate 提交前帮我过一遍 fmt 和 clippy", "should_trigger": false},
-  {"query": "推送前按工单验收标准把这个 Python 工具测一遍并写测试报告", "should_trigger": false}
+  { "query": "给 export.py 加个进度条，日志也换成 loguru", "should_trigger": true },
+  { "query": "新开一个 Python 工具项目时，依赖和环境按我们的约定该怎么配？", "should_trigger": true },
+  { "query": "report_tool.py 里的 load_config 要加一个参数 filename，默认值是 config.ini，读取的文件名从这个参数来", "should_trigger": true },
+  { "query": "解释一下 Python 的 GIL 是什么", "should_trigger": false },
+  { "query": "这个 Rust crate 提交前帮我过一遍 fmt 和 clippy", "should_trigger": false },
+  { "query": "推送前按工单验收标准把这个 Python 工具测一遍并写测试报告", "should_trigger": false }
 ]

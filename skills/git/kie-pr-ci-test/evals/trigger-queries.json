@@ -1,8 +1,0 @@
-[
-  {"query": "PR 的 CI 跑完了，产物我已经下到本地，按工单验收标准在远端产物上测一遍", "should_trigger": true},
-  {"query": "CI 绿了，这样算验收通过了吗？还要做什么", "should_trigger": true},
-  {"query": "给 PR 写一份远端产物的测试报告评论，先起草别发", "should_trigger": true},
-  {"query": "推送前先在本地按工单验收标准测一遍", "should_trigger": false},
-  {"query": "CI 上 clippy 报了三个 warning，帮我看看怎么修", "should_trigger": false},
-  {"query": "帮我起草这个分支的 PR 描述", "should_trigger": false}
-]

@@ -1,8 +1,0 @@
-[
-  { "query": "f-8123456789 修好了，推送前按工单验收标准本地测一遍", "should_trigger": true },
-  { "query": "这个 bug 的修复验证一下，拿有问题那一版做个对照", "should_trigger": true },
-  { "query": "实现都完成了，提 PR 之前帮我核对哪些验收标准过了哪些没过", "should_trigger": true },
-  { "query": "PR 的 CI 跑完了，把远端产物拉下来验一下", "should_trigger": false },
-  { "query": "按 plan.md 继续实现，每个任务跑完验收命令就勾上", "should_trigger": false },
-  { "query": "推送前这次改动要跑哪些 cargo 测试，帮我选最小测试集", "should_trigger": false }
-]
