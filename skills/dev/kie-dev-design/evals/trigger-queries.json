@@ -1,7 +1,7 @@
 [
-  { "query": "m-7000000001 的方案拍板了，按 solve.md 把技术设计文档写一版", "should_trigger": true },
-  { "query": "设计文档里的数据链路图补一下，标出这次新增的环节", "should_trigger": true },
-  { "query": "方案定了，这条路具体怎么走写下来给我评审", "should_trigger": true },
+  { "query": "m-7000000001 的方案拍板了，按 solution.md 把技术设计文档写一版", "should_trigger": true },
+  { "query": "design.md 里的数据链路图补一下，标出这次新增的环节", "should_trigger": true },
+  { "query": "方案定了，把落地路径写成 design.md 给我评审", "should_trigger": true },
   { "query": "这个功能还没想好怎么做，先调研几个方案对比一下", "should_trigger": false },
   { "query": "design.md 我确认了，按它拆任务开始写代码", "should_trigger": false },
   { "query": "推送前按工单验收标准把这个单本地测一遍", "should_trigger": false }

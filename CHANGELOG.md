@@ -1,3 +1,81 @@
+## [kie-dev-exec 0.1.0] - 2026-11-05
+
+### Added
+
+- 合并 `kie-dev-execute`、`kie-dev-test` 与 `kie-pr-ci-test`，依据设计完成开发和验收，并按每项工作的测试目录保存验收报告。
+
+## [kie-dev-review 0.2.0] - 2026-11-05
+
+### Changed
+
+- `kie-pr-review` 更名为 `kie-dev-review`，支持评审本地分支和他人的 PR，并输出可供发送的评审文件。
+
+## [kie-dev-fix 0.5.0] - 2026-11-05
+
+### Changed
+
+- `kie-pr-review-fix` 更名为 `kie-dev-fix`，支持依据 PR 评论或指定评审文件跟进修复记录。
+
+## [kie-commit-pr 0.4.0] - 2026-11-05
+
+### Added
+
+- 支持发送评审文件中的 PR 总评和内联评论，发现已有意见时暂停并征求处理决定。
+
+## [kie-dev-solution 0.8.0] - 2026-11-05
+
+### Changed
+
+- 在工作项的 `solution.md` 中直接记录选定方向。
+
+## [kie-dev-design 0.6.0] - 2026-11-05
+
+### Changed
+
+- 技术设计以工作项 `solution.md` 中的选定方向为依据。
+
+## [kie-agent-rules 0.15.0] - 2026-11-05
+
+### Changed
+
+- 每个仓库使用 `source/` 与各工作项目录组织源码、工作区、文档和临时文件。
+
+## [kie-git-worktree 0.5.0] - 2026-11-05
+
+### Changed
+
+- 工作区放在对应工作项目录下，分支名称使用该目录的名称。
+
+## [kie-env-setup 0.4.0] - 2026-11-05
+
+### Changed
+
+- 环境探测和技能仓库落位使用新的仓库容器目录结构。
+
+## [kie-skill-fix 0.8.0] - 2026-11-05
+
+### Changed
+
+- 技能修复从当前仓库运行评估脚本，并引用新的评审修复技能名称。
+
+## [kie-python-style 0.5.0] - 2026-11-05
+
+### Changed
+
+- 验收测试相关的技能入口更新为 `kie-dev-exec`。
+
+## [kie-rust-gates 0.3.0] - 2026-11-05
+
+### Changed
+
+- 验收测试和 CI 产物验收的技能入口更新为 `kie-dev-exec`。
+
+## [kie-skill-dev 0.24.0] - 2026-11-05
+
+### Fixed
+
+- 触发评估将超时中止识别为证据不足，并在存在证据不足的运行时返回失败状态。
+
 # 更新日志
 
 本文件记录本仓库每个技能的显著变动，按技能各自的版本倒序排列。

@@ -1,8 +1,8 @@
 [
-  {"query": "为 f-7128574383 开个分支，我要开始修了", "should_trigger": true},
-  {"query": "另开个独立目录干活，别动我当前工作区的改动", "should_trigger": true},
-  {"query": "已经交付的版本出了严重问题要马上修，帮我开个紧急修复的分支和工作区", "should_trigger": true},
-  {"query": "把 worktrees 下面那个已经合并的工作区清理掉", "should_trigger": false},
-  {"query": "切到 feat/m-7113016070/export 那个分支看看", "should_trigger": false},
-  {"query": "这个分支能合进 main 了吗，合入要满足什么条件", "should_trigger": false}
+  { "query": "为 f-7128574383 开个分支，我要开始修了", "should_trigger": true },
+  { "query": "另开个独立目录干活，别动我当前工作区的改动", "should_trigger": true },
+  { "query": "已经交付的版本出了严重问题要马上修，帮我开个紧急修复的分支和工作区", "should_trigger": true },
+  { "query": "把 worktrees 下面那个已经合并的工作区清理掉", "should_trigger": false },
+  { "query": "切到 feat/m-7113016070/export 那个分支看看", "should_trigger": false },
+  { "query": "这个分支能合进 main 了吗，合入要满足什么条件", "should_trigger": false }
 ]

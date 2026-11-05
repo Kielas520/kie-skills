@@ -90,7 +90,7 @@ def probe_workspace(root):
                           "" if exists else f"mkdir -p {path}", "工作空间", todo=True))
     containers = []
     if root.is_dir():
-        containers = sorted(d.name for d in root.iterdir() if d.is_dir() and d.name.endswith("-p"))
+        containers = sorted(d.name for d in root.iterdir() if d.is_dir() and (d / "source" / ".git").exists())
     rows.append(entry("项目容器", f"{len(containers)} 个（{'、'.join(containers) if containers else '无'}）",
                       "由其他技能按任务建出，本技能不预建", "", "工作空间"))
     return rows
@@ -102,10 +102,11 @@ def find_clones():
         depth = len(Path(current).relative_to(HOME).parts)
         if depth >= 3:
             dirs[:] = []
-            continue
-        dirs[:] = [d for d in dirs if not d.startswith(".") and d != "node_modules"]
-        if Path(current).name == REPO_NAME and (Path(current) / ".git").exists():
-            found.add(Path(current))
+        else:
+            dirs[:] = [d for d in dirs if not d.startswith(".") and d != "node_modules"]
+        path = Path(current)
+        if (path.name == REPO_NAME or (path.name == "source" and path.parent.name == REPO_NAME)) and (path / ".git").exists():
+            found.add(path)
     return sorted(found)
 
 
@@ -116,8 +117,9 @@ def clone_remote(path):
 
 def probe_repo(root):
     rows = []
-    target = root / REPO_NAME
-    if target.is_dir():
+    target = root / REPO_NAME / "source"
+    remote = clone_remote(target) if (target / ".git").exists() else ""
+    if REPO_REMOTE_HINT.lower() in remote.lower():
         _, branch = run(["git", "-C", str(target), "rev-parse", "--abbrev-ref", "HEAD"])
         _, commit = run(["git", "-C", str(target), "rev-parse", "--short", "HEAD"])
         _, status = run(["git", "-C", str(target), "status", "--short"])
@@ -126,15 +128,20 @@ def probe_repo(root):
                           f"{REPO_REMOTE_HINT} 的克隆", "", "仓库落位"))
         rows.append(entry("目标仓库工作区", "干净" if not status else f"有改动：{first_line(status)}", "干净",
                           "" if not status else "报给用户，等其处理后再继续", "仓库落位", todo=bool(status)))
+    elif target.exists() or target.is_symlink():
+        rows.append(entry(str(target), f"目标路径已存在，远端 {remote or '未知'}",
+                          f"{REPO_REMOTE_HINT} 的克隆", "停下报告，不覆盖目标路径", "仓库落位", todo=True))
     else:
-        rows.append(entry(str(target), "不存在", f"{REPO_REMOTE_HINT} 的克隆", "下面两条二选一", "仓库落位"))
-    others = [path for path in find_clones() if path != target]
-    for path in others:
-        rows.append(entry(str(path), f"已有克隆，远端 {clone_remote(path) or '未知'}", f"落位到 {target}",
-                          f"确认 status 干净且 worktree 只有主仓库后 mv {path} {target}", "仓库落位", todo=True))
-    if not target.is_dir() and not others:
-        rows.append(entry("克隆来源", "本机无克隆", f"落位到 {target}",
-                          f"git clone git@github.com:{REPO_REMOTE_HINT}.git {target}", "仓库落位", todo=True))
+        rows.append(entry(str(target), "不存在", f"{REPO_REMOTE_HINT} 的克隆", "", "仓库落位"))
+        others = [path for path in find_clones() if path != target and REPO_REMOTE_HINT.lower() in clone_remote(path).lower()]
+        for path in others:
+            action = f"确认 status 干净且 worktree 只有主仓库后，按技能说明将 {path} 移动到 {target}"
+            rows.append(entry(str(path), f"已有克隆，远端 {clone_remote(path)}", f"落位到 {target}",
+                              action, "仓库落位", todo=True))
+        if not others:
+            rows.append(entry("克隆来源", "本机无克隆", f"落位到 {target}",
+                              f"mkdir -p {target.parent} && git clone git@github.com:{REPO_REMOTE_HINT}.git {target}",
+                              "仓库落位", todo=True))
     return rows
 
 

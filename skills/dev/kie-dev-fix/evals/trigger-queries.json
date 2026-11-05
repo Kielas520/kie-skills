@@ -1,0 +1,8 @@
+[
+  { "query": "按 comment-review-2.md 里列的评审意见处理，先写修复方案", "should_trigger": true },
+  { "query": "comment-review-2.md 里有一条我不打算采纳，帮我起草回复，写清技术理由，先别发", "should_trigger": true },
+  { "query": "之前修过的问题又出现了，更新 .tmp/fix/fix-1.md 里的方案", "should_trigger": true },
+  { "query": "评审一下当前本地分支的代码，列出问题", "should_trigger": false },
+  { "query": "把 comment-review-1.md 里的评审意见发送到 PR 上", "should_trigger": false },
+  { "query": "这个 PR 的 CI 产物帮我验一下", "should_trigger": false }
+]

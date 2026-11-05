@@ -1,16 +1,16 @@
 ---
 name: kie-git-worktree
 description: |
-  只在需要为一个任务新建独立的 git worktree 与分支时使用：按工作项 ID 与任务内容生成分支名（feat/m-<ID>/<英文梗概>、fix/f-<ID>/<英文梗概>、chore/<英文梗概>、hotfix/<英文梗概>），把工作区建到 ~/kie-ws/<项目名称>-p/worktrees/<分支名>，从项目容器的 source/<仓库名> 开出。用户说「开个分支做这个」「单独开个工作区」「另开个独立目录干活」「并行处理两件事」「为这个单开个分支」「别动我当前工作区」时使用，即使没有说出 worktree 这个词；用户给出飞书项目单号并要求开始这个单的工作时同样适用；个人项目开发同样适用；已交付版本的紧急修复要新建 hotfix 分支与工作区时同样适用。不适用：对已有分支与已有工作区的任何操作（查看、切换、合并、清理、删除）、在当前目录直接开发、把代码放到其他位置、提交与推送、合入规则与合并方式。
+  为任务新建独立 git worktree 与分支：根据工作项 ID 与工作目录 name 命名分支，在仓库容器的任务目录内创建工作区。用户说「开个分支做这个」「单独开个工作区」「并行处理两件事」或给出工单并要求开始工作时使用；个人项目和紧急修复也适用。不适用已有分支与工作区的操作、当前目录直接开发、提交推送或合入。
 license: MIT
 metadata:
   author: Kielas
-  version: "0.4.0"
+  version: "0.5.0"
 ---
 
 # 新建 worktree 工作区
 
-为一个任务建立独立的开发工作区，多个任务并行时互不干扰。工作区统一放在 `~/kie-ws/<项目名称>-p/worktrees/` 下，由 `~/kie-ws/<项目名称>-p/source/<仓库名>/` 开出。`<项目名称>` 与 `<仓库名>` 的取值见 `kie-agent-rules` 技能目录下的 `references/workspace.md`。
+为一个任务建立独立开发工作区：源仓库是 `~/kie-ws/<仓库名>/source/`，工作项目录是 `~/kie-ws/<仓库名>/<name>/`。`name` 是工作内容的简短名称，也用于分支名。工作区有单号时放在工作项目录下的 `<单号>/`，无单号时放在 `branch_source/`。工作空间约定见 `kie-agent-rules` 的 `references/workspace.md`。
 
 ## 子能力
 
@@ -25,7 +25,7 @@ metadata:
 
 ## 步骤 1：收集基线与占用情况
 
-命令在源仓库 `~/kie-ws/<项目名称>-p/source/<仓库名>/` 内执行；不在仓库目录里时给每条命令加 `git -C <源仓库>`。
+命令在源仓库 `~/kie-ws/<仓库名>/source/` 内执行；不在仓库目录里时给每条命令加 `git -C <源仓库>`。
 
 ```bash
 git fetch origin                                  # 个人项目的本地仓库没有远端时跳过
@@ -46,30 +46,30 @@ git branch -a --list '<分支名>' '*/<分支名>'       # 拟用分支名在本
 
 | 场景 | 格式 | 示例 |
 | --- | --- | --- |
-| 缺陷单 | `fix/f-{ID}/{梗概}` | `fix/f-6925239029/fix-crash` |
-| 需求单 / Epic | `feat/m-{ID}/{梗概}` | `feat/m-6918761640/add-login` |
-| 不影响功能的杂项（依赖升级、文档、配置整理） | `chore/{梗概}` | `chore/update-deps` |
-| 已交付版本的紧急修复 | `hotfix/{梗概}` | `hotfix/fix-boot-loop` |
+| 缺陷单 | `fix/f-{ID}/{name}` | `fix/f-6925239029/fix-crash` |
+| 需求单 / Epic | `feat/m-{ID}/{name}` | `feat/m-6918761640/add-login` |
+| 不影响功能的杂项（依赖升级、文档、配置整理） | `chore/{name}` | `chore/update-deps` |
+| 已交付版本的紧急修复 | `hotfix/{name}` | `hotfix/fix-boot-loop` |
 
 - 一个分支对应一个工作项；一次解决多个单时用主单 ID 建分支，其余单号写进 commit footer。
-- 梗概段写成动词开头的英文短语，全小写单词用连字符连接，一般 2 个词以内、最多 3 个词，不使用下划线、空格、中文与驼峰。
-- 单号与梗概来自用户给出的工作项与对话内容，不自行编造，也不拿相近的编号顶替。
-- 改动会影响功能、又没有单号时，问用户是先给单号，还是用 `chore/` 命名。紧急修复没有单号时直接用 `hotfix/{梗概}`，不阻塞。
+- `name` 是工作项目录名，写成动词开头的英文短语，全小写单词用连字符连接，一般 2 个词以内、最多 3 个词，不使用下划线、空格、中文与驼峰。
+- 单号与 `name` 来自用户给出的工作项与对话内容，不自行编造，也不拿相近的编号顶替。
+- 改动会影响功能、又没有单号时，问用户是先给单号，还是用 `chore/` 命名。紧急修复没有单号时直接用 `hotfix/{name}`，不阻塞。
 
 把三项一起给用户：
 
 ```text
-分支: fix/f-<ID>/<梗概>
-工作区: ~/kie-ws/<项目名称>-p/worktrees/fix/f-<ID>/<梗概>
+分支: fix/f-<ID>/<name>
+工作区: ~/kie-ws/<仓库名>/<name>/f-<ID>
 基线: origin/main (<commit>)
 ```
 
-工作区路径固定是 `~/kie-ws/<项目名称>-p/worktrees/<分支名>`。分支名里的斜杠就是目录层级，不压成连字符；用户只给出根目录时补上 `<项目名称>-p` 与 `worktrees` 两层。项目容器不存在时说明会一并建出。
+有单号时工作区路径是 `~/kie-ws/<仓库名>/<name>/<单号>`，没有单号时是 `~/kie-ws/<仓库名>/<name>/branch_source`；`<name>` 与分支最后一段一致。工作项目录不存在时说明会一并建出。
 
 ## 步骤 3：创建 worktree
 
 ```bash
-git -C ~/kie-ws/<项目名称>-p/source/<仓库名> worktree add ~/kie-ws/<项目名称>-p/worktrees/<分支名> -b <分支名> <基线>
+git -C ~/kie-ws/<仓库名>/source worktree add ~/kie-ws/<仓库名>/<name>/<单号或branch_source> -b <分支名> <基线>
 ```
 
 命令里显式写基线：不带基线时从当前 HEAD 分叉，源仓库停在旧提交或别的分支时会带进错误的基线。git 会自动创建多层父目录。
@@ -84,8 +84,8 @@ git -C ~/kie-ws/<项目名称>-p/source/<仓库名> worktree add ~/kie-ws/<项�
 
 ```bash
 git worktree list
-git -C ~/kie-ws/<项目名称>-p/worktrees/<分支名> status --short --branch
-git -C ~/kie-ws/<项目名称>-p/worktrees/<分支名> log --oneline -1
+git -C ~/kie-ws/<仓库名>/<name>/<单号或branch_source> status --short --branch
+git -C ~/kie-ws/<仓库名>/<name>/<单号或branch_source> log --oneline -1
 ```
 
 第二条输出新分支名，第三条输出与基线一致的 commit，两条都对上才算建好；对不上时把实际输出报给用户。
@@ -93,9 +93,9 @@ git -C ~/kie-ws/<项目名称>-p/worktrees/<分支名> log --oneline -1
 ```text
 ━━━ worktree 已创建 ━━━
 分支: <分支名>
-工作区: ~/kie-ws/<项目名称>-p/worktrees/<分支名>
+工作区: ~/kie-ws/<仓库名>/<name>/<单号或branch_source>
 基线: origin/<默认分支> (<commit>)
-进入: cd ~/kie-ws/<项目名称>-p/worktrees/<分支名>
+进入: cd ~/kie-ws/<仓库名>/<name>/<单号或branch_source>
 提醒: 新工作区不共享构建产物与未纳入版本控制的文件（Rust 的 target/、Node 的 node_modules/、.env 之类），需要先装依赖或构建；仓库没有这些时写明不需要重新准备
 ```
 
@@ -103,10 +103,10 @@ git -C ~/kie-ws/<项目名称>-p/worktrees/<分支名> log --oneline -1
 
 ## 硬性约束
 
-- 不在仓库内建 worktree（源仓库下的 `.worktrees/` 同样不允许），工作区一律建到 `~/kie-ws/<项目名称>-p/worktrees/` 下；用户明确给出其他路径时按用户给的建。
-- 源仓库 `source/<仓库名>/` 只用来开工作区与同步默认分支，不在它的默认分支上做开发改动。
+- 不在仓库内建 worktree（源仓库下的 `.worktrees/` 同样不允许），工作区放在工作项目录下；用户明确给出其他路径时按用户给的建。
+- 源仓库 `source/` 只用来开工作区与同步默认分支，不在它的默认分支上做开发改动。
 - 不使用 `--force`，不覆盖已有目录，不删除已有 worktree。
 
 ## Gotchas
 
-- 已经在某个 worktree 内执行时，`git rev-parse --show-toplevel` 给出的是当前 worktree 的路径，项目名不能取它的目录名，要从源仓库路径取。
+- 已经在某个 worktree 内执行时，`git rev-parse --show-toplevel` 给出的是当前 worktree 的路径，仓库名不能取它的目录名，要从源仓库路径取。

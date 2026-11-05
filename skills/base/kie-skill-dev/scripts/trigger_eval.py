@@ -110,7 +110,13 @@ def run_one(agent, skills_root, skill_name, work, job):
             verdict = "timeout"
     if verdict == "miss":
         text = log.read_text(encoding="utf-8", errors="replace")
-        if not agent.has_events(text):
+        endings = (event.get("messages") or [] for event in agent_cli.iter_events(text)
+                   if event.get("type") == "agent_end")
+        aborted = [messages[-1] for messages in endings
+                   if messages and messages[-1].get("stopReason") == "aborted"]
+        if any("Deadline exceeded" in (message.get("errorMessage") or "") for message in aborted):
+            verdict = "timeout"
+        elif aborted or not agent.has_events(text):
             verdict = "error"
     return idx, run, verdict, time.monotonic() - begun
 
@@ -258,9 +264,9 @@ def main():
           f"负例 {summary['negatives_passed']}/{summary['negatives_total']} "
           f"墙钟 {wall:.1f}s 超时/错误运行 {unverified_runs} 结果 {out / 'results.json'}")
     if unverified_runs:
-        print(f"有 {unverified_runs} 次运行没有产生工具调用事件，列为证据不足未计入分母。"
-              "整批都这样通常是客户端或账号侧的问题，先单独复跑确认。")
-    return 0 if not failed and not unverified_cases else 1
+        print(f"有 {unverified_runs} 次运行超时、中止或没有产生工具调用事件，"
+              "列为证据不足，未计入分母。")
+    return 0 if not failed and not unverified_cases and not unverified_runs else 1
 
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
 [
-  {"query": "Rust 项目提交前要过哪些检查？fmt 和 clippy 具体怎么跑，先列出来别动手", "should_trigger": true},
-  {"query": "Rust 项目推送前测试范围怎么选？只测分支相对 main 的改动、别跑全量，规则讲给我听", "should_trigger": true},
-  {"query": "CI 上 clippy 和 fmt 报错了，帮我修一下", "should_trigger": true},
-  {"query": "帮我把这次 Rust 改动的提交信息写一下", "should_trigger": false},
-  {"query": "按工单验收标准把这个 crate 的产物测一遍，写测试报告", "should_trigger": false},
-  {"query": "这个 Python 脚本的类型注解按我们的约定改一下", "should_trigger": false}
+  { "query": "Rust 项目提交前要过哪些检查？fmt 和 clippy 具体怎么跑，先列出来别动手", "should_trigger": true },
+  { "query": "Rust 项目推送前测试范围怎么选？只测分支相对 main 的改动、别跑全量，规则讲给我听", "should_trigger": true },
+  { "query": "CI 上 clippy 和 fmt 报错了，帮我修一下", "should_trigger": true },
+  { "query": "帮我把这次 Rust 改动的提交信息写一下", "should_trigger": false },
+  { "query": "按工单验收标准把这个 crate 的产物测一遍，写测试报告", "should_trigger": false },
+  { "query": "这个 Python 脚本的类型注解按我们的约定改一下", "should_trigger": false }
 ]

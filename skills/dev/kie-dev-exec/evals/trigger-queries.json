@@ -1,0 +1,8 @@
+[
+  { "query": "design.md 我确认了，按设计文档开始开发，做完按其中的验收内容写测试报告", "should_trigger": true },
+  { "query": "设计已经确认，把功能实现并验证运行结果", "should_trigger": true },
+  { "query": "实现完成了，按 design.md 的验收内容写份测试报告", "should_trigger": true },
+  { "query": "方案定了，先把技术设计文档写出来给我评审", "should_trigger": false },
+  { "query": "这个功能还没想好怎么做，先调研几个方案对比一下", "should_trigger": false },
+  { "query": "帮我把这次改动的提交信息写一下", "should_trigger": false }
+]

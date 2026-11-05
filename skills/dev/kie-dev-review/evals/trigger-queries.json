@@ -1,0 +1,8 @@
+[
+  { "query": "评审一下我当前的本地分支，列出代码问题", "should_trigger": true },
+  { "query": "对照设计自查当前分支，把建议写成 .tmp/comment/comment-review-1.md", "should_trigger": true },
+  { "query": "评审本地分支未提交的改动，看看边界条件有没有问题", "should_trigger": true },
+  { "query": "按 comment-review-1.md 里的评审意见修复代码", "should_trigger": false },
+  { "query": "把这次改动提交掉，写个提交信息", "should_trigger": false },
+  { "query": "设计已经确认，按 design.md 实现这个功能", "should_trigger": false }
+]

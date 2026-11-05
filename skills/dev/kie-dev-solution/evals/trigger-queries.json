@@ -1,8 +1,8 @@
 [
-  { "query": "我想给 CLI 的日志导出加个按时间范围筛选，你先调研下有几种做法，出个方案文档给我选", "should_trigger": true },
+  { "query": "CLI 的日志导出想加按时间范围筛选，常见做法有哪几种？各自成本和取舍讲给我听", "should_trigger": true },
   { "query": "日志解析这块用现成的库还是自己写好？帮我把几个选择对比一下，先别写代码", "should_trigger": true },
   { "query": "想做一个从零开始的命令行小工具，批量把 CSV 转成 Parquet，用什么语言和库比较稳？先对比几种做法", "should_trigger": true },
-  { "query": "方案二我已经拍板了，按 solve.md 把技术设计文档写出来", "should_trigger": false },
+  { "query": "方案二我已经拍板了，按 solution.md 把技术设计文档写出来", "should_trigger": false },
   { "query": "design.md 我确认了，按它拆任务开始写代码", "should_trigger": false },
   { "query": "这个 bug 修好了，推送前按工单验收标准本地测一遍", "should_trigger": false }
 ]

@@ -3,37 +3,37 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "这次的项目容器就当当前目录。先在 source/demo-project 下 git init 一个演示仓库（分支 main，放个 README 做一个初始提交）。然后为缺陷单 f-7128574383 开分支和独立工作区，梗概用 linux-commit-unknown，分支名、工作区和基线你按规范定，定好直接建，不用等我确认。",
-      "expected_output": "分支 fix/f-7128574383/linux-commit-unknown，工作区建在 worktrees/fix/f-7128574383/linux-commit-unknown，基线为本地 main 的初始提交；验证分支名与 commit，交付里给出进入命令与构建产物提醒。",
+      "prompt": "这次的仓库容器就当当前目录。先在 source 下 git init 一个演示仓库（分支 main，放个 README 做一个初始提交）。然后为缺陷单 f-7128574383 开分支和独立工作区，工作名称用 linux-commit-unknown，分支名、工作区和基线你按规范定，定好直接建，不用等我确认。",
+      "expected_output": "分支 fix/f-7128574383/linux-commit-unknown，工作区建在 linux-commit-unknown/f-7128574383，基线为本地 main 的初始提交；验证分支名与 commit，交付里给出进入命令与构建产物提醒。",
       "files": [],
       "assertions": [
         "创建出的分支名是 fix/f-7128574383/linux-commit-unknown",
-        "工作区目录是 worktrees/fix/f-7128574383/linux-commit-unknown，由 git worktree 创建（目录里有指向主仓库的 .git 文件），没有建在 source/demo-project 里面",
+        "工作区目录是 linux-commit-unknown/f-7128574383，由 git worktree 创建（目录里有指向主仓库的 .git 文件），没有建在 source 里面",
         "回复给出基线 commit 与进入新工作区的命令",
         "回复说明新工作区与构建产物或依赖的关系：有就提醒需要重新准备，没有就写明不需要重新准备"
       ]
     },
     {
       "id": 2,
-      "prompt": "这次的项目容器就当当前目录。先在 source/demo-project 下 git init（分支 main，一个初始提交）。我要开始做 m-7113016070 的 git commit provenance，要跟手上的活并行推进，帮我把分支名、工作区、基线三项定下来给我看。",
-      "expected_output": "给出分支 feat/m-7113016070/<英文梗概>、工作区 worktrees/feat/m-7113016070/<梗概>、基线三项与占用情况，停下来等用户确认，不创建分支与工作区。",
+      "prompt": "这次的仓库容器就当当前目录。先在 source 下 git init（分支 main，一个初始提交）。我要开始做 m-7113016070 的 git commit provenance，要跟手上的活并行推进，帮我把分支名、工作区、基线三项定下来给我看。",
+      "expected_output": "给出分支 feat/m-7113016070/<name>、工作区 <name>/m-7113016070、基线三项与占用情况，停下来等用户确认，不创建分支与工作区。",
       "files": [],
       "assertions": [
-        "回复给出「分支 / 工作区 / 基线」三项，分支名形如 feat/m-7113016070/<英文梗概>",
+        "回复给出「分支 / 工作区 / 基线」三项，分支名形如 feat/m-7113016070/<name>，工作区为 <name>/m-7113016070",
         "回复说明拟用分支名在仓库里的占用情况",
-        "仓库里仍然只有 main 一个分支，工作目录下没有生成 worktrees 目录",
+        "仓库里仍然只有 main 一个分支，没有创建新的工作区",
         "回复请用户确认三项后再创建"
       ]
     },
     {
       "id": 3,
-      "prompt": "这次的项目容器就当当前目录。先在 source/demo-project 下 git init（分支 main，一个初始提交）。我想给它加一个导出报表的功能，帮我开个分支和工作区。",
+      "prompt": "这次的仓库容器就当当前目录。先在 source 下 git init（分支 main，一个初始提交）。我想给它加一个导出报表的功能，帮我开个分支和工作区。",
       "expected_output": "这是会影响功能的改动，用户没有给单号：问用户是先给单号，还是用 chore/ 命名；不编造单号，不创建分支与工作区。",
       "files": [],
       "assertions": [
         "回复问用户是先给单号，还是用 chore/ 命名",
         "回复和仓库里都没有出现编造的工作项 ID（如 feat/m- 后跟用户没给过的数字）",
-        "仓库里仍然只有 main 一个分支，工作目录下没有生成 worktrees 目录"
+        "仓库里仍然只有 main 一个分支，没有创建新的工作区"
       ]
     }
   ]

@@ -1,8 +1,0 @@
-[
-  { "query": "design.md 我确认了，按设计文档开始开发", "should_trigger": true },
-  { "query": "设计定了，先拆个计划，然后动工", "should_trigger": true },
-  { "query": "上次的计划还剩两项没勾，接着把这个功能做完", "should_trigger": true },
-  { "query": "实现都做完了，推送前按工单验收标准本地测一遍，写测试报告", "should_trigger": false },
-  { "query": "方案定了，先把技术设计文档写出来给我评审", "should_trigger": false },
-  { "query": "提交前帮我把 fmt 和 clippy 跑一遍", "should_trigger": false }
-]
