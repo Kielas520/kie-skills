@@ -33,7 +33,7 @@ metadata:
 
 1. 拉取 PR 概况：标题、作者、body、base 与 head 分支、head SHA、提交列表、改动文件、CI 状态、已有的 review 与未解决 threads。已有 threads 用来避免重复提别人提过的意见。
 2. 检出 head 的最新代码：在 `source/<仓库名>/` 里 `git fetch` PR 的 head，再以 detached 方式把 head SHA 挂到 `~/kie-ws/<项目名称>-p/worktrees/<head 分支名>/`；该路径已有工作区时先核对它停在 head SHA 上，不一致就 fetch 后 checkout 到 head SHA。评审只读这个工作区里的代码，不在 `source/` 里切分支。
-3. 读目标仓库根目录的 `AGENTS.md` 及其引用的开发约定，作为「项目约定核对」的依据。没有就跳过这一项。
+3. 先找目标仓库根目录是否有 `AGENTS.md`，有的话必须读 AGENTS.md ，了解并学习仓库的开发约定，作为「项目约定核对」的依据。没有就跳过这一项。最后回复用户的时候一定要说自己是否阅读了AGENTS.md。
 4. 读 diff 与相关的未改动代码，逐处核对：改动是否做到了 PR body 与工单声称的事、有没有超出范围的改动、正确性、边界与错误处理、并发与资源、安全、性能、测试覆盖、文档与注释是否跟着改。需要时在工作区里运行测试或构建，看真实输出。
 5. 按 [assets/pr-report.md](assets/pr-report.md) 的模板与「填写要求」写评审报告。
 
