@@ -1,3 +1,9 @@
+## [kie-agent-rules 0.16.0] - 2026-11-06
+
+### Changed
+
+- 工作空间新增 `~/kie-ws/spike/` 目录：Spike 调研单的调研目录为 `~/kie-ws/spike/<name>/`，调研用到的源码仓库都克隆在该目录内并直接以仓库名命名，可同时放多个仓库。
+
 ## [kie-dev-exec 0.1.0] - 2026-11-05
 
 ### Added

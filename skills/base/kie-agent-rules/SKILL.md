@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要支持 Agent Skills 的 agent 会话；GitHub 交互用内置工具或已登录的 gh CLI；命令行优先使用 rg、fd、bat、sd；删除文件需要 gio trash、gomi 或 trash-cli 之一
 metadata:
   author: Kielas
-  version: "0.15.0"
+  version: "0.16.0"
 ---
 
 # agent 协作技能
@@ -83,6 +83,7 @@ agent 与用户交互的硬性规则：怎么说话，以及哪些事不经用�
 ## 工作空间
 
 - 开发、测试与产出物都落在 `~/kie-ws` 下。禁止读写 `/tmp`，不在当前目录与 `~/kie-ws` 根目录下落单个文件。
+- Spike 调研单（spike 单）的调研目录放在 `~/kie-ws/spike/<name>/`，调研用到的源码仓库都克隆在该目录内并直接以仓库名命名。
 - 要决定源仓库、工作区、任务文档、中间结果或草稿的落点时，读 [references/workspace.md](references/workspace.md)。
 
 ## 数据安全
