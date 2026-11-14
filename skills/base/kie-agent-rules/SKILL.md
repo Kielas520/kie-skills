@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要支持 Agent Skills 的 agent 会话；GitHub 交互用内置工具或已登录的 gh CLI；命令行优先使用 rg、fd、bat、sd；删除文件需要 gio trash、gomi 或 trash-cli 之一
 metadata:
   author: Kielas
-  version: "0.16.0"
+  version: "0.17.0"
 ---
 
 # agent 协作技能
@@ -15,7 +15,7 @@ agent 与用户交互的硬性规则：怎么说话，以及哪些事不经用�
 ## 适用范围与优先级
 
 - 本技能属于通用规则层，与项目 `AGENTS.md` 同时生效；项目 `AGENTS.md` 及其引用的开发约定与本技能冲突时，以项目规则为准，其余条款继续适用。
-- 加载后完整阅读本技能全文，并在整个会话中持续遵守。详述层在 [references/user-rules-full.md](references/user-rules-full.md)：用词与指令类型的例子、项目专属条款，加载本技能后一并读取。
+- 加载后完整阅读本技能全文，并在整个会话中持续遵守。详述层在 [references/user-rules-full.md](references/user-rules-full.md)：用词与开工授权的例子，加载本技能后一并读取。
 - 确定在哪个项目里工作后，读取该项目仓库根目录的 `AGENTS.md`，在第一次回复里说明读取的是哪一份；与任务无关的项目不读，没有就跳过。用户在消息里提到 `AGENTS.md` 时重新读取。
 - 规则适用于思考、回答、文档、注释等自然语言内容，以及研究、实现和验证行为。
 
@@ -82,9 +82,11 @@ agent 与用户交互的硬性规则：怎么说话，以及哪些事不经用�
 
 ## 工作空间
 
-- 开发、测试与产出物都落在 `~/kie-ws` 下。禁止读写 `/tmp`，不在当前目录与 `~/kie-ws` 根目录下落单个文件。
-- Spike 调研单（spike 单）的调研目录放在 `~/kie-ws/spike/<name>/`，调研用到的源码仓库都克隆在该目录内并直接以仓库名命名。
-- 要决定源仓库、工作区、任务文档、中间结果或草稿的落点时，读 [references/workspace.md](references/workspace.md)。
+- 开发、测试与产出物都落在 `~/kie-ws` 下。禁止读写 `/tmp`，不在 `~/kie-ws` 根目录下落单个文件。
+- 按任务建立工作空间：没有工单编号时使用 `~/kie-ws/<任务简述>/`，上下文明确本任务的 `SWE-<编号>` 时使用 `~/kie-ws/swe-<编号>-<任务简述>/`。任务涉及的仓库直接放在任务根目录下，具体命名判定见 `references/workspace.md`。
+- 临时文件与报告放在任务根目录的 `.tmp/` 下，按测试、调研等具体活动分类。仅生成文档时使用 `.tmp/docs-tmp/`。
+- 开始任务时记录任务根目录。仓库修改与测试结束后，将会话工作目录恢复到任务根目录，再继续对话。
+- 要决定仓库、任务文档、中间结果或草稿的落点，以及如何恢复工作目录时，读 [references/workspace.md](references/workspace.md)。
 
 ## 数据安全
 

@@ -5,12 +5,12 @@ license: MIT
 compatibility: 需要 git；评审 GitHub PR 时需要已登录的 gh CLI 与仓库读取权限。
 metadata:
   author: Kielas
-  version: "0.2.0"
+  version: "0.3.0"
 ---
 
 # 代码评审
 
-评审自己的本地分支或他人的 PR，产出可供用户查看和处理的评审建议。发送 PR 评论由 `kie-commit-pr` 负责。
+评审自己的本地分支或他人的 PR，产出可供用户查看和处理的评审建议。本技能不发送 PR 评论。
 
 ## 子能力
 
@@ -19,7 +19,9 @@ metadata:
 | 评审本地分支 | `<工作目录>/.tmp/comment/comment-review-n.md`，只写评审建议 |
 | 评审他人的 PR | 同一位置的 `comment-review-n.md`，含 PR body 和内联评论 |
 
-`<工作目录>` 是 `~/kie-ws/<仓库名>/<name>/`，分支代码位于其下的 `branch_source/` 或工单编号目录。`n` 在该项工作的 `.tmp/comment/` 中递增：检查已有 `comment-review-n.md` 与 `comment-fix-n.md`，取其中最大编号加一；没有文件时从 1 开始。不得覆盖已有文件。
+`<工作目录>` 即任务根 `~/kie-ws/<任务简述>/`，无工单号也适用；代码仓库直接位于 `<任务根>/<仓库名>/`，复用已有克隆。`n` 在任务根的 `.tmp/comment/` 中递增：检查已有 `comment-review-n.md` 与 `comment-fix-n.md`，取其中最大编号加一；没有文件时从 1 开始。不得覆盖已有文件。评审活动临时文件放在 `.tmp/comment/`，测试临时文件放在 `.tmp/test/`，仅文档活动的临时文件放在 `.tmp/docs-tmp/`。
+
+进入任务时记录任务根。仓库命令优先通过工具的 `cwd` 参数指定仓库目录；若实际切换会话目录，仓库操作结束和测试结束后都恢复到记录的任务根，不用子 shell 中的 `pwd` 代替会话目录恢复。
 
 ## 评审
 

@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import shlex
 import shutil
 import socket
 import subprocess
@@ -78,35 +79,39 @@ def entry(name, current, expected, action="", group="", todo=False):
             "action": action, "todo": bool(todo and action)}
 
 
-def probe_workspace(root):
+def probe_workspace(root: str | Path, task_root: str | Path | None = None) -> list[dict[str, str | bool]]:
+    root = Path(root)
     rows = []
-    exists = root.is_dir()
-    rows.append(entry(str(root), "存在" if exists else "不存在", "存在",
-                      "" if exists else f"mkdir -p {root}", "工作空间", todo=True))
-    for sub in (".tmp", ".draft", "test"):
-        path = root / sub
+    paths = [root]
+    if task_root is not None:
+        paths.append(Path(task_root))
+    for path in paths:
         exists = path.is_dir()
         rows.append(entry(str(path), "存在" if exists else "不存在", "存在",
-                          "" if exists else f"mkdir -p {path}", "工作空间", todo=True))
-    containers = []
-    if root.is_dir():
-        containers = sorted(d.name for d in root.iterdir() if d.is_dir() and (d / "source" / ".git").exists())
-    rows.append(entry("项目容器", f"{len(containers)} 个（{'、'.join(containers) if containers else '无'}）",
-                      "由其他技能按任务建出，本技能不预建", "", "工作空间"))
+                          "" if exists else f"mkdir -p {shlex.quote(str(path))}", "工作空间", todo=True))
+    rows.append(entry("任务目录", str(task_root) if task_root is not None else "未指定",
+                      f"{root}/<任务简述>/，上下文明确本任务 SWE-编号时使用 swe-<编号>-<任务简述>/",
+                      "", "工作空间"))
+    rows.append(entry("任务临时文件", "按活动需要创建",
+                      "<任务根>/.tmp/ 下按 test/、<调研简述>/、docs-tmp/ 等活动分类，不预建全局目录",
+                      "", "工作空间"))
     return rows
 
 
-def find_clones():
+def find_clones(root: str | Path) -> list[Path]:
+    root = Path(root)
     found = set()
-    for current, dirs, _ in os.walk(HOME):
-        depth = len(Path(current).relative_to(HOME).parts)
-        if depth >= 3:
-            dirs[:] = []
-        else:
-            dirs[:] = [d for d in dirs if not d.startswith(".") and d != "node_modules"]
-        path = Path(current)
-        if (path.name == REPO_NAME or (path.name == "source" and path.parent.name == REPO_NAME)) and (path / ".git").exists():
-            found.add(path)
+    for base, max_depth in ((HOME, 3), (root, 2)):
+        for current, dirs, _ in os.walk(base):
+            path = Path(current)
+            depth = len(path.relative_to(base).parts)
+            if (path / ".git").exists():
+                found.add(path)
+                dirs[:] = []
+            elif depth >= max_depth:
+                dirs[:] = []
+            else:
+                dirs[:] = [d for d in dirs if not d.startswith(".") and d != "node_modules"]
     return sorted(found)
 
 
@@ -115,33 +120,36 @@ def clone_remote(path):
     return text if code == 0 else ""
 
 
-def probe_repo(root):
+def probe_repo(root: str | Path, task_root: str | Path | None = None) -> list[dict[str, str | bool]]:
+    root = Path(root)
     rows = []
-    target = root / REPO_NAME / "source"
-    remote = clone_remote(target) if (target / ".git").exists() else ""
-    if REPO_REMOTE_HINT.lower() in remote.lower():
-        _, branch = run(["git", "-C", str(target), "rev-parse", "--abbrev-ref", "HEAD"])
-        _, commit = run(["git", "-C", str(target), "rev-parse", "--short", "HEAD"])
-        _, status = run(["git", "-C", str(target), "status", "--short"])
-        remote = clone_remote(target)
-        rows.append(entry(str(target), f"{branch or '分支未知'} {commit or ''}，远端 {remote or '未知'}",
-                          f"{REPO_REMOTE_HINT} 的克隆", "", "仓库落位"))
-        rows.append(entry("目标仓库工作区", "干净" if not status else f"有改动：{first_line(status)}", "干净",
-                          "" if not status else "报给用户，等其处理后再继续", "仓库落位", todo=bool(status)))
-    elif target.exists() or target.is_symlink():
-        rows.append(entry(str(target), f"目标路径已存在，远端 {remote or '未知'}",
+    target = Path(task_root) / REPO_NAME if task_root is not None else None
+    candidates = find_clones(root)
+    if target is not None and (target / ".git").exists() and target not in candidates:
+        candidates.append(target)
+    remotes = {path: clone_remote(path) for path in candidates}
+    clones = [path for path in candidates if REPO_REMOTE_HINT.lower() in remotes[path].lower()]
+    if target is not None and (target.exists() or target.is_symlink()) and target not in clones:
+        rows.append(entry(str(target), f"目标路径已存在，远端 {remotes.get(target) or '未知'}",
                           f"{REPO_REMOTE_HINT} 的克隆", "停下报告，不覆盖目标路径", "仓库落位", todo=True))
-    else:
-        rows.append(entry(str(target), "不存在", f"{REPO_REMOTE_HINT} 的克隆", "", "仓库落位"))
-        others = [path for path in find_clones() if path != target and REPO_REMOTE_HINT.lower() in clone_remote(path).lower()]
-        for path in others:
-            action = f"确认 status 干净且 worktree 只有主仓库后，按技能说明将 {path} 移动到 {target}"
-            rows.append(entry(str(path), f"已有克隆，远端 {clone_remote(path)}", f"落位到 {target}",
-                              action, "仓库落位", todo=True))
-        if not others:
-            rows.append(entry("克隆来源", "本机无克隆", f"落位到 {target}",
-                              f"mkdir -p {target.parent} && git clone git@github.com:{REPO_REMOTE_HINT}.git {target}",
-                              "仓库落位", todo=True))
+    for path in sorted(clones, key=lambda path: (path != target, str(path))):
+        _, branch = run(["git", "-C", str(path), "rev-parse", "--abbrev-ref", "HEAD"])
+        _, commit = run(["git", "-C", str(path), "rev-parse", "--short", "HEAD"])
+        code, status = run(["git", "-C", str(path), "status", "--short"])
+        rows.append(entry(str(path), f"{branch or '分支未知'} {commit or ''}，远端 {remotes[path]}",
+                          f"{REPO_REMOTE_HINT} 的克隆，原位复用", "", "仓库落位"))
+        current = f"探测失败：{status}" if code != 0 else ("干净" if not status else f"有改动：{first_line(status)}")
+        rows.append(entry(f"{path} 工作区", current, "按实际状态报告并保留已有内容",
+                          "报给用户，不覆盖已有内容" if code != 0 or status else "", "仓库落位",
+                          todo=code != 0 or bool(status)))
+    if not clones:
+        action = "核对搜索范围以外的已知克隆，并确定任务根"
+        if target is not None and not target.exists() and not target.is_symlink():
+            action = (f"核对已知克隆并获准后执行：mkdir -p {shlex.quote(str(target.parent))} && "
+                      f"git clone git@github.com:{REPO_REMOTE_HINT}.git {shlex.quote(str(target))}")
+        rows.append(entry("克隆来源", f"未发现克隆（家目录下最多 3 层，{root} 下最多 2 层）",
+                          f"新增克隆放在 {target or '<任务根>/kie-skills'}",
+                          action, "仓库落位", todo=True))
     return rows
 
 
@@ -277,19 +285,22 @@ def render(rows):
     return "\n".join(lines)
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(description="探测本机环境与工作空间现状，只读，不创建与修改任何文件")
     parser.add_argument("--workspace", default=str(HOME / "kie-ws"), help="工作空间根目录，默认 ~/kie-ws")
+    parser.add_argument("--task-root", help="本次任务根目录，例如 ~/kie-ws/技能维护；省略时只探测已有克隆")
     parser.add_argument("--net", action="store_true", help="追加联网检查，各域名取一次状态码")
     parser.add_argument("--json", action="store_true", help="只输出 JSON")
     parser.add_argument("--eval", action="store_true", help="要跑技能评估时使用，user namespace 相关项计入待确认")
     args = parser.parse_args()
     root = Path(args.workspace).expanduser()
-    rows = probe_workspace(root) + probe_repo(root) + probe_tools() + probe_system(args.eval)
+    task_root = Path(args.task_root).expanduser() if args.task_root else None
+    rows = probe_workspace(root, task_root) + probe_repo(root, task_root) + probe_tools() + probe_system(args.eval)
     if args.net:
         rows += probe_network()
     if args.json:
-        print(json.dumps({"workspace": str(root), "rows": rows}, ensure_ascii=False, indent=2))
+        print(json.dumps({"workspace": str(root), "task_root": str(task_root) if task_root is not None else None,
+                          "rows": rows}, ensure_ascii=False, indent=2))
         return 0
     print(f"探测: env_probe.py，工作空间 {root}")
     print(render(rows))

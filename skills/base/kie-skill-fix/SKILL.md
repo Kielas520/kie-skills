@@ -5,7 +5,7 @@ license: MIT
 compatibility: 需要 python3 与 unshare（评估沙箱隔离）、uv（质量评估脚本用 uv run 运行）与 uvx（skills-ref 校验器），以及一个可无头驱动的 agent CLI（用 --list-agents 看本机有哪些）
 metadata:
   author: Kielas
-  version: "0.8.0"
+  version: "0.9.0"
 ---
 
 # 技能修复
@@ -40,19 +40,19 @@ frontmatter 与正文的写法、校验、评估、总结确认、更新日志�
 | 实际行为 | 技能当时实际做了什么 |
 | 期望行为 | 按它的 description 与正文，它本该做什么 |
 
-用户的原话保留在方案里。
+方案保留用户反馈的行为含义。反馈包含真实工作内容时先替换为虚构通用场景，不逐字复制业务细节，遵循 kie-skill-dev 的评估内容过滤规则。
 
 ### 2. 复现
 
 复现用例只放在仓库的 `.scratch/` 下，不写进被修技能的 `evals/`。
 
-- 触发类（老是不触发、误触发）：把用户当时那句话写进 `.scratch/<任务>/queries.json`，单条跑：
+- 触发类（老是不触发、误触发）：保留用户当时请求的触发意图，将真实工作内容替换为虚构通用场景后写进 `.scratch/<任务>/queries.json`，单条跑：
 
   ```bash
   python3 skills/base/kie-skill-dev/scripts/trigger_eval.py <技能名> --agent <名字> --queries .scratch/<任务>/queries.json --runs 1
   ```
 
-- 行为类（越界、做错事、输出走样）：把当时的输入压成一条用例，写进 `.scratch/<任务>/evals/evals.json`，输入文件放在 `.scratch/<任务>/evals/files/` 下，布局与技能目录的 `evals/` 一致，单条跑：
+- 行为类（越界、做错事、输出走样）：将当时的输入抽象成一条虚构通用用例，保留引发错误所需的行为条件，写进 `.scratch/<任务>/evals/evals.json`，输入文件放在 `.scratch/<任务>/evals/files/` 下，布局与技能目录的 `evals/` 一致，单条跑：
 
   ```bash
   uv run skills/base/kie-skill-dev/scripts/quality_eval.py <技能名> --agent <名字> --evals-root .scratch/<任务> --cases <id> --no-grade
@@ -87,6 +87,7 @@ frontmatter 与正文的写法、校验、评估、总结确认、更新日志�
 - 触发类：把第 2 步 `.scratch/` 里的查询并进被修技能的 `evals/trigger-queries.json`。
 - 行为类：把第 2 步 `.scratch/` 里的用例与输入文件并进被修技能的 `evals/evals.json` 与 `evals/files/`，补上 `assertions`。断言直接判这次的错误行为，不写「输出合理」这类判不出来的句子。
 - 用例要能在沙箱里独立跑通：输入文件按 `evals/files/` 之后的相对路径放好，查询里提到的路径是沙箱里成立的说法。
+- 合入回归用例前按 kie-skill-dev 的评估内容过滤规则检查查询、断言、输入文件与路径，只保留虚构通用场景。若脱敏后无法保留复现条件，报告缺失条件，不写入真实工作内容，也不宣称已经复现。
 
 ## 硬性约束
 

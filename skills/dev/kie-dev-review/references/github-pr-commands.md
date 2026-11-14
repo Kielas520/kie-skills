@@ -30,4 +30,4 @@ gh api graphql -f query='
 }'
 ```
 
-PR 的 head 可通过 `git fetch origin pull/0/head` 获取。需要新工作区时先核对已有 worktree 及目标路径，在该工作的分支代码目录安全创建 detached worktree；不得覆盖已有工作区。`git diff` 的 `+++ b/<path>` 与 `@@ -a,b +c,d @@` 指示 head 的文件和行号；行内评论须落在有效改动行。
+PR 的 head 可在 `<任务根>/<仓库名>/` 的既有克隆中通过 `git fetch origin pull/0/head` 获取，再用 `git show FETCH_HEAD:<路径>` 读取对应文件，无需切换当前分支或创建额外工作区。`git diff` 的 `+++ b/<path>` 与 `@@ -a,b +c,d @@` 指示 head 的文件和行号；行内评论须落在有效改动行。

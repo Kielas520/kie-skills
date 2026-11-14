@@ -4,10 +4,19 @@
 
 ## 沙箱与技能投放
 
-- 沙箱建在 `~/kie-ws/test/coop-<技能名哈希>/`，目录名由技能名哈希得到、不含技能名，会话翻到路径时不会顺着名字判定这是该技能的评测。
+- 沙箱建在 `<任务根目录>/.tmp/test/coop-<技能名哈希>/`，质量评估目录在哈希后加 `-q`。脚本以自身所属仓库的直接父目录作为任务根目录，不依赖命令启动目录。目录名不含技能名，避免会话根据路径判断被评估技能。
 - 整份 `skills/` 平铺复制进沙箱，并删掉各技能的 `evals/`；`work/` 作为会话工作目录。仓库里的 `.agents/`、`.claude/` 不参与复制。
 - 技能按用户选定的 agent 放到它能读到的位置，放法由 `scripts/agent_cli.py` 里该 agent 的适配类负责。仓库里不需要为评估建任何软链。
-- 每次运行套 `unshare -rm`，用 tmpfs（内存文件系统，脚本拿它盖住真实目录）盖住本仓库路径、该 agent 的用户层技能目录、回收站 `~/.local/share/Trash`（旧沙箱删除后进回收站，里面留着技能副本）、`~/.agents/skills`（另一个 agent 的用户层技能目录）、`~/.claude/projects`（历史会话记录）、`~/kie-ws` 根下除 `test/` 以外的全部目录（项目容器、只读克隆、`.tmp/`、`.draft/`）、测试工作区里本次运行之外的目录，以及同一轮里的兄弟目录（其他组、其他用例）。会话因此读不到真实仓库、真实工作区、用户层技能与旁边的其他沙箱。`~/kie-ws` 根与 `test/` 下的单个文件盖不住，会话仍看得到文件名。会话可能写入的用户配置文件（claude 是 `~/.claude.json` 与 `~/.claude/settings.json`）先复制一份进沙箱，再用 `mount --bind` 把副本盖在原路径上，会话执行 `claude mcp add` 这类命令只改到副本。挂完遮蔽后，脚本再套一层 `unshare -U --map-user=<当前 uid> --map-group=<当前 gid>`，让会话以当前用户身份运行，不以命名空间里的 root 运行。`unshare` 受限时脚本退出码 2，排查见 kie-env-setup 的 `references/system-network.md`。
+- 每次运行使用 `unshare -rm` 创建隔离命名空间。保留当前评估组目录，从它的父目录逐层向上，直到任务根目录的父目录，遮蔽每层的其他目录和文件。因此，其他组、其他用例、其他运行、任务内仓库、任务文档、其他临时产物和其他任务均不可读取。目录用 tmpfs（内存文件系统）遮蔽，单个文件绑定到 `/dev/null`。当前组内的 `work/`、投放技能和配置保留可用。
+- 本仓库、agent 用户层技能目录、回收站 `~/.local/share/Trash`、`~/.agents/skills` 与 `~/.claude/projects` 仍单独遮蔽。会话可能写入的用户配置文件先复制到当前组的 `protected/` 下，再用 `mount --bind` 将副本绑定到原路径，写入只影响副本。遮蔽后使用 `unshare -U --map-user=<当前 uid> --map-group=<当前 gid>` 让会话以当前用户身份运行。工作目录不在任务沙箱目录内时直接报错，`unshare` 受限时脚本退出码 2，排查见 kie-env-setup 的 `references/system-network.md`。
+
+隔离逻辑的回归测试不启动 agent 会话，在仓库根目录运行：
+
+```bash
+python3 skills/base/kie-skill-dev/scripts/test_agent_cli.py -v
+```
+
+测试需要 `unshare` 和 `gio`，实际运行命名空间并检查任务资料不可读、当前组可用、用户配置写入只影响副本。测试目录位于本任务的 `.tmp/test/`，结束后移入回收站。
 
 ## 触发评估（trigger_eval.py）
 

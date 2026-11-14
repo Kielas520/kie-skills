@@ -22,8 +22,8 @@ gh pr view <pr> --json statusCheckRollup \
 gh run list --branch <分支名> --json databaseId,name,status,conclusion,url -L 10
 gh run view <run-id> --json jobs --jq '.jobs[] | {name, conclusion, url}'
 gh api repos/{owner}/{repo}/actions/runs/<run-id>/artifacts --jq '.artifacts[] | {name, archive_download_url}'
-gh run download <run-id> -n <artifact 名称> -D <下载目录>
-gh run download <run-id> -p '<glob>'           # 按名称模式取多个产物
+gh run download <run-id> -n <artifact 名称> -D <任务根>/.tmp/test/<n>/
+gh run download <run-id> -p '<glob>' -D <任务根>/.tmp/test/<n>/  # 按名称模式取多个产物
 ```
 
 从运行页面的 Artifacts 段或上述 API 查询结果读取产物名称与下载链接。

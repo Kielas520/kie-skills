@@ -14,12 +14,12 @@
     },
     {
       "id": 2,
-      "prompt": "当前目录里的 ticket-story.json 是工单接口的原始返回，description 是转义过的。帮我把 description 还原成 markdown 存一份文件，另外把这条 MQL 写成参数文件留给同事：SELECT `名称`, `验收标准` FROM `软件空间`.`Story` WHERE `work_item_id` = 7000000001",
-      "expected_output": "两份中间产物落在工作空间约定的落点（还没有工作区时是 ~/kie-ws/.tmp/，归不到任务时是 ~/kie-ws/.draft/），回复里说明落在哪里，不落在会话工作目录。",
+      "prompt": "当前目录是本次工单资料整理的任务根目录。ticket-story.json 是工单接口的原始返回，description 是转义过的。帮我把 description 还原成 markdown 存一份文件，另外把这条 MQL 写成参数文件留给同事：SELECT `名称`, `验收标准` FROM `软件空间`.`Story` WHERE `work_item_id` = 7000000001",
+      "expected_output": "两份文档产物保存在当前任务根目录的 .tmp/docs-tmp/ 下，回复说明具体路径。",
       "files": ["evals/files/ticket-story.json"],
       "assertions": [
-        "会话工作目录里除了投放的 ticket-story.json 没有新增文件",
-        "回复里给出的两份文件落点在 `~/kie-ws/.tmp/` 或 `~/kie-ws/.draft/` 下，没有把当前目录当成落点"
+        "还原的 description 文档与 MQL 参数文件均保存在当前任务根目录的 .tmp/docs-tmp/ 下，内容与用户输入一致",
+        "没有在任务根目录直接新增产物，没有写入 ~/kie-ws/.tmp/ 或 ~/kie-ws/.draft/"
       ]
     },
     {
@@ -31,6 +31,40 @@
         "回复第一次提到 `DEMO_SDK_ROOT` 时说明它是一个环境变量，并说明它出自 build.log 的报错",
         "回复如果提到 `gen/schema.rs` 或 `demo-schema`，第一次出现时说明它是什么（报错位置的源文件或构建失败的包），并说明出自 build.log",
         "build.log 没有被修改，工作目录里没有新增文件"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "以下是虚构评估场景。当前目录是 mode-sync 任务根目录，alpha 和 beta 是这个任务下的两个仓库目录。把两个目录里的 mode.txt 都改成 ready，逐个进入目录读取文件验证，把每个仓库的验证日志保存在这次任务的测试目录，最后把操作空间回到任务根目录。不要提交。",
+      "expected_output": "两个 mode.txt 均为 ready，两份验证日志属于任务根目录同一轮 .tmp/test/ 下的目录。操作结束时恢复任务根目录，或始终通过工作目录参数隔离仓库操作。",
+      "files": ["evals/files/alpha/mode.txt", "evals/files/beta/mode.txt"],
+      "assertions": [
+        "alpha/mode.txt 与 beta/mode.txt 均改为 ready，并实际执行读取验证",
+        "两个仓库的验证日志保存在任务根目录 .tmp/test/ 下同一轮目录，没有在仓库内创建 .tmp",
+        "仓库操作后持久会话恢复任务根目录，或工具通过工作目录参数保持任务根目录不变；不把独立子进程的 cd 与 pwd 当成会话恢复证据",
+        "没有提交，没有新增 source 或 branch_source 目录，没有为任务建立额外工作区"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "这次把当前目录下的 kie-ws 当作 ~/kie-ws。没有工单号，我要做一个 spike 调研日志导出方案，任务简述用 log-export。先创建任务根目录和调研资料子目录，不下载仓库，不写报告，不提交。",
+      "expected_output": "创建 kie-ws/log-export/ 任务根目录，调研资料子目录位于其中的 .tmp/ 下，按调研内容命名。",
+      "files": [],
+      "assertions": [
+        "任务根目录是 kie-ws/log-export/，没有因为 spike 一词添加前缀或父目录",
+        "调研资料目录位于 kie-ws/log-export/.tmp/ 下并按调研内容命名",
+        "没有要求提供工单号，没有创建仓库容器、source 或 branch_source，没有下载仓库或写报告"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "以下编号与任务均为虚构评估数据。这次把当前目录下的 kie-ws 当作 ~/kie-ws。本任务字段是 SWE-900001，内容是示例文件整理，任务简述用 sample-files。上下文还提到依赖问题 SWE-900002。按工作空间约定创建本任务根目录，不克隆仓库，不写文档，不提交。",
+      "expected_output": "创建 kie-ws/swe-900001-sample-files/，使用主任务完整编号，不使用关联问题编号。",
+      "files": [],
+      "assertions": [
+        "创建了 kie-ws/swe-900001-sample-files/，保留 swe-900001 完整工单标识",
+        "没有使用 SWE-900002 作为本任务目录编号，没有为依赖问题额外创建任务目录",
+        "没有克隆仓库、写文档或提交"
       ]
     }
   ]

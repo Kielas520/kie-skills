@@ -3,27 +3,27 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "工作目录里 ws/demo 是仓库目录，源仓库是 ws/demo/source，就用现在这份，不用克隆也不用同步。需求单 m-7000000002，工作名称 export-time：给 log export 子命令加按时间范围筛选的能力，只导出起止时间之间的记录。你先调研现有代码，出一份方案文档给我选。",
-      "expected_output": "读 source 的 export.rs 与 parser.rs 后，在 ws/demo/export-time/solution.md 写出选型文档：要实现的功能、项目现状、按风险从低到高排列的候选方案，每个方案写到文件与符号并带四项风险评估；不带选定标记，把路径与方案摘要交用户选。",
+      "prompt": "工作目录里 ws/export-research 是任务根，源码仓库是 ws/export-research/demo，就用现在这份，不用克隆也不用同步。需求单 m-7000000002：给 log export 子命令加按时间范围筛选的能力，只导出起止时间之间的记录。你先调研现有代码，出一份方案文档给我选。",
+      "expected_output": "读 demo 仓库的 export.rs 与 parser.rs 后，在 ws/export-research/solution.md 写出选型文档：要实现的功能、项目现状、按风险从低到高排列的候选方案，每个方案写到文件与符号并带四项风险评估；不带选定标记，把路径与方案摘要交用户选。",
       "files": [
-        "evals/files/ws/demo/source/README.md",
-        "evals/files/ws/demo/source/src/cli/export.rs",
-        "evals/files/ws/demo/source/src/parser.rs"
+        "evals/files/ws/export-research/demo/README.md",
+        "evals/files/ws/export-research/demo/src/cli/export.rs",
+        "evals/files/ws/export-research/demo/src/parser.rs"
       ],
       "assertions": [
-        "ws/demo/export-time/solution.md 存在，文档不放在源仓库或工单编号目录中",
+        "ws/export-research/solution.md 存在，文档位于任务根；调研临时文件放在任务根 .tmp/<调研简述>/，仓库操作结束后会话恢复到任务根",
         "solution.md 含「要实现的功能」「项目现状」两节，「项目现状」写出现有 log export 读取全部记录再逐条打印、parser 按时间戳升序返回这类原有设计，不只是文件清单",
         "每个方案都有「涉及的改动位置」表，写到 export.rs 或 parser.rs 里的具体符号（如 run、ExportArgs、read_entries），并有改动量、实现复杂度、可维护性、风险四项风险评估",
-        "solution.md 里没有任何方案标题带「已选定」，没有拍板方向，没有生成其他方向文档或 design.md，source 下的代码文件未被修改",
+        "solution.md 里没有任何方案标题带「已选定」，没有拍板方向，没有生成其他方向文档或 design.md，demo 下的代码文件未被修改",
         "回复给出 solution.md 路径与方案摘要，请用户选定，没有替用户选方案"
       ]
     },
     {
       "id": 2,
-      "prompt": "工作目录里 ws/demo 是仓库目录，工作名称 export-file，m-7000000001 的选型文档在 ws/demo/export-file/solution.md。三个方案里按第二个来，拍板了。",
+      "prompt": "工作目录里 ws/export-file 是任务根，m-7000000001 的选型文档在 ws/export-file/solution.md。三个方案里按第二个来，拍板了。",
       "expected_output": "在 solution.md 第二个方案的标题处加「已选定」，保留其他方案，在同一文档记录拍板方向与取舍，把路径交用户确认，不写设计文档。",
       "files": [
-        "evals/files/ws/demo/export-file/solution.md"
+        "evals/files/ws/export-file/solution.md"
       ],
       "assertions": [
         "solution.md 里第二个方案的标题带「已选定」标记，方案一与方案三仍在文档中且没有标记",
@@ -34,15 +34,15 @@
     },
     {
       "id": 3,
-      "prompt": "工作目录里的 ws/demo 是仓库目录，源仓库是 ws/demo/source，就用现在这份，不用克隆也不用同步。这次没有工单，工作名称叫 export-gzip：想让 log export 支持把导出结果压缩成 gzip。你先调研现有代码，出一份方案文档给我选。",
-      "expected_output": "选型文档写到 ws/demo/export-gzip/solution.md；按 assets/solution.md 的结构写项目现状与各候选方案，按风险从低到高排列并写四项风险评估；不带选定标记，请用户选定方案。",
+      "prompt": "工作目录里的 ws/export-research 是任务根，源码仓库是 ws/export-research/demo，就用现在这份，不用克隆也不用同步。这次没有工单：想让 log export 支持把导出结果压缩成 gzip。你先调研现有代码，出一份方案文档给我选。",
+      "expected_output": "选型文档写到 ws/export-research/solution.md；按 assets/solution.md 的结构写项目现状与各候选方案，按风险从低到高排列并写四项风险评估；不带选定标记，请用户选定方案。",
       "files": [
-        "evals/files/ws/demo/source/README.md",
-        "evals/files/ws/demo/source/src/cli/export.rs",
-        "evals/files/ws/demo/source/src/parser.rs"
+        "evals/files/ws/export-research/demo/README.md",
+        "evals/files/ws/export-research/demo/src/cli/export.rs",
+        "evals/files/ws/export-research/demo/src/parser.rs"
       ],
       "assertions": [
-        "选型文档写在 ws/demo/export-gzip/solution.md，不是写在仓库目录或当前目录",
+        "无工单时仍将选型文档写在任务根 ws/export-research/solution.md，不写在仓库目录；复用任务内已有克隆",
         "solution.md 的「项目现状」下分「原有设计」与「与本次相关的现状」两个小节",
         "每个方案标题形如「方案一：<名称>（风险 低/中/高）」，方案一的风险等级不高于后面的方案",
         "每个方案的风险评估都写了「改动量」「实现复杂度」「可维护性」「风险」四项",

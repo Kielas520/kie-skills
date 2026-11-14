@@ -5,7 +5,7 @@ description: |
 license: MIT
 metadata:
   author: Kielas
-  version: "0.3.0"
+  version: "0.3.1"
 ---
 
 # 项目文档文风规范

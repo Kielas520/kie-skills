@@ -11,10 +11,10 @@ import re
 import shutil
 import signal
 import subprocess
+import shlex
 
 HOME = pathlib.Path.home()
 USER_SKILLS = HOME / ".agents" / "skills"
-SANDBOX_ROOT = HOME / "kie-ws" / "test"
 WINDOWS_PATH = re.compile(r"([A-Za-z]):[\\/](.*)")
 PATH_SEPARATORS = re.compile(r"[\\/]+")
 
@@ -31,6 +31,8 @@ def find_repo():
 
 
 REPO = find_repo()
+TASK_ROOT = REPO.parent
+SANDBOX_ROOT = TASK_ROOT / ".tmp" / "test"
 
 
 def iter_events(stream):
@@ -60,25 +62,18 @@ def windows_to_wsl(path):
     return pathlib.Path("/mnt") / match.group(1).lower() / match.group(2).replace("\\", "/")
 
 
-def test_workspace_masks(work):
-    """挡掉测试工作区里用不到的目录：其他运行的沙箱，以及同一轮里其他组、其他用例的沙箱，
-    会话翻进去就能接着答。只留当前组自己的目录。"""
-    current = None
-    for path in work.parents:
-        if path.parent == SANDBOX_ROOT:
-            current = path
-            break
-    if current is None:
-        return []
-    # 工作空间根下的项目容器、只读克隆与 .tmp/.draft 也盖住：会话在 ~/kie-ws 下翻找时能看到真实工作区
-    masks = [path for path in sorted(SANDBOX_ROOT.parent.iterdir())
-             if path.is_dir() and path != SANDBOX_ROOT and path != REPO]
-    masks += [path for path in sorted(SANDBOX_ROOT.iterdir()) if path != current and path.is_dir()]
-    # 质量评估把两组放在同一轮目录下，逐层盖住兄弟目录，直到本轮沙箱根
-    arm = work.parent
-    while arm != current:
-        masks += [path for path in sorted(arm.parent.iterdir()) if path != arm and path.is_dir()]
-        arm = arm.parent
+def test_workspace_masks(work: str | pathlib.Path) -> list[pathlib.Path]:
+    work = pathlib.Path(work).resolve()
+    if not work.is_relative_to(SANDBOX_ROOT.resolve()):
+        raise HarnessError(f"错误：评估工作目录 {work} 不在任务沙箱目录 {SANDBOX_ROOT} 内")
+    # 保留当前组的技能与工作目录，逐层遮蔽其他组、运行、任务产物及仓库。
+    masks = []
+    current = work.parent
+    workspace = TASK_ROOT.parent
+    while current != workspace:
+        masks.extend(path for path in sorted(current.parent.iterdir())
+                     if path != current and path != REPO)
+        current = current.parent
     return masks
 
 
@@ -169,7 +164,8 @@ class Agent:
         """单轮问答，返回助手回复文本。评分与接入验证用。"""
         raise NotImplementedError
 
-    def run(self, prompt, work, cap, tools, auto_approve):
+    def run(self, prompt: str, work: pathlib.Path, cap: int,
+            tools: str, auto_approve: bool) -> list[str]:
         masks = [REPO] + self.mask_dirs() + test_workspace_masks(work)
         # 回收站留着旧沙箱的技能副本；~/.agents/skills 是另一个 agent 的用户层技能目录；
         # ~/.claude/projects 里是历史会话记录，会话在家目录下翻找时都能读到
@@ -187,9 +183,14 @@ class Agent:
             copy = work.parent / "protected" / path.name
             copy.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, copy)
-            binds.append(f"mount --bind {copy} {path}")
-        inner = " && ".join([f"mount -t tmpfs none {path}" for path in masks] + binds
-                            + [f"cd {work}",
+            binds.append(f"mount --bind {shlex.quote(str(copy))} {shlex.quote(str(path))}")
+        mounts = [
+            f"mount -t tmpfs none {shlex.quote(str(path))}" if path.is_dir()
+            else f"mount --bind /dev/null {shlex.quote(str(path))}"
+            for path in dict.fromkeys(masks)
+        ]
+        inner = " && ".join(mounts + binds
+                            + [f"cd {shlex.quote(str(work))}",
                                "exec " + drop_root + self.command(work, cap, tools, auto_approve)])
         return ["unshare", "-rm", "bash", "-c", inner, f"{self.name}-eval", prompt]
 
@@ -214,11 +215,11 @@ class OmpAgent(Agent):
                                              "  enableAgentsUser: false\n")
         return root
 
-    def command(self, work, cap, tools, auto_approve):
+    def command(self, work: pathlib.Path, cap: int, tools: str, auto_approve: bool) -> str:
         # 路径从沙箱推出来，不落实例字段：多个组并发跑同一个适配实例，字段会被别的组改写
         overlay = work.parent / "overlay.yml"
         approve = " --auto-approve" if auto_approve else ""
-        return (f"omp -p --mode json --no-session --config {overlay} --tools {tools}"
+        return (f"omp -p --mode json --no-session --config {shlex.quote(str(overlay))} --tools {tools}"
                 f"{approve} --max-time {cap} \"$1\"")
 
     def hit(self, line, skills_root, skill_name):
@@ -297,12 +298,12 @@ class ClaudeAgent(Agent):
             copy_skills(skills_source, root / ".claude" / "skills")
         return root
 
-    def command(self, work, cap, tools, auto_approve):
+    def command(self, work: pathlib.Path, cap: int, tools: str, auto_approve: bool) -> str:
         # 路径从沙箱推出来，不落实例字段：多个组并发跑同一个适配实例，字段会被别的组改写
         # --restricted 会连沙箱技能一起停掉，隔离靠 --add-dir 投放的技能目录
         return (f"claude -p \"$1\" --output-format stream-json --verbose --no-session-persistence "
                 f"--permission-mode bypassPermissions --tools \"{tools}\" "
-                f"--add-dir {work.parent / 'skills-root'}")
+                f"--add-dir {shlex.quote(str(work.parent / 'skills-root'))}")
 
     def normalize(self, line):
         # claude 在本机以 Windows 进程运行，路径在输出里是 \\wsl.localhost\... 形式
