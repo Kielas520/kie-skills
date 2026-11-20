@@ -1,0 +1,26 @@
+[
+  {
+    "query": "我要写 one-pager，准备开始做一个新需求",
+    "should_trigger": true
+  },
+  {
+    "query": "我写了一份 one-pager，帮我审一下看看我是不是真的想清楚了，能不能发给团队看",
+    "should_trigger": true
+  },
+  {
+    "query": "动手写代码前我写了份 one-pager，你帮我把把关看有没有漏掉边界和权衡",
+    "should_trigger": true
+  },
+  {
+    "query": "帮我调研一下这个新功能有哪些技术方案可以选，写个方案对比",
+    "should_trigger": false
+  },
+  {
+    "query": "帮我审一下这个 PR 的代码改动，看看有没有 bug",
+    "should_trigger": false
+  },
+  {
+    "query": "把这份项目周报的文风润色一下，让它更简洁正式",
+    "should_trigger": false
+  }
+]

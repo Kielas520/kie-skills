@@ -1,3 +1,9 @@
+## [kie-onepager-review 0.1.0] - 2026-11-20
+
+### Added
+
+- 新增 one-pager 理解度审查技能，按背景、非目标、方案权衡、影响与风险、Call to Action 五个维度追问开发者并引导其自主优化出可评审的 one-pager。
+
 ## [kie-skill-fix 0.9.0] - 2026-11-13
 
 ### Changed
